@@ -1,0 +1,549 @@
+﻿@model List<QuanLyKH>
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+
+
+
+<link href="~/adminpanel/css/style.css" rel="stylesheet" />
+<script src="~/adminpanel/js/script.js"></script>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1">
+    <!-- site metas -->
+    <title>4uhost</title>
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <!-- bootstrap css -->
+
+    <link href="~/css(4u)/bootstrap.min.css" rel="stylesheet" />
+    <!-- style css -->
+
+    <link href="~/css(4u)/style.css" rel="stylesheet" />
+    <!-- Responsive-->
+    <link href="~/css(4u)/responsive.css" rel="stylesheet" />
+
+    <!-- fevicon -->
+    <!-- Tweaks for older IEs-->
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>User Actions</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+    <style>
+        /* Tùy chỉnh màu xanh đậm cho bảng */
+    
+            
+        .table td, .table th {
+            white-space: nowrap; /* Ngăn xuống dòng */
+            text-align: center; /* Canh giữa nội dung */
+            vertical-align: middle; /* Canh giữa theo chiều dọc */
+        }
+
+        .table-responsive {
+            overflow-x: auto; /* Kích hoạt cuộn ngang khi nội dung quá dài */
+        }
+         
+    </style>
+
+   
+</head>
+<body>
+
+    <div class="container-fluid">
+       
+
+       
+        <div class="container-fluid">
+            <!-- Page Heading -->
+            <h1 class="h3 mb-2 text-gray-800">Danh sách Dự Án</h1>
+           
+            <!-- DataTales Example -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <form method="get" action="@Url.Action("Index")" class="form-inline mb-4" style="margin-top:20px;">
+                            <div class="form-group mx-sm-3 mb-2">
+                                <input type="text" name="searchUser" class="form-control" placeholder="Tìm kiếm theo tên dự án " value="@ViewBag.SearchUser" />
+                            </div>
+                            <button type="submit" class="btn btn-primary mb-2">Tìm kiếm</button>
+                            <a href="@Url.Action("Index", "ThemSuaXoaDuAn")" class="btn btn-danger mb-2 ml-2">
+                                CLEAR FILTER
+                            </a>
+                        </form>
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped table-hover" id="dataTable" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th colspan="12" class="text-center">Thông tin chung</th>
+                                    <th colspan="3" class="text-center">Khách hàng thanh toán</th>
+                                    <th colspan="6" class="text-center">Chi phí OPERATION</th>
+                                    <th colspan="4" class="text-center">Chi phí Research</th>
+                                    <th colspan="4" class="text-center">Chi phí DP và Translator</th>
+                                    <th colspan="11" class="text-center">Thanh toán và kiểm toán</th>
+                                </tr>
+                                <tr>
+                                    <!-- Thông tin chung -->
+                                    <th>Chức năng</th>
+                                    <th>STT</th>
+                                    <th>Mã dự án quốc tế</th>
+                                    <th>Mã dự án Việt Nam</th>
+                                    <th>Team</th>
+                                    <th>Tên Dự Án</th>
+                                    <th>Khách Hàng</th>
+                                    <th>Tháng</th>
+                                    <th>Số mẫu</th>
+                                    <th>Hợp đồng chưa VAT</th>
+                                    <th>Hợp đồng có VAT</th>
+                                    <th>Tình trạng dự án</th>
+                                    <!-- Khách hàng thanh toán -->
+                                    <th>Chi tiêu tạm ứng</th>
+                                    <th>Tình trạng hợp đồng</th>
+                                    <th>Số tiền còn lại</th>
+                                    <!-- Chi phí OPERATION -->
+                                    <th>Quà tặng đáp viên</th>
+                                    <th>Lương phỏng vấn viên</th>
+                                    <th>Lương GSV và Manage</th>
+                                    <th>Chi phí QC</th>
+                                    <th>Chi phí Travel</th>
+                                    <th>Chi phí khác</th>
+                                    <!-- Chi phí Research -->
+                                    <th>Chi phí bảng câu hỏi</th>
+                                    <th>Chi phí người điều hành</th>
+                                    <th>Report</th>
+                                    <th>Chi phí khác RS</th>
+                                    <!-- Chi phí Research -->
+                                    <th>Translator</th>
+                                    <th>DP Scripting</th>
+                                    <th>DP Tabulation</th>
+                                    <th>Chi phí khác DP</th>
+                                    <!-- Thanh toán và kiểm toán -->
+                                    <th>Phần trăm chi phí theo dự án</th>
+                                    <th>Còn lại</th>
+                                    <th>Khách hàng hoa hồng</th>
+                                    <th>Tổng chi phí phải trả</th>
+                                    <th>Net</th>
+                                    <th>Ngày bắt đầu</th>
+                                    <th>Ngày kết thúc</th>
+                                    <th>Số lần thanh toán</th>
+                                    <th>Ngày thanh toán</th>
+                                    <th>Ghi chú thanh toán</th>
+                                  
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model != null && Model.Any())
+                                {
+                                    foreach (var project in Model)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <a href="@Url.Action("Edit", new { id = project.Stt })" class="btn btn-warning btn-sm">Sửa</a>
+                                                <form method="post" asp-action="Delete" asp-route-id="@project.Stt" style="display:inline;">
+                                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Bạn có chắc chắn muốn xóa dự án @project.TenDuAn không?')">Xóa</button>
+                                                </form>
+                                            </td>
+                                            <!-- Thông tin chung -->
+                                            <td>@project.Stt</td>
+                                            <td>@project.CodeQuocte</td>
+                                            <td>@project.CodeVietNam</td>
+                                            <td>@project.Team</td>
+                                            <td>@project.TenDuAn</td>
+                                            <td>@project.KhachHang</td>
+                                            <td>@project.Thang</td>
+
+                                            <!-- Chi phí và hợp đồng -->
+                                            <td>@project.Sample</td>
+                                            <td>@project.HopDong</td>
+                                            <td>@project.HopDongYesNo</td>
+                                            <td>@project.Status</td>
+                                            <td>@project.TamUng</td>
+                                            <td>@project.TinhTrangHopDong</td>
+                                            <td>@project.SoTienChoThanhToan</td>
+                                            <td>@project.QuaTangDapVien</td>
+                                            <td>@project.LuongPVV</td>
+                                            <td>@project.LuongGSVvaManage</td>
+
+                                            <!-- Chi phí chi tiết -->
+                                            <td>@project.ChiPhiQC</td>
+                                            <td>@project.ChiPhiTravel</td>
+                                            <td>@project.ChiPhiKhacOP</td>
+                                            <td>@project.ChiPhiBCH</td>
+                                            <td>@project.Moderator</td>
+                                            <td>@project.Report</td>
+                                            <td>@project.ChiPhiKhacRS</td>
+                                            <td>@project.Translator</td>
+                                            <td>@project.DPScripting</td>
+                                            <td>@project.DPTabulation</td>
+
+                                            <!-- Phần trăm và tính toán -->
+                                            <td>@project.Amount</td>
+                                            <td>@project.AmountPercent</td>
+                                            <td>@project.AmountAfter</td>
+                                            <td>@project.CommissionClients</td>
+                                            <td>@project.TongChiPhi</td>
+                                            <td>@project.Net</td>
+
+                                            <td>@project.NgayBatDau?.ToString("dd 'tháng' MM, yyyy")</td>
+                                            <td>@project.NgayKetThuc?.ToString("dd 'tháng' MM, yyyy")</td>
+                                            <td>@project.SoLanThanhToan</td>
+                                            <td>@project.NgayThanhToan?.ToString("dd 'tháng' MM, yyyy")</td>
+                                            <td>@project.GhiChuThanhToan</td>
+                                            
+                                            
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="45" class="text-center">Không có dữ liệu</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <div class="row">
+            <!-- Nút đóng/mở -->
+            <div class="col-xl-8 col-lg-7">
+                <div class="card shadow mb-4">
+                    <!-- Card Header - Dropdown -->
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-primary">Thêm dự án</h6>
+                        <button class="btn btn-sm btn-info" id="toggleButton">Mở/Đóng Form</button> <!-- Nút đóng/mở -->
+                    </div>
+                    <!-- Card Body -->
+                    <div class="card-body" id="formBody" style="display: none;">
+                        <!-- Nội dung form sẽ được ẩn/hiện khi nhấn nút -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="CodeQuocte">Mã Quốc Tế</label>
+                                    <input type="text" id="CodeQuocte" name="CodeQuocte" class="form-control" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="CodeVietnam">Mã Việt Nam</label>
+                                    <input type="text" id="CodeVietnam" name="CodeVietnam" class="form-control" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="Team">Nhóm</label>
+                                    <input type="text" id="Team" name="Team" class="form-control" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="TenDuAn">Tên Dự Án</label>
+                                    <input type="text" id="TenDuAn" name="TenDuAn" class="form-control" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="KhachHang">Khách Hàng</label>
+                                    <input type="text" id="KhachHang" name="KhachHang" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="Thang">Tháng</label>
+                                    <input type="text" id="Thang" name="Thang" class="form-control" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="Sample">Mẫu</label>
+                                    <input type="text" id="Sample" name="Sample" class="form-control" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="HopDong">Hợp Đồng</label>
+                                    <input type="text" id="HopDong" name="HopDong" class="form-control" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="HopDongVAT">Hợp Đồng VAT</label>
+                                    <input type="text" id="HopDongVAT" name="HopDongVAT" class="form-control" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="Status">Trạng Thái</label>
+                                    <input type="text" id="Status" name="Status" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="TamUng">Tạm Ứng</label>
+                                    <input type="text" id="TamUng" name="TamUng" class="form-control" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="TinhTrangHD">Tình Trạng Hợp Đồng</label>
+                                    <input type="text" id="TinhTrangHD" name="TinhTrangHD" class="form-control" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="SoTienConLai">Số Tiền Còn Lại</label>
+                                    <input type="text" id="SoTienConLai" name="SoTienConLai" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="QuaTangDapVien">Quà Tặng Dáp Viên</label>
+                                    <input type="text" id="QuaTangDapVien" name="QuaTangDapVien" class="form-control" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="LuongPVV">Lương PVV</label>
+                                    <input type="text" id="LuongPVV" name="LuongPVV" class="form-control" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="LuongGSVvaManage">Lương GSV và Quản Lý</label>
+                                    <input type="text" id="LuongGSVvaManage" name="LuongGSVvaManage" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Các phần còn lại của các input... -->
+
+                        <button type="submit" class="btn btn-primary">Lưu Dự Án</button>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="col-xl-4 col-lg-5">
+                <div class="card shadow mb-4">
+                    <!-- Card Header - Dropdown -->
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-primary">Kiểm toán note</h6>
+                        <button class="btn btn-sm btn-info" id="toggleButton1">Mở/Đóng Form</button> <!-- Nút đóng/mở -->
+                    </div>
+                    <!-- Card Body -->
+                    <div class="card-body" id="formBody1" style="display: none;">
+                        <!-- Bảng kiểm toán -->
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Mã dự án quốc tế</th>
+                                        <th>Mã dự án Việt Nam</th>
+                                        <th>Kiểm toán note</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var project in Model)
+                                    {
+                                        <tr>
+                                            <td>@project.CodeQuocte</td>
+                                            <td>@project.CodeVietNam</td>
+                                            <td>@project.KiemToanNote</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+@* 
+
+            <h2>Thêm mới dự án</h2>
+
+            <form method="post" asp-action="Create">
+                <div class="form-group">
+                    <label for="CodeQuocte">Mã Quốc Tế</label>
+                    <input type="text" id="CodeQuocte" name="CodeQuocte" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="CodeVietnam">Mã Việt Nam</label>
+                    <input type="text" id="CodeVietnam" name="CodeVietnam" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="Team">Nhóm</label>
+                    <input type="text" id="Team" name="Team" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="TenDuAn">Tên Dự Án</label>
+                    <input type="text" id="TenDuAn" name="TenDuAn" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="KhachHang">Khách Hàng</label>
+                    <input type="text" id="KhachHang" name="KhachHang" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="Thang">Tháng</label>
+                    <input type="month" id="Thang" name="Thang" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="Sample">Mẫu</label>
+                    <input type="text" id="Sample" name="Sample" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="HopDong">Hợp Đồng</label>
+                    <input type="text" id="HopDong" name="HopDong" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="HopDongVAT">Hợp Đồng VAT</label>
+                    <input type="text" id="HopDongVAT" name="HopDongVAT" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="Status">Trạng Thái</label>
+                    <input type="text" id="Status" name="Status" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="TamUng">Tạm Ứng</label>
+                    <input type="text" id="TamUng" name="TamUng" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="TinhTrangHD">Tình Trạng Hợp Đồng</label>
+                    <input type="text" id="TinhTrangHD" name="TinhTrangHD" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="SoTienConLai">Số Tiền Còn Lại</label>
+                    <input type="text" id="SoTienConLai" name="SoTienConLai" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="QuaTangDapVien">Quà Tặng Dáp Viên</label>
+                    <input type="text" id="QuaTangDapVien" name="QuaTangDapVien" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="LuongPVV">Lương PVV</label>
+                    <input type="text" id="LuongPVV" name="LuongPVV" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="LuongGSVvaManage">Lương GSV và Quản Lý</label>
+                    <input type="text" id="LuongGSVvaManage" name="LuongGSVvaManage" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="ChiPhiQC">Chi Phí QC</label>
+                    <input type="text" id="ChiPhiQC" name="ChiPhiQC" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="ChiPhiTravel">Chi Phí Travel</label>
+                    <input type="text" id="ChiPhiTravel" name="ChiPhiTravel" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="ChiPhiKhacOP">Chi Phí Khác OP</label>
+                    <input type="text" id="ChiPhiKhacOP" name="ChiPhiKhacOP" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="ChiPhiBCH">Chi Phí BCH</label>
+                    <input type="text" id="ChiPhiBCH" name="ChiPhiBCH" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="Moderator">Moderator</label>
+                    <input type="text" id="Moderator" name="Moderator" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="Report">Report</label>
+                    <input type="text" id="Report" name="Report" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="ChiPhiKhacRS">Chi Phí Khác RS</label>
+                    <input type="text" id="ChiPhiKhacRS" name="ChiPhiKhacRS" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="Translator">Translator</label>
+                    <input type="text" id="Translator" name="Translator" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="DPScripting">DPScripting</label>
+                    <input type="text" id="DPScripting" name="DPScripting" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="Coding">Coding</label>
+                    <input type="text" id="Coding" name="Coding" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="DPTabulation">DPTabulation</label>
+                    <input type="text" id="DPTabulation" name="DPTabulation" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="ChiPhiKhacDP">Chi Phí Khác DP</label>
+                    <input type="text" id="ChiPhiKhacDP" name="ChiPhiKhacDP" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="Adccording">Adccording</label>
+                    <input type="text" id="Adccording" name="Adccording" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="Amount">Amount</label>
+                    <input type="text" id="Amount" name="Amount" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="CommissionClients">Commission Clients</label>
+                    <input type="text" id="CommissionClients" name="CommissionClients" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="TongChiPhi">Tổng Chi Phí</label>
+                    <input type="text" id="TongChiPhi" name="TongChiPhi" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="VAT">VAT</label>
+                    <input type="text" id="VAT" name="VAT" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="Amountafter">Amount After</label>
+                    <input type="text" id="Amountafter" name="Amountafter" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="AmountPercent">Amount Percent</label>
+                    <input type="text" id="AmountPercent" name="AmountPercent" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="Net">Net</label>
+                    <input type="text" id="Net" name="Net" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="DoneSalary">Done Salary</label>
+                    <input type="text" id="DoneSalary" name="DoneSalary" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="NotDoneSalary">Not Done Salary</label>
+                    <input type="text" id="NotDoneSalary" name="NotDoneSalary" class="form-control" />
+                </div>
+                <button type="submit" class="btn btn-primary">Lưu Dự Án</button>
+            </form>
+
+        </div>
+    </div> *@
+    </div>
+
+
+    <script>
+        // Lắng nghe sự kiện click vào nút đóng/mở
+        document.getElementById("toggleButton").addEventListener("click", function() {
+            var formBody = document.getElementById("formBody");
+            if (formBody.style.display === "none") {
+                formBody.style.display = "block";
+            } else {
+                formBody.style.display = "none";
+            }
+        });
+                 document.getElementById("toggleButton1").addEventListener("click", function() {
+                var formBody = document.getElementById("formBody1");
+                if (formBody.style.display === "none") {
+                    formBody.style.display = "block";
+                } else {
+                    formBody.style.display = "none";
+                }
+            });
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popperjs/core@2.0.11/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
+
+
+
+

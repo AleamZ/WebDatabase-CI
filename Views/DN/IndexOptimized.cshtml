@@ -1,0 +1,598 @@
+@model List<CIResearch.Models.QLKH>
+
+@{
+    ViewData["Title"] = "🚀 Optimized Dashboard - Performance for Millions of Records";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    /* 🚀 OPTIMIZED STYLES FOR PERFORMANCE */
+    .performance-info {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 10px 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-size: 12px;
+    }
+    
+    .lazy-load-container {
+        min-height: 300px;
+        position: relative;
+    }
+    
+    .loading-spinner {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: none;
+    }
+    
+    .lazy-chart {
+        background: #f8f9fa;
+        border: 2px dashed #dee2e6;
+        border-radius: 8px;
+        min-height: 300px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .lazy-chart:hover {
+        background: #e9ecef;
+        border-color: #adb5bd;
+    }
+    
+    .virtual-table {
+        height: 600px;
+        overflow-y: auto;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+    }
+    
+    .pagination-info {
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 6px;
+        margin: 10px 0;
+    }
+</style>
+
+<div class="container-fluid">
+    <!-- 🚀 PERFORMANCE INFO -->
+    <div class="performance-info">
+        <i class="fas fa-rocket"></i> <strong>Optimized Dashboard</strong> - 
+        Loading only @Model.Count records out of @ViewBag.PaginationInfo.TotalRecords total records
+        | Page @ViewBag.PaginationInfo.Page of @ViewBag.PaginationInfo.TotalPages
+        | 🔥 Database queries optimized for millions of records
+    </div>
+
+    <!-- 🚀 STATISTICS CARDS (LOADED FROM CACHE) -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Tổng Doanh Nghiệp
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                @ViewBag.TotalCompanies.ToString("N0")
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-building fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Tổng Lao Động
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                @ViewBag.TotalLabor.ToString("N0")
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-users fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                DN Có Doanh Thu
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                @ViewBag.CompaniesWithRevenue.ToString("N0")
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-chart-line fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Năm Phân Tích
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                @ViewBag.CurrentAnalysisYear
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🚀 LAZY LOADING CHARTS -->
+    <div class="row mb-4">
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        📊 Phân bố theo Vùng Kinh tế
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="lazy-load-container">
+                        <div class="lazy-chart" data-chart-type="Regional" onclick="loadChart(this)">
+                            <div class="text-center">
+                                <i class="fas fa-chart-pie fa-3x text-muted mb-3"></i>
+                                <br>
+                                <strong>Click để tải biểu đồ</strong>
+                                <br>
+                                <small class="text-muted">Lazy loading cho hiệu suất tối ưu</small>
+                            </div>
+                        </div>
+                        <div class="loading-spinner">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="sr-only">Loading...</span>
+                            </div>
+                        </div>
+                        <canvas id="regionalChart" style="display: none;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        📊 Phân bố theo Loại hình DN
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="lazy-load-container">
+                        <div class="lazy-chart" data-chart-type="BusinessType" onclick="loadChart(this)">
+                            <div class="text-center">
+                                <i class="fas fa-chart-bar fa-3x text-muted mb-3"></i>
+                                <br>
+                                <strong>Click để tải biểu đồ</strong>
+                                <br>
+                                <small class="text-muted">Lazy loading cho hiệu suất tối ưu</small>
+                            </div>
+                        </div>
+                        <div class="loading-spinner">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="sr-only">Loading...</span>
+                            </div>
+                        </div>
+                        <canvas id="businessTypeChart" style="display: none;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        📊 Phân bố theo Ngành nghề
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="lazy-load-container">
+                        <div class="lazy-chart" data-chart-type="Industry" onclick="loadChart(this)">
+                            <div class="text-center">
+                                <i class="fas fa-industry fa-3x text-muted mb-3"></i>
+                                <br>
+                                <strong>Click để tải biểu đồ</strong>
+                                <br>
+                                <small class="text-muted">Top 20 ngành được hiển thị</small>
+                            </div>
+                        </div>
+                        <div class="loading-spinner">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="sr-only">Loading...</span>
+                            </div>
+                        </div>
+                        <canvas id="industryChart" style="display: none;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        📊 Phân bố theo Quy mô DN
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="lazy-load-container">
+                        <div class="lazy-chart" data-chart-type="CompanySize" onclick="loadChart(this)">
+                            <div class="text-center">
+                                <i class="fas fa-chart-doughnut fa-3x text-muted mb-3"></i>
+                                <br>
+                                <strong>Click để tải biểu đồ</strong>
+                                <br>
+                                <small class="text-muted">Siêu nhỏ, Nhỏ, Vừa, Lớn</small>
+                            </div>
+                        </div>
+                        <div class="loading-spinner">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="sr-only">Loading...</span>
+                            </div>
+                        </div>
+                        <canvas id="companySizeChart" style="display: none;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🚀 VIRTUAL SCROLLING DATA TABLE -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">
+                📋 Dữ liệu Doanh nghiệp - Virtual Scrolling
+            </h6>
+        </div>
+        <div class="card-body">
+            <!-- Pagination Info -->
+            <div class="pagination-info">
+                <div class="row">
+                    <div class="col-md-6">
+                        <span class="badge badge-info">
+                            Hiển thị @Model.Count / @ViewBag.PaginationInfo.TotalRecords bản ghi
+                        </span>
+                        <span class="badge badge-secondary">
+                            Trang @ViewBag.PaginationInfo.Page / @ViewBag.PaginationInfo.TotalPages
+                        </span>
+                    </div>
+                    <div class="col-md-6 text-right">
+                        <button class="btn btn-sm btn-outline-primary" onclick="previousPage()" 
+                                @(ViewBag.PaginationInfo.HasPrevious ? "" : "disabled")>
+                            <i class="fas fa-chevron-left"></i> Trước
+                        </button>
+                        <button class="btn btn-sm btn-outline-primary" onclick="nextPage()" 
+                                @(ViewBag.PaginationInfo.HasNext ? "" : "disabled")>
+                            Sau <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Virtual Table -->
+            <div class="virtual-table">
+                <table class="table table-bordered table-hover">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>STT</th>
+                            <th>Tên DN</th>
+                            <th>Mã số thuế</th>
+                            <th>Loại hình</th>
+                            <th>Vùng kinh tế</th>
+                            <th>Quy mô</th>
+                            <th>Năm</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dataTableBody">
+                        @foreach (var item in Model)
+                        {
+                                <tr>
+                                    <td>@item.STT</td>
+                                    <td>@item.TenDN</td>
+                                    <td>@item.Masothue</td>
+                                    <td>@item.Loaihinhkte</td>
+                                    <td>@item.Vungkinhte</td>
+                                    <td>@item.QUY_MO</td>
+                                    <td>@item.Nam</td>
+                                </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 🚀 OPTIMIZED JAVASCRIPT -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // 🚀 GLOBAL VARIABLES
+    let currentPage = @ViewBag.PaginationInfo.Page;
+    let totalPages = @ViewBag.PaginationInfo.TotalPages;
+    let loadedCharts = new Set();
+
+    // 🚀 LAZY CHART LOADING
+    async function loadChart(element) {
+        const chartType = element.getAttribute('data-chart-type');
+        
+        if (loadedCharts.has(chartType)) {
+            console.log(`📊 Chart ${chartType} already loaded`);
+            return;
+        }
+
+        console.log(`🚀 Loading chart: ${chartType}`);
+        
+        // Show loading spinner
+        const container = element.closest('.lazy-load-container');
+        const spinner = container.querySelector('.loading-spinner');
+        element.style.display = 'none';
+        spinner.style.display = 'block';
+
+        try {
+            // Fetch chart data
+            const response = await fetch(`/OptimizedDN/GetChartData?chartType=${chartType}`);
+            const result = await response.json();
+
+            if (result.success) {
+                // Create chart
+                const canvasId = getCanvasIdByChartType(chartType);
+                const canvas = document.getElementById(canvasId);
+                
+                spinner.style.display = 'none';
+                canvas.style.display = 'block';
+                
+                createChart(canvas, result.data, chartType);
+                loadedCharts.add(chartType);
+                
+                console.log(`✅ Chart ${chartType} loaded successfully`);
+            } else {
+                throw new Error(result.error || 'Failed to load chart data');
+            }
+        } catch (error) {
+            console.error(`❌ Error loading chart ${chartType}:`, error);
+            
+            // Show error message
+            spinner.style.display = 'none';
+            element.innerHTML = `
+                <div class="text-center text-danger">
+                    <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
+                    <br>
+                    <strong>Lỗi tải biểu đồ</strong>
+                    <br>
+                    <small>${error.message}</small>
+                    <br>
+                    <button class="btn btn-sm btn-outline-danger mt-2" onclick="loadChart(this.closest('.lazy-chart'))">
+                        Thử lại
+                    </button>
+                </div>
+            `;
+            element.style.display = 'block';
+        }
+    }
+
+    function getCanvasIdByChartType(chartType) {
+        const mapping = {
+            'Regional': 'regionalChart',
+            'BusinessType': 'businessTypeChart',
+            'Industry': 'industryChart',
+            'CompanySize': 'companySizeChart'
+        };
+        return mapping[chartType];
+    }
+
+    function createChart(canvas, data, chartType) {
+        const config = getChartConfig(data, chartType);
+        new Chart(canvas, config);
+    }
+
+    function getChartConfig(data, chartType) {
+        const labels = data.map(item => item.label);
+        const values = data.map(item => item.value);
+        
+        if (chartType === 'CompanySize') {
+            // Doughnut chart for company size
+            return {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'right' }
+                    }
+                }
+            };
+        } else {
+            // Bar chart for others
+            return {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Số lượng',
+                        data: values,
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            };
+        }
+    }
+
+    // 🚀 PAGINATION FUNCTIONS
+    async function nextPage() {
+        if (currentPage < totalPages) {
+            await loadPage(currentPage + 1);
+        }
+    }
+
+    async function previousPage() {
+        if (currentPage > 1) {
+            await loadPage(currentPage - 1);
+        }
+    }
+
+    async function loadPage(page) {
+        console.log(`🚀 Loading page ${page}`);
+        
+        try {
+            // Show loading
+            document.getElementById('dataTableBody').innerHTML = `
+                <tr>
+                    <td colspan="7" class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                        <br>
+                        Đang tải trang ${page}...
+                    </td>
+                </tr>
+            `;
+
+            // Fetch new page data
+            const response = await fetch('/OptimizedDN/GetPaginatedData', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    page: page,
+                    size: @ViewBag.PaginationInfo.Size,
+                    filters: @Html.Raw(Json.Serialize(ViewBag.CurrentFilters ?? new object()))
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                // Update table
+                updateTable(result.data);
+                
+                // Update pagination info
+                currentPage = result.pagination.page;
+                totalPages = result.pagination.totalPages;
+                updatePaginationUI();
+                
+                console.log(`✅ Page ${page} loaded successfully`);
+            } else {
+                throw new Error(result.error || 'Failed to load page data');
+            }
+        } catch (error) {
+            console.error(`❌ Error loading page ${page}:`, error);
+            
+            document.getElementById('dataTableBody').innerHTML = `
+                <tr>
+                    <td colspan="7" class="text-center text-danger">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Lỗi tải dữ liệu: ${error.message}
+                        <br>
+                        <button class="btn btn-sm btn-outline-danger mt-2" onclick="loadPage(${page})">
+                            Thử lại
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }
+    }
+
+    function updateTable(data) {
+        const tbody = document.getElementById('dataTableBody');
+        tbody.innerHTML = data.map(item => `
+            <tr>
+                <td>${item.stt}</td>
+                <td>${item.tenDN || ''}</td>
+                <td>${item.masothue || ''}</td>
+                <td>${item.loaihinhkte || ''}</td>
+                <td>${item.vungkinhte || ''}</td>
+                <td>${item.quy_MO || ''}</td>
+                <td>${item.nam || ''}</td>
+            </tr>
+        `).join('');
+    }
+
+    function updatePaginationUI() {
+        // Update pagination buttons
+        const prevBtn = document.querySelector('button[onclick="previousPage()"]');
+        const nextBtn = document.querySelector('button[onclick="nextPage()"]');
+        
+        prevBtn.disabled = currentPage <= 1;
+        nextBtn.disabled = currentPage >= totalPages;
+        
+        // Update pagination info
+        const infoSpan = document.querySelector('.pagination-info .badge-secondary');
+        infoSpan.textContent = `Trang ${currentPage} / ${totalPages}`;
+    }
+
+    // 🚀 PERFORMANCE MONITORING
+    function logPerformance() {
+        if (performance.memory) {
+            console.log('🚀 Memory Usage:', {
+                used: Math.round(performance.memory.usedJSHeapSize / 1024 / 1024) + ' MB',
+                total: Math.round(performance.memory.totalJSHeapSize / 1024 / 1024) + ' MB',
+                limit: Math.round(performance.memory.jsHeapSizeLimit / 1024 / 1024) + ' MB'
+            });
+        }
+    }
+
+    // Log performance every 30 seconds
+    setInterval(logPerformance, 30000);
+
+    // 🚀 INITIALIZATION
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('🚀 Optimized Dashboard initialized');
+        console.log(`📊 Displaying ${@Model.Count} records out of ${@ViewBag.PaginationInfo.TotalRecords} total`);
+        logPerformance();
+    });
+</script> 

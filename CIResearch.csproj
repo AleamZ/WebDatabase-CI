@@ -1,0 +1,97 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>annotations</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <PublishTrimmed>false</PublishTrimmed>
+    <PublishSingleFile>false</PublishSingleFile>
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <TieredCompilation>true</TieredCompilation>
+    <TieredPGO>true</TieredPGO>
+    <InvariantGlobalization>false</InvariantGlobalization>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <NoWarn>IL2026;IL2090;CS8600;CS8602;CS8603;CS8604;CS8618;CS8629</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- 🚀 PERFORMANCE & OPTIMIZATION -->
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.11" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.10" />
+    <PackageReference Include="Microsoft.AspNetCore.ResponseCompression" Version="2.2.0" />
+    <PackageReference Include="System.Text.Json" Version="9.0.0" />
+    
+    <!-- 🚀 DATABASE & ORM OPTIMIZATION -->
+    <PackageReference Include="EPPlus" Version="7.4.2" />
+    <PackageReference Include="MySql.Data" Version="9.3.0" />
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.11" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.11" />
+    
+    <!-- 🚀 HTTP & API OPTIMIZATION -->
+    <PackageReference Include="RestSharp" Version="112.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.17" />
+    
+    <!-- 🚀 DEVELOPMENT TOOLS -->
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.7" />
+    
+    <!-- 🚀 SECURITY & MONITORING -->
+    <PackageReference Include="Microsoft.AspNetCore.Authentication" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="8.0.11" />
+    
+    <!-- 🚀 LOGGING & TELEMETRY -->
+    <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
+    <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Controllers\Content\CSS %28LOGIN%29\" />
+    <Folder Include="Controllers\Content\FONT\" />
+    <Folder Include="Controllers\Content\JS\" />
+    <Folder Include="Controllers\Content\SCRIPT\" />
+    <Folder Include="Uploads\" />
+    <Folder Include="wwwroot\adminpanel\Vender\" />
+    <Folder Include="wwwroot\adminpanel\SCSS\" />
+    <Folder Include="wwwroot\JS%281%29\" />
+    <Folder Include="wwwroot\Login11_6\JS\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Controllers\Content\CSS(4U)\.DS_Store" />
+    <None Include="Controllers\Content\CSS(4U)\JS\.DS_Store" />
+    <None Include="wwwroot\CSS%28 LOGIN %29\style.css" />
+    <None Include="wwwroot\CSS%28 LOGIN %29\style.scss" />
+    <None Include="wwwroot\CSS(4U)\.DS_Store" />
+    <None Include="wwwroot\CSS(4U)\JS\.DS_Store" />
+    <None Include="wwwroot\FONT\glyphicons-halflings-regular.eot" />
+    <None Include="wwwroot\FONT\glyphicons-halflings-regular.svg" />
+    <None Include="wwwroot\FONT\glyphicons-halflings-regular.ttf" />
+    <None Include="wwwroot\FONT\glyphicons-halflings-regular.woff" />
+    <None Include="wwwroot\FONT\glyphicons-halflings-regular.woff2" />
+    <None Include="wwwroot\SCRIPT\bootstrap.js" />
+    <None Include="wwwroot\SCRIPT\bootstrap.min.js" />
+    <None Include="wwwroot\SCRIPT\jquery-3.3.1.intellisense.js" />
+    <None Include="wwwroot\SCRIPT\jquery-3.3.1.js" />
+    <None Include="wwwroot\SCRIPT\jquery-3.3.1.min.js" />
+    <None Include="wwwroot\SCRIPT\jquery-3.3.1.min.map" />
+    <None Include="wwwroot\SCRIPT\jquery-3.3.1.slim.js" />
+    <None Include="wwwroot\SCRIPT\jquery-3.3.1.slim.min.js" />
+    <None Include="wwwroot\SCRIPT\jquery-3.3.1.slim.min.map" />
+    <None Include="wwwroot\SCRIPT\jquery.validate-vsdoc.js" />
+    <None Include="wwwroot\SCRIPT\jquery.validate.js" />
+    <None Include="wwwroot\SCRIPT\jquery.validate.min.js" />
+    <None Include="wwwroot\SCRIPT\jquery.validate.unobtrusive.js" />
+    <None Include="wwwroot\SCRIPT\jquery.validate.unobtrusive.min.js" />
+    <None Include="wwwroot\SCRIPT\modernizr-2.8.3.js" />
+  </ItemGroup>
+
+  <!-- 🚀 BUILD OPTIMIZATION -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+
+</Project>

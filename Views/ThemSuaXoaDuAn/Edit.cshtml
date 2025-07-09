@@ -1,0 +1,27 @@
+﻿@model QuanLyKH
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<h2>Sửa Dự Án</h2>
+
+<form method="post">
+    <div class="form-group">
+        <label for="TenDuAn">Tên Dự Án</label>
+        <input type="text" class="form-control" id="TenDuAn" name="TenDuAn" value="@Model.TenDuAn" required />
+    </div>
+
+    <div class="form-group">
+        <label for="CodeQuocte">Code Quốc Tế</label>
+        <input type="text" class="form-control" id="CodeQuocte" name="CodeQuocte" value="@Model.CodeQuocte" required />
+    </div>
+
+    <div class="form-group">
+        <label for="CodeVietNam">Code Việt Nam</label>
+        <input type="text" class="form-control" id="CodeVietNam" name="CodeVietNam" value="@Model.CodeVietNam" required />
+    </div>
+
+    <!-- Thêm các trường thông tin khác tương tự -->
+
+    <button type="submit" class="btn btn-primary">Cập Nhật</button>
+</form>

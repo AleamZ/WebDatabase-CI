@@ -1,0 +1,104 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Chọn Survey ID và thư mục lưu dữ liệu</h2>
+
+<form id="getDataForm">
+    <label for="surveyID">Survey ID:</label>
+    <input type="text" id="surveyID" name="surveyID" required />
+
+    <label for="folderPath">Tên thư mục:</label>
+    <input type="text" id="folderPath" name="folderPath" required />
+
+    <button type="submit" id="submitButton">
+        <span class="button-text">Lấy dữ liệu</span>
+        <span class="spinner" style="display: none;">⏳</span>
+    </button>
+</form>
+
+<p id="statusMessage"></p>
+
+<style>
+    button {
+        position: relative;
+        padding: 10px 20px;
+        font-size: 16px;
+        border: none;
+        background-color: #007bff;  
+        color: white;
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
+
+        button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+
+    .spinner {
+        display: inline-block;
+        margin-left: 10px;
+        font-size: 16px;
+    }
+</style>
+
+<script>
+     document.getElementById("getDataForm").addEventListener("submit", function(event) {
+        event.preventDefault();
+
+        let button = document.getElementById("submitButton");
+        let buttonText = button.querySelector(".button-text");
+        let spinner = button.querySelector(".spinner");
+
+        button.disabled = true;
+        buttonText.innerText = "Đang lấy dữ liệu...";
+        spinner.style.display = "inline-block";
+
+        let surveyID = document.getElementById("surveyID").value;
+        let folderPath = document.getElementById("folderPath").value;
+
+        let angle = 0;
+        let rotateSpinner = setInterval(() => {
+            angle += 30;
+            spinner.style.transform = `rotate(${angle}deg)`;
+        }, 100);
+
+        // Gửi yêu cầu tới API để tải dữ liệu
+        fetch('/API/GetData?surveyID=' + encodeURIComponent(surveyID) + '&folderPath=' + encodeURIComponent(folderPath), {
+            method: 'GET'
+        })
+        .then(response => response.json())
+            .then(data => {
+        // Hiển thị thông báo và thông tin chi tiết
+        document.getElementById("statusMessage").innerText = data.message;
+
+        if (data.success) {
+            // Hiển thị dung lượng file và thời gian tải
+            let fileSize = data.fileSize; // Dung lượng file (MB)
+            let loadTime = data.loadTime; // Thời gian tải (giây)
+            let extractedText = data.extractedText; // Chuỗi "con chó ngu"
+
+            let details = `
+                Dung lượng file: ${fileSize} MB<br>
+                Thời gian tải: ${loadTime} giây<br>
+                Tình trạng : 100%
+            `;
+            document.getElementById("statusMessage").innerHTML = details;
+        }
+    })
+
+        .catch(error => {
+            document.getElementById("statusMessage").innerText = "Lỗi khi gọi API!";
+        })
+        .finally(() => {
+            clearInterval(rotateSpinner);
+            spinner.style.display = "none";
+            button.disabled = false;
+            buttonText.innerText = "Lấy dữ liệu";
+        });
+    });
+
+</script>

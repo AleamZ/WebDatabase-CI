@@ -1,0 +1,71 @@
+﻿@model List<CIResearch.Models.User>
+@{
+    ViewData["Title"] = "Danh sách Tài khoản Nhân viên";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link href="~/adminpanel/css/style.css" rel="stylesheet" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="initial-scale=1, maximum-scale=1">
+<!-- site metas -->
+<title>4uhost</title>
+<meta name="keywords" content="">
+<meta name="description" content="">
+<meta name="author" content="">
+<!-- bootstrap css -->
+
+<link href="~/css(4u)/bootstrap.min.css" rel="stylesheet" />
+<!-- style css -->
+
+<link href="~/css(4u)/style.css" rel="stylesheet" />
+<!-- Responsive-->
+<link href="~/css(4u)/responsive.css" rel="stylesheet" />
+
+<!-- fevicon -->
+<!-- Tweaks for older IEs-->
+<link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css">
+
+<h2>Danh sách Tài khoản Nhân viên</h2>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Tên đăng nhập</th>
+            <th>Thông tin người dùng</th>
+            <th>Xóa</th>
+           
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr id="user-row-@user.Id">
+                <td>@user.Username</td>
+                <td>
+                    <form asp-action="UpdateUser" method="post">
+                        <input type="hidden" name="Id" value="@user.Id" />
+                        <input type="text" name="Role" value="@user.Role" class="form-control" />
+                        <input type="text" name="FullName" value="@user.FullName" class="form-control" />
+                        <input type="email" name="Email" value="@user.Email" class="form-control" />
+                        <input type="text" name="Phone" value="@user.Phone" class="form-control" />
+                        <input type="text" name="Address" value="@user.Address" class="form-control" />
+                        <input type="date" name="DateOfBirth" value="@(user.DateOfBirth?.ToString("yyyy-MM-dd") ?? "")" class="form-control" />
+                        <input type="text" name="Phongban" value="@user.Phongban" class="form-control" />
+                        <button type="submit" class="btn btn-primary">Cập nhật</button>
+                    </form>
+                </td>
+                <td>
+                    <form asp-action="DeleteUser" method="post" style="display:inline;">
+                        <input type="hidden" name="id" value="@user.Id" />
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa người dùng này không?');">Xóa</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success">@TempData["Message"]</div>
+}

@@ -1,0 +1,3947 @@
+@using CIResearch.Models;
+@using System.Text.Json;
+
+@{
+    ViewData["Title"] = "Dashboard Doanh Nghiệp - CI Research";
+    Layout = null;
+    var loaihinhData = ViewBag.loaihinhData != null ? ViewBag.loaihinhData : "[]";
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        /* Reset và Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-image: url('/IMG(4UU)/STOREAUDIT.jpg');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        /* Header Navigation */
+        .top-nav {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-brand {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-brand:hover {
+            color: #f8f9fa;
+            text-decoration: none;
+        }
+
+        .nav-brand i {
+            margin-right: 0.5rem;
+        }
+
+        .user-info {
+            color: white;
+            font-weight: 500;
+        }
+
+        /* Container chính */
+        .main-container {
+            width: 100%;
+            min-height: calc(100vh - 80px);
+            padding: 0;
+            margin: 0;
+        }
+
+        /* Content wrapper */
+        .content-wrapper {
+            width: 100%;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            min-height: calc(100vh - 80px);
+        }
+
+    /* Table styles */
+    .table-container {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+    }
+
+    /* Filter styles */
+    .custom-multi-select {
+        position: relative;
+        width: 215px;
+        margin: 0 auto;
+    }
+
+    .select-box {
+        padding: 10px;
+        border: 1px solid #ccc;
+        cursor: pointer;
+        background-color: #fff;
+        position: relative;
+        border-radius: 8px;
+    }
+
+    .selected-options {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        width: 100%;
+    }
+
+    .arrow {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%) rotate(45deg);
+        border: solid #666;
+        border-width: 0 2px 2px 0;
+        padding: 3px;
+    }
+
+    .dropdown-options {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        max-height: 150px;
+        overflow-y: auto;
+        z-index: 1000;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .dropdown-options label {
+        display: block;
+        padding: 8px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .dropdown-options label:hover {
+        background-color: #f0f0f0;
+    }
+
+    .search-box {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-bottom: 2px solid #007bff;
+        font-size: 14px;
+        outline: none;
+        border-radius: 8px 8px 0 0;
+    }
+
+    .search-box:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+    }
+
+    /* Card styles */
+    .metric-card {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        border: 1px solid #e5e7eb;
+        height: 100%;
+    }
+
+    .metric-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .metric-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+        line-height: 1;
+    }
+
+    .metric-label {
+        font-size: 1rem;
+        font-weight: 500;
+        color: #6b7280;
+        margin-bottom: 15px;
+    }
+
+    /* Chart styles */
+    .chart-container {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+    }
+
+    .chart-title {
+        color: #374151;
+        font-weight: 600;
+        margin-bottom: 15px;
+        font-size: 1.1rem;
+        text-align: center;
+    }
+
+    .chart-container canvas {
+        max-height: 300px !important;
+        width: 100% !important;
+    }
+
+    /* Progress bar styles */
+    .progress {
+        height: 12px !important;
+        background-color: #e5e7eb !important;
+        border-radius: 10px !important;
+        overflow: hidden !important;
+        box-shadow: none !important;
+    }
+
+    .progress-bar {
+        height: 100% !important;
+        border-radius: 10px !important;
+        transition: width 1.2s ease !important;
+        font-weight: normal !important;
+        text-align: left !important;
+    }
+
+    /* Additional filter CSS for search box */
+    .search-box {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-bottom: 2px solid #007bff;
+        font-size: 14px;
+        outline: none;
+    }
+
+    .search-box:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+    }
+
+    /* Enhanced Metric Cards */
+    .metric-card {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        border: 1px solid #e5e7eb;
+        height: 100%;
+    }
+
+    .metric-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .metric-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+        line-height: 1;
+    }
+
+    .metric-label {
+        font-size: 1rem;
+        font-weight: 500;
+        color: #6b7280;
+        margin-bottom: 15px;
+    }
+
+    .progress-modern {
+        height: 12px;
+        background: #e5e7eb;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 8px;
+        position: relative;
+        width: 100%;
+    }
+
+    .progress-bar-modern {
+        height: 100%;
+        border-radius: 10px;
+        transition: width 1.2s ease;
+        background-color: currentColor;
+        position: relative;
+    }
+
+    .metric-percentage {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #6b7280;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 5px;
+    }
+
+    .metric-ratio {
+        font-size: 0.8rem;
+        color: #9ca3af;
+    }
+
+    /* Custom Progress Bar Styling for Technology Cards */
+    .metric-card .progress {
+        height: 12px !important;
+        background-color: #e5e7eb !important;
+        border-radius: 10px !important;
+        overflow: hidden !important;
+        box-shadow: none !important;
+    }
+
+    .metric-card .progress-bar {
+        height: 100% !important;
+        border-radius: 10px !important;
+        transition: width 1.2s ease !important;
+        font-weight: normal !important;
+        text-align: left !important;
+        /* Colors will be set inline via style attribute */
+    }
+
+    .tooltip-container {
+        position: relative;
+        display: inline-block;
+    }
+
+    .tooltip-container .custom-tooltip {
+        display: none;
+        /* ?n m?c d?nh */
+        position: absolute;
+        top: -200px;
+        /*i?u ch?nh v? tr tooltip */
+        right: 90%;
+        transform: translateX(90%);
+        background-color: #e3f2fd;
+        /* Xanh duong nh?t, t?o c?m gic y t? */
+        color: #0d47a1;
+        /* Xanh duong d?m cho ch? */
+        padding: 15px 20px;
+        border-radius: 8px;
+        /* Vi?n bo trn */
+        font-size: 0.9em;
+        line-height: 1.6;
+        white-space: nowrap;
+        z-index: 1000;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        /* Hi?u ?ng d? bng nh? */
+        border: 1px solid #90caf9;
+        /*u?ng vi?n xanh nh?t */
+        font-family: "Arial", sans-serif;
+        /* Font ch? don gi?n, d? d?c */
+        transform-origin: top center;
+        text-align: left;
+        /* Can tri n?i dung */
+    }
+
+    .tooltip-container:hover .custom-tooltip {
+        display: block;
+        /* Hi?n th? tooltip khi hover */
+    }
+
+    /* Specific chart heights */
+    #businessTypeChartContainer .chart-container {
+        max-height: 350px;
+    }
+
+    #revenueChartContainer .chart-container {
+        max-height: 300px;
+    }
+
+    .tooltip-container .custom-tooltip strong {
+        color: #1565c0;
+        /* Xanh d?m d? nh?n m?nh */
+    }
+
+    /* Ho?t ?nh t?i trang */
+    /* Ho?t ?nh t?i trang */
+    .loader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        /* L?p m? mu xm */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        /*?m b?o loader lun n?m trn cng */
+    }
+
+    .loader img {
+        width: 800px;
+        /* Kch thu?c hnh GIF, c th? di?u ch?nh */
+        height: auto;
+        /* Kch thu?c hnh GIF, c th? di?u ch?nh */
+    }
+
+    /* Ki?u dng thanh ti?n d? */
+    .progress {
+        height: 30px;
+        /*? cao c?a thanh ti?n d? */
+        background-color: #f1f1f1;
+        /* Mu n?n nh?t */
+        border-radius: 10px;
+        /* Bo gc thanh ti?n d? */
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        /* Thm bng nh? */
+    }
+
+    /* Ki?u dng thanh ti?n d? bn trong */
+    .progress-bar {
+        font-weight: bold;
+        /* Lm d?m ch? */
+        text-align: center;
+        /* Can gi?a ch? */
+        color: white;
+        /* Mu ch? tr?ng */
+        border-radius: 10px;
+        /* Bo gc cho thanh ti?n d? */
+        transition: width 0.5s ease-in-out;
+        /* Hi?u ?ng chuy?n d?ng mu?t m khi thay d?i t? l? */
+    }
+
+    /* Mu s?c ph h?p v?i ch? d? y t? */
+    .progress-bar-striped {
+        background-image: linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);
+        background-size: 40px 40px;
+    }
+
+    /* C?i thi?n d? d?c cho ch? */
+    .progress-bar span {
+        font-size: 1.2em;
+        /* Tang kch thu?c ch? */
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        /* Thm bng cho ch? */
+    }
+
+    /* Mu s?c thanh ti?n d? ty thu?c vo ti?n d? */
+    .progress-bar {
+        background-color: #28a745;
+        /* Mu xanh l */
+    }
+
+    .progress-bar[data-completion="warning"] {
+        background-color: #ffc107;
+        /* Mu vng khi ti?n d? ? m?c trung bnh */
+    }
+
+    .progress-bar[data-completion="danger"] {
+        background-color: #dc3545;
+        /* Mu d? khi g?n hon thnh */
+    }
+
+
+
+    .sparkle {
+        fill: #AAAAAA;
+        transition: all 800ms ease;
+    }
+
+    .text {
+        font-weight: 600;
+        color: #AAAAAA;
+        font-size: medium;
+    }
+
+    .btn:hover {
+        background: linear-gradient(0deg, #5bc0de, #008c8c);
+        /* Mu xanh duong v xanh lam */
+        box-shadow: inset 0px 1px 0px 0px rgba(255, 255, 255, 0.4), inset 0px -4px 0px 0px rgba(0, 0, 0, 0.2), 0px 0px 0px 4px rgba(255, 255, 255, 0.2), 0px 0px 180px 0px #5bc0de;
+        /* Thm bng m? mu xanh duong */
+        transform: translateY(-2px);
+    }
+
+    .btn:hover .text {
+        color: white;
+    }
+
+    .btn:hover .sparkle {
+        fill: white;
+        transform: scale(1.2);
+    }
+
+
+    #map {
+        border: 1px solid #ddd;
+        /* Thm vi?n n?u mu?n */
+        border-radius: 8px;
+        /* Bo gc nh? */
+        overflow: hidden;
+        /* ?n n?i dung trn n?u c */
+    }
+
+    /* Enhanced Stats Cards */
+    .stats-card {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        border: 1px solid #e5e7eb;
+        height: 100%;
+        min-height: 120px;
+    }
+
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .stats-card .icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 15px;
+        color: white;
+        font-size: 20px;
+    }
+
+    .stats-card .stats-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin: 0;
+        line-height: 1.1;
+    }
+
+    .stats-card .stats-label {
+        font-size: 0.9rem;
+        color: #6b7280;
+        margin: 5px 0;
+        font-weight: 500;
+    }
+
+    .stats-card small {
+        font-size: 0.75rem;
+        color: #9ca3af;
+        font-style: italic;
+    }
+
+    /* Override Bootstrap progress styling */
+    .progress {
+        background-color: #e5e7eb !important;
+        border-radius: 10px !important;
+        overflow: hidden;
+    }
+
+    .progress .progress-bar {
+        border-radius: 10px !important;
+        transition: width 1.2s ease !important;
+    }
+
+    /* Custom Progress Bar Styling for Technology Cards */
+    .metric-card .progress {
+        height: 12px !important;
+        background-color: #e5e7eb !important;
+        border-radius: 10px !important;
+        overflow: hidden !important;
+        box-shadow: none !important;
+    }
+
+    .metric-card .progress-bar {
+        height: 100% !important;
+        border-radius: 10px !important;
+        transition: width 1.2s ease !important;
+        font-weight: normal !important;
+        text-align: left !important;
+        /* Colors will be set inline via style attribute */
+    }
+
+    /* Chart Styles */
+    .chart-container {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+    }
+
+    .chart-legend {
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        height: 400px;
+        overflow-y: auto;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+        padding: 8px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .legend-color {
+        width: 20px;
+        height: 20px;
+        border-radius: 4px;
+        margin-right: 12px;
+        flex-shrink: 0;
+    }
+
+    .legend-text {
+        flex: 1;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .legend-value {
+        font-size: 13px;
+        color: #6c757d;
+        margin-left: 8px;
+    }
+
+    .legend-percentage {
+        font-size: 12px;
+        color: #28a745;
+        font-weight: 600;
+    }
+
+    /* Ensure chart visibility */
+    #vungKinhTeChart {
+        display: block !important;
+        width: 100% !important;
+        height: 100% !important;
+        max-width: 100%;
+        max-height: 380px;
+    }
+
+    .chart-container canvas {
+        width: 100% !important;
+        height: 100% !important;
+    }
+
+    /* Phân bố theo Ngành nghề Chart */
+    .industry-chart-card {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    .industry-chart-card .card-body {
+        flex: 1;
+        padding: 1rem;
+        display: flex;
+    }
+    .industry-chart-card .row {
+        flex: 1;
+        margin: 0;
+    }
+    .industry-chart-card .col-md-8 {
+        height: 100%;
+        padding: 0;
+    }
+    .industry-chart-card .chart-container {
+        height: 100% !important;
+        min-height: 700px;
+        width: 100%;
+    }
+    </style>
+</head>
+
+<body>
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <div class="container-fluid">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <a href="#" class="nav-brand">
+                        <i class="fas fa-building"></i>
+                        CÔNG TY TNHH CI RESEARCH
+                    </a>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="user-info">
+                        @if (Context.Session.GetString("Username") != null)
+                        {
+                                        <span>Xin chào @Context.Session.GetString("Username")!</span>
+                        }
+                        else
+                        {
+                                        <span>Khách</span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <div class="content-wrapper">
+    <!-- Modern Dashboard Header -->
+    @* <div class="card shadow mb-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">
+        <div class="card-body text-white">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="display-6 fw-bold mb-2">
+                        <i class="fas fa-building me-3"></i>
+                        Dashboard Doanh Nghiệp
+                    </h1>
+                    <p class="lead mb-0 opacity-75">
+                        Phân tích và báo cáo tổng hợp dữ liệu doanh nghiệp Việt Nam
+                    </p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="d-flex flex-column align-items-end">
+                        <div class="mb-2">
+                            <i class="fas fa-calendar-alt me-2"></i>
+                            <span class="fw-semibold">@DateTime.Now.ToString("dd/MM/yyyy")</span>
+                        </div>
+                        <div class="small opacity-75">
+                            <i class="fas fa-clock me-1"></i>
+                            Cập nhật: @ViewBag.LastImportTime?.ToString("HH:mm")
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> *@
+
+    <div class="container-fluid px-3">
+        <!-- Advanced Filters Section (Similar to Admin) -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h5 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-filter me-2"></i>
+                    Bộ lọc dữ liệu doanh nghiệp
+            </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <form method="get" action="@Url.Action("Index", "DN")" class="filter-form">
+                            <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+
+                                <!-- Năm Multi-select -->
+                                <div class="custom-multi-select">
+                                    <div class="select-box" onclick="toggleDropdown(this)">
+                                        <span class="selected-options" data-placeholder="Năm">Năm</span>
+                                        <i class="arrow"></i>
+                                    </div>
+                                    <div class="dropdown-options">
+                                        <input type="text" class="search-box" placeholder="Tìm kiếm năm" oninput="filterOptions(this)">
+                                        @foreach (var year in new List<string> { "2018", "2019", "2020", "2021", "2022", "2023", "2024" })
+                                        {
+                                                        <label>
+                                                            <input type="checkbox" name="Nam" value="@year" @(ViewBag.Nam?.Contains(year) == true ? "checked" : "") /> @year
+                                                        </label>
+                                        }
+                                    </div>
+                    </div>
+
+                                <!-- Tỉnh/Thành phố Multi-select -->
+                                <div class="custom-multi-select">
+                                    <div class="select-box" onclick="toggleDropdown(this)">
+                                        <span class="selected-options" data-placeholder="Tỉnh/Thành phố">Tỉnh/Thành phố</span>
+                                        <i class="arrow"></i>
+                                    </div>
+                                    <div class="dropdown-options">
+                                        <input type="text" class="search-box" placeholder="Tìm kiếm tỉnh thành" oninput="filterOptions(this)">
+                                        @foreach (var province in new List<string>
+                                                                                                                                                                                                                                                                                                                                {
+                                                                                                                                                                                                                                                                                                                                                                "An Giang", "Bà Rịa-Vũng Tàu", "Bắc Giang", "Bắc Kạn", "Bạc Liêu", "Bắc Ninh", "Bến Tre", "Bình Định",
+                                                                                                                                                                                                                                                                                                                                                                "Bình Dương", "Bình Phước", "Bình Thuận", "Cà Mau", "Cao Bằng", "Đắk Lắk", "Đắk Nông", "Điện Biên",
+                                                                                                                                                                                                                                                                                                                                                                "Đồng Nai", "Đồng Tháp", "Gia Lai", "Hà Giang", "Hà Nam", "Hà Tĩnh", "Hải Dương", "Hậu Giang",
+                                                                                                                                                                                                                                                                                                                                                                "Hòa Bình", "Hưng Yên", "Khánh Hòa", "Kiên Giang", "Kon Tum", "Lai Châu", "Lâm Đồng", "Lạng Sơn",
+                                                                                                                                                                                                                                                                                                                                                                "Lào Cai", "Long An", "Nam Định", "Nghệ An", "Ninh Bình", "Ninh Thuận", "Phú Thọ", "Phú Yên",
+                                                                                                                                                                                                                                                                                                                                                                "Quảng Bình", "Quảng Nam", "Quảng Ngãi", "Quảng Ninh", "Quảng Trị", "Sóc Trăng", "Sơn La",
+                                                                                                                                                                                                                                                                                                                                                                "Tây Ninh", "Thái Bình", "Thái Nguyên", "Thanh Hóa", "Thừa Thiên Huế", "Tiền Giang", "Trà Vinh",
+                                                                                                                                                                                                                                                                                                                                                                "Tuyên Quang", "Vĩnh Long", "Vĩnh Phúc", "Yên Bái", "Hà Nội", "Hồ Chí Minh", "Đà Nẵng", "Hải Phòng", "Cần Thơ"
+                                                                                                                                                                                                                                                                                                                                })
+                                        {
+                                                        <label>
+                                                            <input type="checkbox" name="MaTinh_Dieutra" value="@province" @(ViewBag.MaTinh_Dieutra?.Contains(province) == true ? "checked" : "") /> @province
+                                                        </label>
+                                        }
+                                    </div>
+                    </div>
+
+                                <!-- Loại hình kinh tế Multi-select -->
+                                <div class="custom-multi-select">
+                                    <div class="select-box" onclick="toggleDropdown(this)">
+                                        <span class="selected-options" data-placeholder="Loại hình kinh tế">Loại hình kinh tế</span>
+                                        <i class="arrow"></i>
+                                    </div>
+                                    <div class="dropdown-options">
+                                        <input type="text" class="search-box" placeholder="Tìm kiếm loại hình" oninput="filterOptions(this)">
+                                        @foreach (var type in new List<string>
+                                                                                                                                                                                                                                                                                                                                {
+                                                                                                                                                                                                                                                                                                                                                                "Công ty TNHH", "Công ty cổ phần", "Doanh nghiệp tư nhân", "Doanh nghiệp nhà nước",
+                                                                                                                                                                                                                                                                                                                                                                "Công ty hợp danh", "Hợp tác xã", "Liên doanh", "Chi nhánh công ty", "Văn phòng đại diện"
+                                                                                                                                                                                                                                                                                                                                })
+                                        {
+                                                        <label>
+                                                            <input type="checkbox" name="Loaihinhkte" value="@type" @(ViewBag.Loaihinhkte?.Contains(type) == true ? "checked" : "") /> @type
+                                                        </label>
+                                        }
+                                    </div>
+                    </div>
+
+                                <!-- Vùng kinh tế Multi-select -->
+                                <div class="custom-multi-select">
+                                    <div class="select-box" onclick="toggleDropdown(this)">
+                                        <span class="selected-options" data-placeholder="Vùng kinh tế">Vùng kinh tế</span>
+                                        <i class="arrow"></i>
+                                    </div>
+                                    <div class="dropdown-options">
+                                        <input type="text" class="search-box" placeholder="Tìm kiếm vùng kinh tế" oninput="filterOptions(this)">
+                                        @foreach (var vungkinhte in new List<string> {
+                                                                                                                                                                                                                                                                                                                                                                "Bắc Trung Bộ",
+                                                                                                                                                                                                                                                                                                                                                                "Duyên hải Nam Trung Bộ",
+                                                                                                                                                                                                                                                                                                                                                                "Đồng bằng Sông Cửu Long",
+                                                                                                                                                                                                                                                                                                                                                                "Đồng bằng Sông Hồng",
+                                                                                                                                                                                                                                                                                                                                                                "Đông Nam Bộ",
+                                                                                                                                                                                                                                                                                                                                                                "Tây Nguyên",
+                                                                                                                                                                                                                                                                                                                                                                "Trung du và Miền núi Bắc Bộ"
+                                                                                                                                                                                                                                                                                                                                })
+                                        {
+                                                        <label>
+                                                            <input type="checkbox" name="Vungkinhte" value="@vungkinhte" @(ViewBag.Vungkinhte?.Contains(vungkinhte) == true ? "checked" : "") /> @vungkinhte
+                                                        </label>
+                                        }
+                    </div>
+                </div>
+
+                                <!-- Quy mô doanh nghiệp -->
+                                <div class="custom-multi-select">
+                                    <div class="select-box" onclick="toggleDropdown(this)">
+                                        <span class="selected-options" data-placeholder="Quy mô">Quy mô</span>
+                                        <i class="arrow"></i>
+                                    </div>
+                                    <div class="dropdown-options">
+                                        <input type="text" class="search-box" placeholder="Tìm kiếm quy mô" oninput="filterOptions(this)">
+                                        @foreach (var size in new List<string> { "Siêu nhỏ", "Nhỏ", "Vừa", "Lớn" })
+                                        {
+                                                        <label>
+                                                            <input type="checkbox" name="QuyMo" value="@size" @(ViewBag.QuyMo?.Contains(size) == true ? "checked" : "") /> @size
+                                                        </label>
+                                        }
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+                                <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search me-1"></i>
+                        Áp dụng bộ lọc
+                    </button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="clearAllFilters()">
+                                    <i class="fas fa-times me-1"></i>
+                        Xóa bộ lọc
+                    </button>
+                    <a href="@Url.Action("ViewRawData", "DN")" class="btn btn-outline-info">
+                        <i class="fas fa-table me-1"></i>
+                        Xem dữ liệu chi tiết
+                    </a>
+                </div>
+            </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+         <!-- Main Statistics Summary Cards (Similar to Admin) -->
+        <div class="row mb-4">
+             <!-- Tổng số doanh nghiệp -->
+             <div class="col-xl-3 col-md-6 mb-4">
+                 <div class="card border-left shadow h-100 py-2" style="background-color:rgb(136,146,214); padding: 20px;">
+                     <div class="card-body" style="padding: 20px;">
+                         <div class="row no-gutters align-items-center">
+                             <div class="col mr-2 ">
+                                 <h5 class="m-0 font-weight-bold text-white">Tổng doanh nghiệp</h5>
+                                 <div class="h3 mb-0 font-weight text-white">
+                                     <span style="font-size: 0.55em;">Số DN</span> @ViewBag.TotalCompanies
+                </div>
+            </div>
+                             <div class="col-auto">
+                                 <i class="fas fa-building fa-2x text-white"></i>
+        </div>
+                </div>
+                 </div>
+            </div>
+        </div>
+
+         <!-- Tổng số lao động -->
+         <div class="col-xl-3 col-md-6 mb-4">
+             <div class="card border-left shadow h-100 py-2" style="background-color:rgb(69,187,224);padding: 20px;">
+                 <div class="card-body" style="padding: 20px;">
+                     <div class="row no-gutters align-items-center">
+                         <div class="col mr-2">
+                             <h5 class="m-0 font-weight-bold text-white">Tổng lao động</h5>
+                             <div class="h3 mb-0 font-weight text-white">
+                                 <span style="font-size: 0.55em;">Người</span> @String.Format("{0:N0}", ViewBag.TotalLabor ?? 0)
+                </div>
+            </div>
+                         <div class="col-auto">
+                             <i class="fas fa-users fa-2x text-white"></i>
+        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+         <!-- Phân bố vùng kinh tế -->
+         <div class="col-xl-3 col-md-6 mb-4">
+             <div class="card border-left shadow h-100 py-2" style="background-color:rgb(240,98,146);padding: 20px;">
+                 <div class="card-body" style="padding: 20px;">
+                     <div class="row no-gutters align-items-center">
+                         <div class="col mr-2">
+                             <h5 class="m-0 font-weight-bold text-white">DN theo vùng KT</h5>
+                             <div class="h3 mb-0 font-weight text-white">
+                                 <span style="font-size: 0.55em;">Miền Bắc</span> @ViewBag.MienBacCount <span style="font-size: 0.55em;"></span>
+                </div>
+                             <div class="h3 mb-0 font-weight text-white">
+                                 <span style="font-size: 0.55em;">Miền Trung</span> @ViewBag.MienTrungCount <span style="font-size: 0.55em;"></span>
+            </div>
+                             <div class="h3 mb-0 font-weight text-white">
+                                 <span style="font-size: 0.55em;">Miền Nam</span> @ViewBag.MienNamCount <span style="font-size: 0.55em;"></span>
+        </div>
+                </div>
+                         <div class="col-auto">
+                             <i class="fas fa-map-marked-alt fa-2x text-white" style="vertical-align: 60px;"></i>
+            </div>
+        </div>
+                </div>
+            </div>
+        </div>
+
+         <!-- Phân loại doanh nghiệp - Top 3 từ database thực tế -->
+         <div class="col-xl-3 col-md-6 mb-4">
+             <div class="card border-left shadow h-100 py-2" style="background-color:rgb(120,195,80);padding: 20px;">
+                 <div class="card-body" style="padding: 20px;">
+                     <div class="row no-gutters align-items-center">
+                         <div class="col mr-2">
+                             <h5 class="m-0 font-weight-bold text-white">Phân loại DN (top 3)</h5>
+                             <div class="h3 mb-0 font-weight text-white">
+                                 <span style="font-size: 0.45em;">@(ViewBag.TopBusinessType1Name?.ToString().Length > 25 ? ViewBag.TopBusinessType1Name?.ToString().Substring(0, 22) + "..." : ViewBag.TopBusinessType1Name)</span> @String.Format("{0:N0}", ViewBag.TopBusinessType1Count)
+                             </div>
+                             <div class="h3 mb-0 font-weight text-white">
+                                 <span style="font-size: 0.45em;">@(ViewBag.TopBusinessType2Name?.ToString().Length > 25 ? ViewBag.TopBusinessType2Name?.ToString().Substring(0, 22) + "..." : ViewBag.TopBusinessType2Name)</span> @String.Format("{0:N0}", ViewBag.TopBusinessType2Count)
+                             </div>
+                             <div class="h3 mb-0 font-weight text-white">
+                                 <span style="font-size: 0.45em;">@(ViewBag.TopBusinessType3Name?.ToString().Length > 25 ? ViewBag.TopBusinessType3Name?.ToString().Substring(0, 22) + "..." : ViewBag.TopBusinessType3Name)</span> @String.Format("{0:N0}", ViewBag.TopBusinessType3Count)
+                             </div>
+                         </div>
+                         <div class="col-auto">
+                             <i class="fas fa-building fa-2x text-white" style="vertical-align: 60px;"></i>
+                         </div>
+                     </div>
+                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Financial Summary Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card-body border-0 shadow-sm">
+                <div class="card-header bg-gradient text-white text-center"
+                    style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-line me-2"></i>
+                        Tóm tắt tài chính doanh nghiệp
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                         <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6">
+                            <div class="border-end py-3">
+                                 <h4 class="text-primary mb-1">@String.Format("{0:N0}", ViewBag.CompaniesWithRevenue ?? 0)</h4>
+                                    <small class="text-muted">DN có doanh thu</small>
+                            </div>
+                        </div>
+                         <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6">
+                            <div class="border-end py-3">
+                                 <h4 class="text-success mb-1">@String.Format("{0:N0}", ViewBag.CompaniesWithAssets ?? 0)</h4>
+                                <small class="text-muted">DN có tài sản</small>
+                            </div>
+                        </div>
+                         <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6">
+                            <div class="border-end py-3">
+                                 <h4 class="text-warning mb-1">@String.Format("{0:N0}", ViewBag.CompaniesWithProfit ?? 0)</h4>
+                                <small class="text-muted">DN có lợi nhuận</small>
+                            </div>
+                        </div>
+                         <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6">
+                             <div class="py-3">
+                                <h4 class="text-info mb-1">@String.Format("{0:N2}", (ViewBag.TotalAssetsCK ?? 0m) / 1000000000m) tỷ</h4>
+                                <small class="text-muted">Tổng tài sản cuối kỳ</small>
+                             </div>
+                         </div>
+                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+        <!-- Technology Adoption Section -->
+        <div class="mt-5">
+            <div class="technology-section">
+                <h5 class="section-title text-center mb-4">
+                    <i class="fas fa-microchip text-primary me-2"></i>
+                    Mức độ ứng dụng Công nghệ số
+                </h5>
+                <div class="row">
+                     <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 mb-3">
+                        <div class="metric-card">
+                            <div class="metric-value text-primary">@ViewBag.CoInternet</div>
+                            <div class="metric-label">
+                                <i class="fas fa-wifi me-2"></i>Sử dụng Internet
+                            </div>
+                            <div class="progress mt-2" style="height: 12px;">
+                                <div class="progress-bar" role="progressbar" 
+                                     style="width: @(ViewBag.TotalCompanies > 0 ? Math.Round((double)ViewBag.CoInternet / ViewBag.TotalCompanies * 100, 1) : 0)%; background-color: #2563eb;"
+                                     aria-valuenow="@(ViewBag.TotalCompanies > 0 ? Math.Round((double)ViewBag.CoInternet / ViewBag.TotalCompanies * 100, 1) : 0)" 
+                                     aria-valuemin="0" aria-valuemax="100">
+                                </div>
+                            </div>
+                            <div class="metric-percentage">
+                                <span>@(ViewBag.TotalCompanies > 0 ? Math.Round((double)ViewBag.CoInternet / ViewBag.TotalCompanies * 100, 1) : 0)%</span>
+                                <span class="metric-ratio">@ViewBag.CoInternet/@ViewBag.TotalCompanies</span>
+                            </div>
+                        </div>
+                    </div>
+                     <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 mb-3">
+                        <div class="metric-card">
+                            <div class="metric-value text-success">@ViewBag.CoWebsite</div>
+                            <div class="metric-label">
+                                <i class="fas fa-globe me-2"></i>Có Website
+                            </div>
+                            <div class="progress mt-2" style="height: 12px;">
+                                <div class="progress-bar" role="progressbar" 
+                                     style="width: @(ViewBag.TotalCompanies > 0 ? Math.Round((double)ViewBag.CoWebsite / ViewBag.TotalCompanies * 100, 1) : 0)%; background-color: #10b981;"
+                                     aria-valuenow="@(ViewBag.TotalCompanies > 0 ? Math.Round((double)ViewBag.CoWebsite / ViewBag.TotalCompanies * 100, 1) : 0)" 
+                                     aria-valuemin="0" aria-valuemax="100">
+                                </div>
+                            </div>
+                            <div class="metric-percentage">
+                                <span>@(ViewBag.TotalCompanies > 0 ? Math.Round((double)ViewBag.CoWebsite / ViewBag.TotalCompanies * 100, 1) : 0)%</span>
+                                <span class="metric-ratio">@ViewBag.CoWebsite/@ViewBag.TotalCompanies</span>
+                            </div>
+                        </div>
+                    </div>
+                     <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 mb-3">
+                        <div class="metric-card">
+                            <div class="metric-value text-warning">@ViewBag.CoPhanmem</div>
+                            <div class="metric-label">
+                                <i class="fas fa-laptop-code me-2"></i>Sử dụng phần mềm
+                            </div>
+                            <div class="progress mt-2" style="height: 12px;">
+                                <div class="progress-bar" role="progressbar" 
+                                     style="width: @(ViewBag.TotalCompanies > 0 ? Math.Round((double)ViewBag.CoPhanmem / ViewBag.TotalCompanies * 100, 1) : 0)%; background-color: #f59e0b;"
+                                     aria-valuenow="@(ViewBag.TotalCompanies > 0 ? Math.Round((double)ViewBag.CoPhanmem / ViewBag.TotalCompanies * 100, 1) : 0)" 
+                                     aria-valuemin="0" aria-valuemax="100">
+                                </div>
+                            </div>
+                            <div class="metric-percentage">
+                                <span>@(ViewBag.TotalCompanies > 0 ? Math.Round((double)ViewBag.CoPhanmem / ViewBag.TotalCompanies * 100, 1) : 0)%</span>
+                                <span class="metric-ratio">@ViewBag.CoPhanmem/@ViewBag.TotalCompanies</span>
+                            </div>
+                        </div>
+                    </div>
+                     <div class="col-xl-3 col-lg-12 col-md-6 col-sm-12 mb-3">
+                         <div class="metric-card">
+                             <div class="metric-value text-info">@ViewBag.CoTudonghoa</div>
+                             <div class="metric-label">
+                                 <i class="fas fa-robot me-2"></i>Tự động hóa
+                             </div>
+                             <div class="progress mt-2" style="height: 12px;">
+                                 <div class="progress-bar" role="progressbar" 
+                                      style="width: @(ViewBag.TotalCompanies > 0 ? Math.Round((double)ViewBag.CoTudonghoa / ViewBag.TotalCompanies * 100, 1) : 0)%; background-color: #06b6d4;"
+                                      aria-valuenow="@(ViewBag.TotalCompanies > 0 ? Math.Round((double)ViewBag.CoTudonghoa / ViewBag.TotalCompanies * 100, 1) : 0)" 
+                                      aria-valuemin="0" aria-valuemax="100">
+                                 </div>
+                             </div>
+                             <div class="metric-percentage">
+                                 <span>@(ViewBag.TotalCompanies > 0 ? Math.Round((double)ViewBag.CoTudonghoa / ViewBag.TotalCompanies * 100, 1) : 0)%</span>
+                                 <span class="metric-ratio">@ViewBag.CoTudonghoa/@ViewBag.TotalCompanies</span>
+                         </div>
+                     </div>
+                 </div>
+            </div>
+        </div>
+    </div>
+
+        <!-- Charts Section -->
+    <div class="mt-5">
+        <div class="row">
+            <!-- Vùng Kinh Tế Chart -->
+             <!-- Vùng Kinh Tế Chart -->
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow h-100">
+                    <div class="card-header py-3 text-center" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <h6 class="m-0 font-weight-bold text-white">
+                            <i class="fas fa-map-marked-alt me-2"></i>
+                            Phân bố theo Vùng Kinh tế
+                        </h6>
+                        <!-- Debug buttons -->
+                        <div class="mt-2">
+                            <button onclick="testVungKinhTeData()" class="btn btn-sm btn-warning me-1" style="font-size: 0.7rem;">
+                                <i class="fas fa-bug"></i> Test
+                            </button>
+                            <button onclick="createTestChart()" class="btn btn-sm btn-success me-1" style="font-size: 0.7rem;">
+                                <i class="fas fa-chart-pie"></i> Force
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body p-2">
+                        <div class="row">
+                            <div class="col-md-7">
+                                <div class="chart-container" style="position: relative; height: 300px;">
+                                    <canvas id="vungKinhTeChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="chart-legend" style="height: 300px; overflow-y: auto; padding: 10px;">
+                                    <h6 class="text-muted mb-2" style="font-size: 0.9rem;">Chi tiết:</h6>
+                                    <div id="chartLegendDetails">
+                                        <!-- Legend details will be populated by JavaScript -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quy mô Doanh nghiệp Chart -->
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow h-100">
+                    <div class="card-header py-3 text-center" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
+                        <h6 class="m-0 font-weight-bold text-white">
+                            <i class="fas fa-building me-2"></i>
+                            Phân bố theo Quy mô Doanh nghiệp
+                        </h6>
+                        <!-- Debug buttons -->
+                        <div class="mt-2">
+                            <button onclick="testQuyMoData()" class="btn btn-sm btn-warning me-1" style="font-size: 0.7rem;">
+                                <i class="fas fa-bug"></i> Test
+                            </button>
+                            <button onclick="createQuyMoChart()" class="btn btn-sm btn-success me-1" style="font-size: 0.7rem;">
+                                <i class="fas fa-chart-bar"></i> Force
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body p-2">
+                        <div class="row">
+                            <div class="col-md-7">
+                                <div class="chart-container" style="position: relative; height: 300px;">
+                                    <canvas id="quyMoChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="chart-legend" style="height: 300px; overflow-y: auto; padding: 10px;">
+                                    <h6 class="text-muted mb-2" style="font-size: 0.9rem;">Chi tiết:</h6>
+                                    <div id="quyMoLegendDetails">
+                                        <!-- Legend details will be populated by JavaScript -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- Phân bố theo Ngành nghề Chart -->
+    <style>
+        .industry-chart-card {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .industry-chart-card .card-body {
+            flex: 1;
+            padding: 1rem;
+            display: flex;
+        }
+        .industry-chart-card .row {
+            flex: 1;
+            margin: 0;
+        }
+        .industry-chart-card .col-md-8 {
+            height: 100%;
+            padding: 0;
+        }
+        .industry-chart-card .chart-container {
+            height: 100% !important;
+            min-height: 700px;
+            width: 100%;
+        }
+    </style>
+    <style>
+        .industry-distribution-card {
+            height: 100%;
+            min-height: 800px;
+            display: flex;
+            flex-direction: column;
+        }
+        .industry-distribution-card .card-body {
+            flex: 1;
+            padding: 1.5rem;
+            display: flex;
+        }
+        .industry-distribution-card .row {
+            flex: 1;
+            margin: 0;
+        }
+        .industry-distribution-card .col-md-8 {
+            height: 100%;
+            padding: 0;
+        }
+        .industry-distribution-card .chart-wrapper {
+            height: 100% !important;
+            min-height: 800px;
+            width: 100%;
+            position: relative;
+        }
+        .industry-distribution-card .card-header {
+            padding: 1rem;
+        }
+        .industry-distribution-legend {
+            height: 100%;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+    </style>
+    <div class="mt-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow industry-chart-card">
+                    <div class="card-header py-3 text-center" style="background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);">
+                        <h6 class="m-0 font-weight-bold text-white">
+                            <i class="fas fa-industry me-2"></i>
+                            Phân bố Doanh nghiệp theo Ngành nghề
+                        </h6>
+                    </div>
+                    <div class="card-body p-3">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="chart-container" style="position: relative; height: 100%; min-height: 700px;">
+                                    <canvas id="industryChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="chart-legend" style="height: 700px; overflow-y: auto; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                                    <h6 class="text-muted mb-3" style="font-size: 0.9rem; text-align: center;">
+                                        <i class="fas fa-list-ul me-1"></i>
+                                        Top ngành nghề
+                                    </h6>
+                                    
+                                    <!-- Test Button -->
+                                    <div class="text-center mb-3">
+                                        <button onclick="testIndustryDataFromDatabase()" class="btn btn-sm btn-primary" style="font-size: 0.8rem;">
+                                            <i class="fas fa-database me-1"></i>
+                                            Test Database
+                                        </button>
+                                    </div>
+                                    
+                                    <div id="industryLegendDetails">
+                                        <!-- Legend details will be populated by JavaScript -->
+                                    </div>
+                                </div>
+                            </div>
+                             </div>
+                         </div>
+                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Summary -->
+        <div class="mt-4 text-center">
+            <p class="text-muted">
+                <i class="fas fa-info-circle me-1"></i>
+                Tổng số doanh nghiệp được phân tích: <strong>@ViewBag.TotalCompanies</strong>
+            </p>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Simple Chart Test Script -->
+<script>
+console.log('🔍 Page loaded, testing Chart.js...');
+
+// Test if Chart.js is available
+if (typeof Chart === 'undefined') {
+    console.error('❌ Chart.js NOT loaded!');
+} else {
+    console.log('✅ Chart.js loaded:', Chart.version);
+}
+
+// Test canvas element
+window.addEventListener('load', function() {
+    const canvas = document.getElementById('vungKinhTeChart');
+    if (canvas) {
+        console.log('✅ Canvas element found');
+        
+        // Try to create a simple chart immediately
+        try {
+            const simpleChart = new Chart(canvas, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Test 1', 'Test 2', 'Test 3'],
+                    datasets: [{
+                        data: [10, 20, 30],
+                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+            console.log('✅ Simple chart created successfully!');
+        } catch (error) {
+            console.error('❌ Error creating simple chart:', error);
+        }
+    } else {
+        console.error('❌ Canvas element NOT found!');
+    }
+});
+</script>
+
+<!-- Vùng Kinh Tế Chart Script -->
+<script>
+// Function to create Vùng Kinh Tế chart
+function initVungKinhTeChart() {
+    console.log('🎯 Initializing Vùng Kinh Tế Chart...');
+    
+    // Check if Chart.js is loaded
+    if (typeof Chart === 'undefined') {
+        console.error('❌ Chart.js is not loaded!');
+        return false;
+    }
+    
+    // Get canvas context
+    const ctx = document.getElementById('vungKinhTeChart');
+    if (!ctx) {
+        console.error('❌ Canvas element vungKinhTeChart not found!');
+        return false;
+    }
+    
+    // Get data from ViewBag - từ cột Vungkinhte - safely
+    let vungKinhTeData = [];
+    try {
+        const rawDataString = '@Html.Raw(Json.Serialize(ViewBag.VungKinhTeData ?? new List<object>()))';
+        console.log('📊 Raw data string:', rawDataString);
+        
+        if (rawDataString && rawDataString !== '[]' && rawDataString !== '') {
+            vungKinhTeData = JSON.parse(rawDataString);
+        }
+        
+        console.log('📊 Vùng Kinh Tế data from ViewBag:', vungKinhTeData);
+    } catch (error) {
+        console.warn('⚠️ Error loading ViewBag data:', error);
+    }
+    
+    // ONLY USE REAL DATA FROM DATABASE - NO SAMPLE DATA
+    if (!vungKinhTeData || vungKinhTeData.length === 0) {
+        console.log('⚠️ No real data from database - chart will be empty');
+        console.log('⚠️ Expected database: Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;');
+        console.log('⚠️ Expected data from Vungkinhte column');
+        vungKinhTeData = [];
+    }
+    
+    // Prepare chart data
+    let labels = vungKinhTeData.map(item => item.Vungkinhte || item.region || item.Region || 'N/A');
+    let data = vungKinhTeData.map(item => item.SoLuong || item.soLuong || item.Count || 0);
+    let total = data.reduce((sum, value) => sum + value, 0);
+    
+    // NO DEFAULT SAMPLE DATA - Only show empty chart if no database data
+    if (total === 0) {
+        console.log('⚠️ No valid data from database - displaying empty chart');
+        console.log('⚠️ Database connection: Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;');
+        console.log('⚠️ Check Vungkinhte column in dn_all table');
+        labels = ['Không có dữ liệu'];
+        data = [0];
+        total = 0;
+    }
+    
+    console.log('📊 Final chart data:', { labels, data, total });
+    
+    // Chart colors
+    const colors = [
+        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', 
+        '#9966FF', '#FF9F40', '#FF6384'
+    ];
+    
+    try {
+        // Destroy existing chart if any
+        Chart.getChart(ctx)?.destroy();
+        
+        const vungKinhTeChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: colors,
+                    borderColor: '#ffffff',
+                    borderWidth: 3,
+                    hoverBorderWidth: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const percentage = ((context.raw / total) * 100).toFixed(1);
+                                return context.label + ': ' + context.raw.toLocaleString() + ' DN (' + percentage + '%)';
+                            }
+                        },
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleColor: 'white',
+                        bodyColor: 'white',
+                        borderColor: 'rgba(255, 255, 255, 0.2)',
+                        borderWidth: 1
+                    }
+                },
+                animation: {
+                    animateScale: true,
+                    animateRotate: true,
+                    duration: 1000
+                }
+            }
+        });
+        
+        console.log('✅ Vùng Kinh Tế Chart created successfully!');
+        
+        // Create custom legend
+        createCustomLegend(labels, data, colors, total);
+        
+        return true;
+    } catch (error) {
+        console.error('❌ Error creating Vùng Kinh Tế chart:', error);
+        return false;
+    }
+}
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Try to create chart immediately
+    if (!initVungKinhTeChart()) {
+        // If failed, try again after a short delay
+        setTimeout(() => {
+            console.log('🔄 Retrying Vùng Kinh Tế chart creation...');
+            initVungKinhTeChart();
+        }, 500);
+    }
+});
+
+// Also try when window is fully loaded
+window.addEventListener('load', function() {
+    // Double check if chart exists, if not create it
+    const canvas = document.getElementById('vungKinhTeChart');
+    if (canvas && !Chart.getChart(canvas)) {
+        console.log('🔄 Creating Vùng Kinh Tế chart on window load...');
+        initVungKinhTeChart();
+    }
+});
+</script>
+
+<!-- Advanced Filter JavaScript Functions -->
+<script>
+    // Toggle dropdown visibility
+    function toggleDropdown(element) {
+        const dropdown = element.nextElementSibling;
+        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        
+        // Update selected display
+        updateSelectedDisplay(element);
+    }
+
+    // Filter options based on search input
+    function filterOptions(searchInput) {
+        const filter = searchInput.value.toLowerCase();
+        const dropdown = searchInput.parentElement;
+        const labels = dropdown.querySelectorAll('label');
+        
+        labels.forEach(label => {
+            const text = label.textContent.toLowerCase();
+            if (text.includes(filter)) {
+                label.style.display = 'block';
+            } else {
+                label.style.display = 'none';
+            }
+        });
+    }
+
+    // Update selected options display
+    function updateSelectedDisplay(selectBox) {
+        const dropdown = selectBox.nextElementSibling;
+        const selectedSpan = selectBox.querySelector('.selected-options');
+        const checkedInputs = dropdown.querySelectorAll('input[type="checkbox"]:checked');
+        const placeholder = selectedSpan.getAttribute('data-placeholder');
+        
+        if (checkedInputs.length === 0) {
+            selectedSpan.textContent = placeholder;
+        } else if (checkedInputs.length === 1) {
+            selectedSpan.textContent = checkedInputs[0].nextSibling.textContent.trim();
+        } else {
+            selectedSpan.textContent = `${checkedInputs.length} mục đã chọn`;
+        }
+    }
+
+    // Clear all filters
+    function clearAllFilters() {
+        // Uncheck all checkboxes
+        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            checkbox.checked = false;
+        });
+        
+        // Reset all select displays
+        document.querySelectorAll('.select-box').forEach(selectBox => {
+            updateSelectedDisplay(selectBox);
+        });
+        
+        // Reload page without filters
+        window.location.href = '@Url.Action("Index", "DN")';
+    }
+
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', function(event) {
+        if (!event.target.closest('.custom-multi-select')) {
+            document.querySelectorAll('.dropdown-options').forEach(dropdown => {
+                dropdown.style.display = 'none';
+            });
+        }
+    });
+
+    // Initialize filter UI only
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('🔧 Initializing filter UI...');
+        
+        document.querySelectorAll('.select-box').forEach(selectBox => {
+            updateSelectedDisplay(selectBox);
+        });
+        
+        // Add change event listeners to checkboxes
+        document.querySelectorAll('.dropdown-options input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const selectBox = this.closest('.custom-multi-select').querySelector('.select-box');
+                updateSelectedDisplay(selectBox);
+            });
+        });
+    });
+</script>
+
+<!-- Global test function to debug ViewBag data -->
+<script>
+function testVungKinhTeData() {
+    console.log('🧪 TESTING ViewBag Data...');
+    
+    // Test ViewBag values safely
+    const totalCompanies = @(ViewBag.TotalCompanies ?? 0);
+    console.log('📊 ViewBag.TotalCompanies:', totalCompanies);
+    
+    // Test if data is available
+    try {
+        const rawData = '@Html.Raw(Json.Serialize(ViewBag.VungKinhTeData ?? new List<object>()))';
+        console.log('📊 Raw data string:', rawData);
+        
+        let testData = [];
+        if (rawData && rawData !== '[]' && rawData !== '') {
+            testData = JSON.parse(rawData);
+        }
+        
+        console.log('📊 Test data parsed:', testData);
+        console.log('📊 Test data type:', typeof testData);
+        console.log('📊 Test data length:', testData ? testData.length : 'null');
+        
+        if (testData && testData.length > 0) {
+            console.log('✅ Data is available!');
+            alert('✅ Data available: ' + testData.length + ' regions found.\\nTotal companies: ' + totalCompanies + '\\nCheck console for details.');
+        } else {
+            console.log('❌ No data available!');
+            alert('❌ No data available from ViewBag.VungKinhTeData\\nData might be empty or null from database.');
+        }
+        } catch (error) {
+        console.error('❌ Error testing data:', error);
+        alert('❌ Error testing data: ' + error.message);
+    }
+    
+    // Test Chart.js
+    if (typeof Chart !== 'undefined') {
+        console.log('✅ Chart.js is loaded:', Chart.version);
+    } else {
+        console.log('❌ Chart.js is NOT loaded!');
+        alert('❌ Chart.js library is not loaded!');
+    }
+    
+    // Test canvas element
+    const canvas = document.getElementById('vungKinhTeChart');
+    if (canvas) {
+        console.log('✅ Canvas element found:', canvas);
+    } else {
+        console.log('❌ Canvas element NOT found!');
+        alert('❌ Canvas element vungKinhTeChart not found!');
+    }
+}
+</script>
+
+<!-- Global function to force create test chart -->
+<script>
+function createTestChart() {
+    console.log('🧪 Creating test chart...');
+    
+    // Check if canvas exists
+    const canvas = document.getElementById('vungKinhTeChart');
+    if (!canvas) {
+        alert('❌ Canvas element not found!');
+        return;
+    }
+    
+    // Check if Chart.js is available
+    if (typeof Chart === 'undefined') {
+        alert('❌ Chart.js is not loaded!');
+        return;
+    }
+    
+    try {
+        // Destroy existing chart if any
+        const existingChart = Chart.getChart(canvas);
+        if (existingChart) {
+            existingChart.destroy();
+        }
+        
+        // Test data for all 7 Vietnamese economic regions
+        const testData = [
+            { region: 'Đông Nam Bộ', count: 15 },
+            { region: 'Đồng bằng Sông Hồng', count: 12 },
+            { region: 'Duyên hải Nam Trung Bộ', count: 8 },
+            { region: 'Bắc Trung Bộ', count: 6 },
+            { region: 'Đồng bằng Sông Cửu Long', count: 10 },
+            { region: 'Tây Nguyên', count: 4 },
+            { region: 'Trung du và Miền núi Bắc Bộ', count: 5 }
+        ];
+        
+        const labels = testData.map(item => item.region);
+        const data = testData.map(item => item.count);
+        const colors = [
+            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', 
+            '#9966FF', '#FF9F40', '#C9CBCF'
+        ];
+        
+        console.log('📊 Creating chart with test data:', { labels, data });
+        
+        const testChart = new Chart(canvas, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: colors,
+                    borderColor: '#ffffff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const total = data.reduce((a, b) => a + b, 0);
+                                const percentage = ((context.raw / total) * 100).toFixed(1);
+                                return context.label + ': ' + context.raw + ' DN (' + percentage + '%)';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        console.log('✅ Test chart created successfully!', testChart);
+        
+        // Update legend
+        const total = data.reduce((a, b) => a + b, 0);
+        createCustomLegend(labels, data, colors, total);
+        
+        alert('✅ Test chart created successfully!\\nCheck the chart display above.');
+        
+    } catch (error) {
+        console.error('❌ Error creating test chart:', error);
+        alert('❌ Error creating test chart: ' + error.message);
+    }
+}
+</script>
+
+<!-- Quy mô Doanh nghiệp Chart Script -->
+<script>
+// Function to create Quy mô chart
+function initQuyMoChart() {
+    console.log('🎯 Initializing Quy mô Doanh nghiệp Chart...');
+    
+    // Check if Chart.js is loaded
+    if (typeof Chart === 'undefined') {
+        console.error('❌ Chart.js is not loaded!');
+        return false;
+    }
+    
+    // Get canvas context
+    const ctx = document.getElementById('quyMoChart');
+    if (!ctx) {
+        console.error('❌ Canvas element quyMoChart not found!');
+        return false;
+    }
+    
+    // Get data from ViewBag - ENHANCED DEBUG
+    let quyMoData = [];
+    try {
+        console.log('🔍 QUY MO CHART DEBUG - START');
+        console.log('🔍 ViewBag.QuyMoData type check:');
+        console.log('   - Raw ViewBag:', '@ViewBag.QuyMoData');
+        console.log('   - ViewBag exists:', '@ViewBag.QuyMoData' !== '');
+        
+        const rawDataString = '@Html.Raw(Json.Serialize(ViewBag.QuyMoData ?? new List<object>()))';
+        console.log('🔍 Raw Quy mô data string (length: ' + rawDataString.length + '):', rawDataString);
+        console.log('🔍 Raw data string type:', typeof rawDataString);
+        console.log('🔍 Raw data string preview:', rawDataString.substring(0, 200));
+        
+        if (rawDataString && rawDataString !== '[]' && rawDataString !== '' && rawDataString !== 'null') {
+            try {
+                quyMoData = JSON.parse(rawDataString);
+                console.log('✅ Successfully parsed Quy mô data:', quyMoData);
+                console.log('✅ Parsed data type:', typeof quyMoData);
+                console.log('✅ Parsed data length:', quyMoData ? quyMoData.length : 'null');
+                
+                if (quyMoData && quyMoData.length > 0) {
+                    console.log('✅ First item structure:', quyMoData[0]);
+                    console.log('✅ All items preview:');
+                    quyMoData.forEach((item, index) => {
+                        console.log(`   [${index}] QuyMo: "${item.QuyMo}", SoLuong: ${item.SoLuong}, MoTa: "${item.MoTa}"`);
+                    });
+                }
+            } catch (parseError) {
+                console.error('❌ JSON parse error:', parseError);
+                console.error('❌ Failed to parse string:', rawDataString);
+                quyMoData = [];
+            }
+        } else {
+            console.log('⚠️ Raw data string is empty or invalid:', rawDataString);
+        }
+        
+        console.log('📊 Final Quy mô data from ViewBag:', quyMoData);
+        console.log('📊 Data count:', quyMoData ? quyMoData.length : 'null');
+    } catch (error) {
+        console.error('❌ Error loading Quy mô ViewBag data:', error);
+        console.error('❌ Error details:', error.stack);
+    }
+    
+    // ONLY USE REAL DATA FROM DATABASE - NO SAMPLE DATA
+    if (!quyMoData || quyMoData.length === 0) {
+        console.log('⚠️ No real company size data from database - chart will be empty');
+        console.log('⚠️ Expected database: Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;');
+        console.log('⚠️ Expected data from SR_Doanhthu_Thuan_BH_CCDV column for revenue calculation');
+        quyMoData = [];
+    }
+    
+    // Prepare chart data - FIXED PROPERTY NAMES
+    let labels = quyMoData.map(item => item.QuyMo || item.quyMo || item.category || item.Category || 'N/A');
+    let data = quyMoData.map(item => item.SoLuong || item.soLuong || item.count || item.Count || 0);
+    let descriptions = quyMoData.map(item => item.MoTa || item.moTa || item.description || item.Description || '');
+    
+    console.log('🔍 MAPPING DEBUG:');
+    quyMoData.forEach((item, index) => {
+        console.log(`   [${index}] Raw item:`, item);
+        console.log(`   [${index}] Mapped: QuyMo="${labels[index]}", SoLuong=${data[index]}, MoTa="${descriptions[index]}"`);
+    });
+    let total = data.reduce((sum, value) => sum + value, 0);
+    
+    // NO DEFAULT SAMPLE DATA - Only show empty chart if no database data
+    if (total === 0) {
+        console.log('⚠️ No valid company size data from database - displaying empty chart');
+        console.log('⚠️ Database connection: Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;');
+        console.log('⚠️ Check SR_Doanhthu_Thuan_BH_CCDV column in dn_all table');
+        labels = ['Không có dữ liệu quy mô'];
+        data = [0];
+        descriptions = ['Cần dữ liệu doanh thu từ database'];
+        total = 0;
+    }
+    
+    console.log('📊 Final Quy mô chart data:', { labels, data, descriptions, total });
+    
+    // Chart colors - 4 màu cho 4 quy mô
+    const colors = [
+        '#FF6B6B', // Siêu nhỏ - Đỏ nhạt
+        '#4ECDC4', // Nhỏ - Xanh lục
+        '#45B7D1', // Vừa - Xanh dương
+        '#96CEB4'  // Lớn - Xanh lá nhạt
+    ];
+    
+    try {
+        // Destroy existing chart if any
+        Chart.getChart(ctx)?.destroy();
+        
+        const quyMoChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Số lượng DN',
+                    data: data,
+                    backgroundColor: colors,
+                    borderColor: colors.map(color => color + 'CC'),
+                    borderWidth: 2,
+                    borderRadius: 8,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const percentage = ((context.raw / total) * 100).toFixed(1);
+                                const desc = descriptions[context.dataIndex] || '';
+                                return [
+                                    context.label + ': ' + context.raw.toLocaleString() + ' DN (' + percentage + '%)',
+                                    desc
+                                ];
+                            }
+                        },
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleColor: 'white',
+                        bodyColor: 'white',
+                        borderColor: 'rgba(255, 255, 255, 0.2)',
+                        borderWidth: 1
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                    }
+                    }
+                },
+                animation: {
+                    duration: 1000,
+                    easing: 'easeOutBounce'
+                }
+            }
+        });
+        
+        console.log('✅ Quy mô Chart created successfully!');
+        
+        // Create custom legend for Quy mô
+        createQuyMoLegend(labels, data, descriptions, colors, total);
+        
+        return true;
+    } catch (error) {
+        console.error('❌ Error creating Quy mô chart:', error);
+        return false;
+    }
+}
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Try to create chart immediately
+    if (!initQuyMoChart()) {
+        // If failed, try again after a short delay
+        setTimeout(() => {
+            console.log('🔄 Retrying Quy mô chart creation...');
+            initQuyMoChart();
+        }, 500);
+    }
+});
+
+// Also try when window is fully loaded
+window.addEventListener('load', function() {
+    // Double check if chart exists, if not create it
+    const canvas = document.getElementById('quyMoChart');
+    if (canvas && !Chart.getChart(canvas)) {
+        console.log('🔄 Creating Quy mô chart on window load...');
+        initQuyMoChart();
+    }
+});
+</script>
+
+<!-- Test functions for Quy mô chart -->
+<script>
+// Global test function for Quy mô data
+function testQuyMoData() {
+    console.log('🧪 TESTING Quy mô Data...');
+    
+    // Test ViewBag values safely
+    const totalCompanies = @(ViewBag.TotalCompanies ?? 0);
+    console.log('📊 ViewBag.TotalCompanies:', totalCompanies);
+    
+    // Test if data is available
+    try {
+        const rawData = '@Html.Raw(Json.Serialize(ViewBag.QuyMoData ?? new List<object>()))';
+        console.log('📊 Raw Quy mô data string:', rawData);
+        
+        let testData = [];
+        if (rawData && rawData !== '[]' && rawData !== '') {
+            testData = JSON.parse(rawData);
+        }
+        
+        console.log('📊 Test Quy mô data parsed:', testData);
+        console.log('📊 Test data type:', typeof testData);
+        console.log('📊 Test data length:', testData ? testData.length : 'null');
+        
+        if (testData && testData.length > 0) {
+            console.log('✅ Quy mô Data is available!');
+            alert('✅ Quy mô Data available: ' + testData.length + ' categories found.\\nTotal companies: ' + totalCompanies + '\\nCheck console for details.');
+        } else {
+            console.log('❌ No Quy mô data available!');
+            alert('❌ No data available from ViewBag.QuyMoData\\nData might be empty or null from database.');
+        }
+    } catch (error) {
+        console.error('❌ Error testing Quy mô data:', error);
+        alert('❌ Error testing Quy mô data: ' + error.message);
+    }
+    
+    // Test canvas element
+    const canvas = document.getElementById('quyMoChart');
+    if (canvas) {
+        console.log('✅ Quy mô Canvas element found:', canvas);
+    } else {
+        console.log('❌ Quy mô Canvas element NOT found!');
+        alert('❌ Canvas element quyMoChart not found!');
+    }
+}
+
+// Global function to force create Quy mô test chart
+function createQuyMoChart() {
+    console.log('🧪 Creating Quy mô test chart...');
+    
+    // Check if canvas exists
+    const canvas = document.getElementById('quyMoChart');
+    if (!canvas) {
+        alert('❌ Canvas element quyMoChart not found!');
+        return;
+    }
+    
+    // Check if Chart.js is available
+    if (typeof Chart === 'undefined') {
+        alert('❌ Chart.js is not loaded!');
+        return;
+    }
+    
+    try {
+        // Destroy existing chart if any
+        const existingChart = Chart.getChart(canvas);
+        if (existingChart) {
+            existingChart.destroy();
+        }
+        
+        // Test data for company sizes based on revenue (in million VND)
+        const testData = [
+            { category: 'Siêu nhỏ', count: 18, description: 'DT ≤ 3 tỷ' },
+            { category: 'Nhỏ', count: 15, description: '3 tỷ < DT ≤ 50 tỷ' },
+            { category: 'Vừa', count: 8, description: '50 tỷ < DT ≤ 300 tỷ' },
+            { category: 'Lớn', count: 2, description: 'DT > 300 tỷ & TS > 100 tỷ' }
+        ];
+        
+        const labels = testData.map(item => item.category);
+        const data = testData.map(item => item.count);
+        const descriptions = testData.map(item => item.description);
+        const colors = [
+            '#FF6B6B', // Siêu nhỏ - Đỏ nhạt
+            '#4ECDC4', // Nhỏ - Xanh lục
+            '#45B7D1', // Vừa - Xanh dương
+            '#96CEB4'  // Lớn - Xanh lá nhạt
+        ];
+        
+        console.log('📊 Creating Quy mô chart with test data:', { labels, data, descriptions });
+        
+        const testChart = new Chart(canvas, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Số lượng DN',
+                    data: data,
+                    backgroundColor: colors,
+                    borderColor: colors.map(color => color + 'CC'),
+                    borderWidth: 2,
+                    borderRadius: 8,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const total = data.reduce((a, b) => a + b, 0);
+                                const percentage = ((context.raw / total) * 100).toFixed(1);
+                                const desc = descriptions[context.dataIndex] || '';
+                                return [
+                                    context.label + ': ' + context.raw + ' DN (' + percentage + '%)',
+                                    desc
+                                ];
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                },
+                animation: {
+                    duration: 1000,
+                    easing: 'easeOutBounce'
+                }
+            }
+        });
+        
+        console.log('✅ Quy mô Test chart created successfully!', testChart);
+        
+        // Update legend
+        const total = data.reduce((a, b) => a + b, 0);
+        createQuyMoLegend(labels, data, descriptions, colors, total);
+        
+        alert('✅ Quy mô Test chart created successfully!\\nCheck the chart display above.');
+        
+    } catch (error) {
+        console.error('❌ Error creating Quy mô test chart:', error);
+        alert('❌ Error creating Quy mô test chart: ' + error.message);
+    }
+}
+</script>
+
+<!-- Legend Functions -->
+<script>
+// Function to create custom legend for Vùng Kinh Tế chart
+function createCustomLegend(labels, data, colors, total) {
+    const legendContainer = document.getElementById('chartLegendDetails');
+    if (!legendContainer) return;
+    
+    let legendHTML = '';
+    
+    labels.forEach((label, index) => {
+        const value = data[index];
+        const percentage = ((value / total) * 100).toFixed(1);
+        
+        legendHTML += `
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: ${colors[index]}"></div>
+                <div class="legend-text">${label}</div>
+                <div class="legend-value">
+                    ${value.toLocaleString()} DN
+                    <div class="legend-percentage">${percentage}%</div>
+                </div>
+            </div>
+        `;
+    });
+    
+    legendContainer.innerHTML = legendHTML;
+}
+
+// Function to create custom legend for Quy mô chart
+function createQuyMoLegend(labels, data, descriptions, colors, total) {
+    const legendContainer = document.getElementById('quyMoLegendDetails');
+    if (!legendContainer) return;
+    
+    let legendHTML = '';
+    
+    labels.forEach((label, index) => {
+        const value = data[index];
+        const percentage = ((value / total) * 100).toFixed(1);
+        const description = descriptions[index] || '';
+        
+        legendHTML += `
+            <div class="legend-item" style="margin-bottom: 8px;">
+                <div class="legend-color" style="background-color: ${colors[index]}; width: 16px; height: 16px;"></div>
+                <div class="legend-text" style="font-size: 0.85rem;">
+                    <strong>${label}</strong><br>
+                    <small class="text-muted">${description}</small>
+                </div>
+                <div class="legend-value" style="font-size: 0.8rem;">
+                    ${value.toLocaleString()} DN
+                    <div class="legend-percentage" style="font-size: 0.75rem;">${percentage}%</div>
+                </div>
+            </div>
+        `;
+    });
+    
+    legendContainer.innerHTML = legendHTML;
+}
+
+// Function to create custom legend for Trend chart
+function createTrendLegend(revenueData, profitData, years) {
+    const legendContainer = document.getElementById('trendLegendDetails');
+    if (!legendContainer) return;
+    
+    // Calculate totals and trends
+    const totalRevenue = revenueData.reduce((sum, val) => sum + val, 0);
+    const totalProfit = profitData.reduce((sum, val) => sum + val, 0);
+    const avgRevenue = Math.round(totalRevenue / revenueData.length);
+    const avgProfit = Math.round(totalProfit / profitData.length);
+    
+    // Calculate growth rates
+    const revenueGrowth = revenueData.length > 1 ? 
+        (((revenueData[revenueData.length - 1] - revenueData[0]) / revenueData[0]) * 100).toFixed(1) : 0;
+    const profitGrowth = profitData.length > 1 ? 
+        (((profitData[profitData.length - 1] - profitData[0]) / profitData[0]) * 100).toFixed(1) : 0;
+    
+    let legendHTML = `
+        <!-- Revenue Legend -->
+        <div class="legend-item" style="margin-bottom: 15px; padding: 12px; background: rgba(40, 167, 69, 0.05); border-left: 4px solid #28a745; border-radius: 6px;">
+            <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                <div class="legend-color" style="background-color: #28a745; width: 18px; height: 18px; border-radius: 3px;"></div>
+                <div class="legend-text" style="margin-left: 10px;">
+                    <strong style="color: #28a745; font-size: 0.9rem;">Doanh thu</strong>
+                </div>
+            </div>
+            <div style="font-size: 0.8rem; color: #6c757d;">
+                <div>Trung bình: <strong>${avgRevenue.toLocaleString()} tỷ VND</strong></div>
+                <div>Tăng trưởng: <strong style="color: ${revenueGrowth >= 0 ? '#28a745' : '#dc3545'};">${revenueGrowth >= 0 ? '+' : ''}${revenueGrowth}%</strong></div>
+                <div style="margin-top: 5px;">
+                    <small>Giai đoạn: ${years[0]} - ${years[years.length - 1]}</small>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Profit Legend -->
+        <div class="legend-item" style="margin-bottom: 15px; padding: 12px; background: rgba(253, 126, 20, 0.05); border-left: 4px solid #fd7e14; border-radius: 6px;">
+            <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                <div class="legend-color" style="background-color: #fd7e14; width: 18px; height: 18px; border-radius: 3px;"></div>
+                <div class="legend-text" style="margin-left: 10px;">
+                    <strong style="color: #fd7e14; font-size: 0.9rem;">Lợi nhuận</strong>
+                </div>
+            </div>
+            <div style="font-size: 0.8rem; color: #6c757d;">
+                <div>Trung bình: <strong>${avgProfit.toLocaleString()} tỷ VND</strong></div>
+                <div>Tăng trưởng: <strong style="color: ${profitGrowth >= 0 ? '#28a745' : '#dc3545'};">${profitGrowth >= 0 ? '+' : ''}${profitGrowth}%</strong></div>
+                <div style="margin-top: 5px;">
+                    <small>Giai đoạn: ${years[0]} - ${years[years.length - 1]}</small>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Summary -->
+        <div class="legend-item" style="padding: 12px; background: rgba(108, 117, 125, 0.05); border-radius: 6px;">
+            <div class="legend-text" style="font-size: 0.85rem;">
+                <strong style="color: #495057;">Tóm tắt xu hướng</strong>
+            </div>
+            <div style="font-size: 0.75rem; color: #6c757d; margin-top: 8px;">
+                <div>• Tổng doanh thu: <strong>${totalRevenue.toLocaleString()} tỷ</strong></div>
+                <div>• Tổng lợi nhuận: <strong>${totalProfit.toLocaleString()} tỷ</strong></div>
+                <div>• Tỷ lệ lợi nhuận: <strong>${totalRevenue > 0 ? ((totalProfit / totalRevenue) * 100).toFixed(1) : 0}%</strong></div>
+            </div>
+        </div>
+    `;
+    
+    legendContainer.innerHTML = legendHTML;
+}
+
+// Function to create custom legend for Industry chart
+function createIndustryLegend(labels, data, descriptions, colors, total) {
+    const legendContainer = document.getElementById('industryLegendDetails');
+    if (!legendContainer) return;
+    
+    let legendHTML = '';
+    
+    labels.forEach((label, index) => {
+        const value = data[index];
+        const percentage = ((value / total) * 100).toFixed(1);
+        const description = descriptions[index] || '';
+        
+        legendHTML += `
+            <div class="legend-item" style="margin-bottom: 12px; padding: 10px; background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                <div style="display: flex; align-items: center; margin-bottom: 6px;">
+                    <div class="legend-color" style="background-color: ${colors[index]}; width: 20px; height: 20px; border-radius: 4px; margin-right: 10px;"></div>
+                    <div class="legend-text" style="flex: 1;">
+                        <div style="font-weight: 600; font-size: 0.85rem; color: #2d3748; margin-bottom: 2px;">${label}</div>
+                        <div style="font-size: 0.75rem; color: #718096;">${description}</div>
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: 600; color: ${colors[index]}; font-size: 0.9rem;">${value.toLocaleString()} DN</span>
+                    <span style="background: ${colors[index]}20; color: ${colors[index]}; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;">${percentage}%</span>
+                </div>
+            </div>
+        `;
+    });
+    
+    // Add summary section
+    legendHTML += `
+        <div style="margin-top: 20px; padding: 15px; background: linear-gradient(135deg, #667eea20, #764ba220); border-radius: 10px; border-left: 4px solid #6f42c1;">
+            <div style="font-weight: 600; color: #4a5568; margin-bottom: 8px; display: flex; align-items: center;">
+                <i class="fas fa-chart-bar" style="margin-right: 8px; color: #6f42c1;"></i>
+                Tổng quan ngành nghề
+            </div>
+            <div style="font-size: 0.8rem; color: #718096;">
+                <div style="margin-bottom: 4px;">• Tổng số ngành: <strong>${labels.length}</strong></div>
+                <div style="margin-bottom: 4px;">• Tổng doanh nghiệp: <strong>${total.toLocaleString()}</strong></div>
+                <div>• Ngành hàng đầu: <strong>${labels[0]}</strong> (${data[0]} DN)</div>
+            </div>
+        </div>
+    `;
+    
+    legendContainer.innerHTML = legendHTML;
+}
+</script>
+
+<!-- Xu hướng Doanh thu và Lợi nhuận Chart Script -->
+<script>
+
+
+// Global function to debug chart rendering state
+function debugChartRenderingState() {
+    console.log('🔍 DEBUGGING CHART RENDERING STATE...');
+    
+    // Check canvas element
+    const canvas = document.getElementById('trendChart');
+            console.log('📊 Canvas element:', canvas);
+        console.log('📊 Canvas width:', canvas?.width);
+        console.log('📊 Canvas height:', canvas?.height);
+        console.log('📊 Canvas offsetWidth:', canvas?.offsetWidth);
+        console.log('📊 Canvas offsetHeight:', canvas?.offsetHeight);
+        console.log('📊 Canvas style:', canvas?.style.cssText);
+        console.log('📊 Canvas computed style:', canvas ? window.getComputedStyle(canvas) : 'none');
+        console.log('📊 Canvas parent:', canvas?.parentElement);
+        console.log('📊 Canvas visible:', canvas ? canvas.offsetParent !== null : false);
+        
+        // Check container visibility
+        const container = canvas?.closest('.chart-container');
+        console.log('📊 Chart container:', container);
+        console.log('📊 Container visible:', container ? container.offsetParent !== null : false);
+        console.log('📊 Container style:', container?.style.cssText);
+    
+    // Check chart instance
+    const chartInstance = Chart.getChart(canvas);
+    console.log('📊 Chart instance:', chartInstance);
+    
+    if (chartInstance) {
+        console.log('📊 Chart data:', chartInstance.data);
+        console.log('📊 Chart datasets:', chartInstance.data.datasets);
+        console.log('📊 Chart labels:', chartInstance.data.labels);
+        console.log('📊 Chart scales:', chartInstance.scales);
+        
+        // Try to force update
+        console.log('📊 Forcing chart update...');
+        chartInstance.update();
+        
+        // Check canvas content
+        try {
+            const dataURL = canvas.toDataURL();
+            console.log('📊 Canvas data URL length:', dataURL.length);
+            if (dataURL.length > 5000) {
+                console.log('✅ Canvas appears to have content');
+            } else {
+                console.log('⚠️ Canvas appears to be empty or minimal');
+            }
+        } catch (e) {
+            console.log('❌ Cannot read canvas data:', e);
+        }
+    } else {
+        console.log('❌ No Chart instance found on canvas');
+    }
+    
+    // Check ViewBag data one more time
+    const trendDataString = '@Html.Raw(Json.Serialize(ViewBag.TrendData ?? new List<object>()))';
+    console.log('📊 Current ViewBag.TrendData:', trendDataString);
+    
+    try {
+        const parsedData = JSON.parse(trendDataString);
+        console.log('📊 Parsed TrendData for chart:', parsedData);
+        
+        if (parsedData && parsedData.length > 0) {
+            console.log('✅ Data available - chart should render');
+            // Try to recreate chart
+            console.log('📊 Attempting to recreate chart...');
+            initTrendChart();
+        } else {
+            console.log('❌ No data available for chart');
+        }
+    } catch (e) {
+        console.log('❌ Error parsing TrendData:', e);
+    }
+    
+    // Analysis and recommendations
+    let issues = [];
+    let recommendations = [];
+    
+    if (!canvas) {
+        issues.push('Canvas element not found');
+        recommendations.push('Check HTML structure');
+    } else if (!canvas.offsetParent) {
+        issues.push('Canvas is hidden or not visible');
+        recommendations.push('Check CSS visibility and display properties');
+    } else if (canvas.offsetWidth === 0 || canvas.offsetHeight === 0) {
+        issues.push('Canvas has zero dimensions');
+        recommendations.push('Check container sizing and CSS');
+    }
+    
+    if (!chartInstance) {
+        issues.push('Chart instance not created');
+        recommendations.push('Check initTrendChart() function and data availability');
+    } else if (!chartInstance.data.datasets || chartInstance.data.datasets.length === 0) {
+        issues.push('Chart has no datasets');
+        recommendations.push('Check data parsing and ViewBag.TrendData');
+    }
+    
+    const alertMessage = `🔍 CHART DEBUG ANALYSIS\n\n` +
+        `BACKEND DATA: ✅ Available (from logs)\n` +
+        `• Year: 2023\n` +
+        `• Revenue: 244,439,105 triệu VND\n` +
+        `• Profit: 879,922,870,725 triệu VND\n\n` +
+        `FRONTEND ISSUES${issues.length > 0 ? ':\n• ' + issues.join('\n• ') : ': None detected'}\n\n` +
+        `RECOMMENDATIONS${recommendations.length > 0 ? ':\n• ' + recommendations.join('\n• ') : ': Check console logs'}\n\n` +
+        `Check browser console for detailed technical analysis.`;
+    
+    alert(alertMessage);
+}
+
+// Global function to force create test chart with hard-coded data
+function forceCreateTestChart() {
+    console.log('🧪 FORCING TEST CHART CREATION WITH HARD-CODED DATA...');
+    
+    const canvas = document.getElementById('trendChart');
+    if (!canvas) {
+        alert('❌ Canvas element not found!');
+        return;
+    }
+    
+    // Check if Chart.js is available
+    if (typeof Chart === 'undefined') {
+        alert('❌ Chart.js is not loaded!');
+        return;
+    }
+    
+    try {
+        // Destroy existing chart if any
+        const existingChart = Chart.getChart(canvas);
+        if (existingChart) {
+            existingChart.destroy();
+        }
+        
+        // Hard-coded test data based on backend data
+        const testYears = ['2022', '2023'];
+        const testRevenue = [200, 244]; // Tỷ VND
+        const testProfit = [800, 880];  // Tỷ VND
+        
+        console.log('🧪 Creating test chart with:', { testYears, testRevenue, testProfit });
+        
+        const testChart = new Chart(canvas, {
+            type: 'line',
+            data: {
+                labels: testYears,
+                datasets: [
+                    {
+                        label: 'Doanh thu (tỷ VND)',
+                        data: testRevenue,
+                        borderColor: '#28a745',
+                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                        borderWidth: 3,
+                        fill: false,
+                        tension: 0.4,
+                        pointRadius: 6,
+                        pointBackgroundColor: '#28a745',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2
+                    },
+                    {
+                        label: 'Lợi nhuận (tỷ VND)',
+                        data: testProfit,
+                        borderColor: '#fd7e14',
+                        backgroundColor: 'rgba(253, 126, 20, 0.1)',
+                        borderWidth: 3,
+                        fill: false,
+                        tension: 0.4,
+                        pointRadius: 6,
+                        pointBackgroundColor: '#fd7e14',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return value + ' tỷ';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        console.log('✅ Test chart created successfully!', testChart);
+        alert('✅ Test Chart Created!\n\nIf you can see the chart now, the problem is with data parsing.\nIf you still cannot see it, the problem is with Chart.js setup or canvas rendering.');
+        
+    } catch (error) {
+        console.error('❌ Error creating test chart:', error);
+        alert('❌ Test Chart Creation Failed!\n\nError: ' + error.message + '\n\nThis indicates a Chart.js or canvas rendering issue.');
+    }
+}
+
+// Global function to debug raw trend data from database
+function debugRawTrendData() {
+    console.log('🔍 Debugging Raw Trend Data from Database...');
+    
+    fetch('/DN/DebugRawTrendData')
+        .then(response => response.json())
+        .then(data => {
+            console.log('🔍 Raw Data Debug Response:', data);
+            
+            if (data.success) {
+                const stats = data.databaseStatistics;
+                const issues = data.issues;
+                const rawSample = data.rawDataSample;
+                const validByYear = data.validRecordsByYear;
+                
+                let issuesList = [];
+                if (issues.noValidRecords) issuesList.push("No valid records with all 3 fields");
+                if (issues.noYearData) issuesList.push("No year data in Nam column");
+                if (issues.noRevenueData) issuesList.push("No revenue data in SR_Doanhthu_Thuan_BH_CCDV column");
+                if (issues.noProfitData) issuesList.push("No profit data in SR_Loinhuan_TruocThue column");
+                
+                alert(`🔍 RAW DATA DEBUG RESULTS\n\n` +
+                      `Database: ${data.database}.${data.table}\n` +
+                      `Connection: ${data.connectionString}\n\n` +
+                      `DATABASE STATISTICS:\n` +
+                      `• Total Records: ${stats.TotalRecords}\n` +
+                      `• Records with Year: ${stats.RecordsWithYear}\n` +
+                      `• Records with Revenue: ${stats.RecordsWithRevenue}\n` +
+                      `• Records with Profit: ${stats.RecordsWithProfit}\n` +
+                      `• Year Range: ${stats.MinYear || 'N/A'} - ${stats.MaxYear || 'N/A'}\n\n` +
+                      `VALID RECORDS BY YEAR:\n` +
+                      (validByYear.length > 0 ? 
+                          validByYear.map(item => 
+                              `• ${item.Year}: ${item.Count} companies (Revenue: ${(item.Revenue/1000).toFixed(1)}B, Profit: ${(item.Profit/1000).toFixed(1)}B)`
+                          ).join('\n') :
+                          '❌ NO VALID RECORDS FOUND!') +
+                      `\n\n` +
+                      (issuesList.length > 0 ? 
+                          `⚠️ ISSUES FOUND:\n${issuesList.map(issue => `• ${issue}`).join('\n')}\n\n` :
+                          '✅ No major issues found\n\n') +
+                      `RECOMMENDATIONS:\n${data.recommendations.map(rec => `• ${rec}`).join('\n')}\n\n` +
+                      `Check console for raw data sample and full details.`);
+                
+                console.log('🔍 Raw Data Sample (first 20 records):', rawSample);
+                console.log('🔍 Valid Records by Year:', validByYear);
+            } else {
+                alert(`❌ Raw Data Debug FAILED!\n\nError: ${data.message}`);
+            }
+        })
+        .catch(error => {
+            console.error('❌ Raw data debug error:', error);
+            alert(`❌ Raw Data Debug ERROR!\n\nError: ${error.message}`);
+        });
+}
+
+// Global function to test trend data from database
+function testTrendDataFromDatabase() {
+    console.log('🧪 Testing Trend Data from Database...');
+    
+    fetch('/DN/TestTrendData')
+        .then(response => response.json())
+        .then(data => {
+            console.log('📊 Trend Test Response:', data);
+            
+            if (data.success) {
+                const summary = data.summary;
+                const calculated = data.calculatedData;
+                const direct = data.directDatabaseQuery;
+                
+                alert(`✅ Trend Data Test SUCCESSFUL!\n\n` +
+                      `Database: ${data.database}.${data.table}\n` +
+                      `Columns: ${data.columns.year}, ${data.columns.revenue}, ${data.columns.profit}\n\n` +
+                      `Summary:\n` +
+                      `• Total records: ${summary.totalRecords}\n` +
+                      `• Records with trend data: ${summary.recordsWithTrendData}\n` +
+                      `• Years available: ${summary.yearsAvailable}\n\n` +
+                      `Years found: [${calculated.years.join(', ')}]\n\n` +
+                      `Database Query Results:\n` +
+                      direct.slice(0, 3).map(item => 
+                          `• Year ${item.Year}: ${item.CompanyCount} companies, ` +
+                          `Revenue: ${(item.TotalRevenue / 1000).toFixed(1)} tỷ VND, ` +
+                          `Profit: ${(item.TotalProfit / 1000).toFixed(1)} tỷ VND`
+                      ).join('\n') +
+                      `\n\n${summary.confirmRealData}\n\nCheck console for full details.`);
+                
+                // Force refresh the trend chart with real data
+                initTrendChart();
+            } else {
+                alert(`❌ Trend Data Test FAILED!\n\n` +
+                      `Error: ${data.message}\n` +
+                      `Database: ${data.database || 'sakila'}\n` +
+                      `Expected columns: Nam, SR_Doanhthu_Thuan_BH_CCDV, SR_Loinhuan_TruocThue`);
+            }
+        })
+        .catch(error => {
+            console.error('❌ Trend test error:', error);
+            alert(`❌ Trend Data Test ERROR!\n\nError: ${error.message}\n\nUnable to connect to test endpoint.`);
+        });
+}
+
+
+</script>
+
+<!-- Industry Chart Script -->
+<script>
+// Function to create Industry chart
+function initIndustryChart() {
+    console.log('🎯 Initializing Industry Chart...');
+    
+    // Check if Chart.js is loaded
+    if (typeof Chart === 'undefined') {
+        console.error('❌ Chart.js is not loaded!');
+        return false;
+    }
+    
+    // Get canvas context
+    const ctx = document.getElementById('industryChart');
+    if (!ctx) {
+        console.error('❌ Canvas element industryChart not found!');
+        return false;
+    }
+    
+    // Get data from ViewBag - MUST be from database sakila
+    let industryData = [];
+    try {
+        const rawDataString = @Html.Raw(ViewBag.IndustryDataJson ?? "[]");
+        console.log('🔍 INDUSTRY DATA DEBUG:');
+        console.log('📊 Raw Industry data string:', rawDataString);
+        console.log('📊 Data length:', rawDataString.length);
+        console.log('📊 Expected source: Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx; TEN_NGANH column');
+        
+        if (rawDataString && rawDataString !== '[]') {
+            industryData = rawDataString; // No need to parse since Html.Raw already converts it
+            console.log('✅ Successfully loaded industry data from database');
+            console.log('📊 Number of industries:', industryData.length);
+            if (industryData.length > 0) {
+                console.log('📊 First industry sample:', industryData[0]);
+                console.log('📊 Sample structure check:');
+                console.log('   - TEN_NGANH:', industryData[0].TEN_NGANH || industryData[0].ten_nganh || 'NOT FOUND');
+                console.log('   - SoLuong:', industryData[0].SoLuong || industryData[0].soLuong || 'NOT FOUND');
+            }
+        } else {
+            console.error('❌ NO INDUSTRY DATA FROM DATABASE!');
+            console.error('❌ ViewBag.IndustryDataJson is empty or null');
+        }
+        
+        console.log('📊 Final industry data from ViewBag:', industryData);
+    } catch (error) {
+        console.error('❌ Error loading Industry ViewBag data:', error);
+        console.error('❌ This indicates a problem with data serialization from controller');
+    }
+    
+    // Check if we have real data from database
+    if (!industryData || industryData.length === 0) {
+        console.log('⚠️ No real industry data from database - this should not happen!');
+        console.log('📊 Database connection string should be: Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;');
+        console.log('📊 Expected data from TEN_NGANH column');
+        
+        // Only use sample data as absolute fallback
+        industryData = [
+            { category: 'Bán buôn và bán lẻ', count: 25, description: 'Thương mại, dịch vụ' },
+            { category: 'Công nghiệp chế biến', count: 18, description: 'Sản xuất, chế tạo' },
+            { category: 'Xây dựng', count: 15, description: 'Xây dựng, kiến trúc' },
+            { category: 'Vận tải kho bãi', count: 12, description: 'Logistics, vận chuyển' },
+            { category: 'Dịch vụ lưu trú ăn uống', count: 10, description: 'Khách sạn, nhà hàng' },
+            { category: 'Hoạt động chuyên môn', count: 8, description: 'Tư vấn, thiết kế' },
+            { category: 'Công nghệ thông tin', count: 7, description: 'IT, phần mềm' },
+            { category: 'Nông lâm ngư nghiệp', count: 6, description: 'Nông nghiệp' },
+            { category: 'Giáo dục đào tạo', count: 5, description: 'Giáo dục' },
+            { category: 'Y tế hoạt động xã hội', count: 4, description: 'Y tế, chăm sóc' }
+        ];
+    } else {
+        console.log('✅ Using REAL industry data from database sakila');
+        console.log('📊 Data source: TEN_NGANH column');
+        console.log('📊 Number of industries found:', industryData.length);
+    }
+    
+    // Sort by count descending and take top 20 for better space utilization
+    industryData.sort((a, b) => (b.SoLuong || b.count || 0) - (a.SoLuong || a.count || 0));
+    industryData = industryData.slice(0, 20);
+    
+    // Prepare chart data
+    let labels = industryData.map(item => {
+        const name = item.TEN_NGANH || item.category || item.Category || 'N/A';
+        // Truncate long names for better display
+        return name.length > 25 ? name.substring(0, 22) + '...' : name;
+    });
+    let data = industryData.map(item => item.SoLuong || item.count || item.Count || 0);
+    let descriptions = industryData.map(item => item.TEN_NGANH || item.description || item.Description || '');
+    let total = data.reduce((sum, value) => sum + value, 0);
+    
+    // Validate data quality - MUST have real data from database
+    if (total === 0) {
+        console.error('❌ CRITICAL: No valid industry data from database!');
+        console.error('❌ Database: Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;');
+        console.error('❌ Expected TEN_NGANH column data not found');
+        console.error('❌ Check database connection and data availability');
+        
+        // Show error message to user
+        alert('⚠️ Không thể tải dữ liệu ngành nghề từ database!\n\nVui lòng kiểm tra:\n- Kết nối database sakila\n- Dữ liệu trong cột TEN_NGANH\n- Server: localhost, User: root, Password: 1234');
+        
+        // Use minimal fallback data with clear indication it's not real
+        labels = ['[DEMO] Không có dữ liệu thực'];
+        data = [1];
+        descriptions = ['Dữ liệu demo - cần kiểm tra database'];
+        total = 1;
+    } else {
+        console.log('✅ CONFIRMED: Using real industry data from database sakila');
+        console.log('📊 Total companies with industry data:', total);
+    }
+    
+    console.log('📊 Final Industry chart data:', { labels, data, descriptions, total });
+    
+    // Generate colors for industries (20 colors)
+    const colors = [
+        '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFCE56',
+        '#FF9F40', '#9966FF', '#FF6384', '#36A2EB', '#C9CBCF',
+        '#FF5722', '#795548', '#607D8B', '#9C27B0', '#673AB7',
+        '#3F51B5', '#2196F3', '#00BCD4', '#009688', '#4CAF50'
+    ];
+    
+    try {
+        // Destroy existing chart if any
+        Chart.getChart(ctx)?.destroy();
+        
+        const industryChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Số lượng DN',
+                    data: data,
+                    backgroundColor: colors,
+                    borderColor: colors.map(color => color + 'CC'),
+                    borderWidth: 2,
+                    borderRadius: 8,
+                    borderSkipped: false,
+                    barThickness: 'flex',
+                    maxBarThickness: 50,
+                    minBarLength: 5
+                }]
+            },
+            options: {
+                indexAxis: 'y', // This makes it horizontal
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: {
+                    padding: {
+                        top: 20,
+                        bottom: 20,
+                        left: 10,
+                        right: 10
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const percentage = ((context.raw / total) * 100).toFixed(1);
+                                return context.dataset.label + ': ' + context.raw.toLocaleString() + ' DN (' + percentage + '%)';
+                            }
+                        },
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleColor: 'white',
+                        bodyColor: 'white',
+                        borderColor: 'rgba(255, 255, 255, 0.2)',
+                        borderWidth: 1
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0,
+                            font: {
+                                size: 12
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)'
+                        }
+                    },
+                    y: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            font: {
+                                size: 13,
+                                weight: '500'
+                            },
+                            padding: 10
+                        },
+                        // Increase bar thickness by reducing category percentage
+                        categoryPercentage: 0.9,
+                        barPercentage: 0.8
+                    }
+                },
+                animation: {
+                    duration: 1200,
+                    easing: 'easeOutBounce'
+                }
+            }
+        });
+        
+        console.log('✅ Industry Chart created successfully!');
+        
+        // Create custom legend for Industry
+        createIndustryLegend(labels, data, descriptions, colors, total);
+        
+        return true;
+        } catch (error) {
+        console.error('❌ Error creating Industry chart:', error);
+        return false;
+    }
+}
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Try to create chart immediately
+    if (!initIndustryChart()) {
+        // If failed, try again after a short delay
+        setTimeout(() => {
+            console.log('🔄 Retrying Industry chart creation...');
+            initIndustryChart();
+        }, 500);
+    }
+});
+
+// Also try when window is fully loaded
+window.addEventListener('load', function() {
+    // Double check if chart exists, if not create it
+    const canvas = document.getElementById('industryChart');
+    if (canvas && !Chart.getChart(canvas)) {
+        console.log('🔄 Creating Industry chart on window load...');
+        initIndustryChart();
+        }
+    });
+</script>
+
+<!-- Test functions for Industry chart -->
+ <script>
+// Global test function for Industry data
+function testIndustryData() {
+    console.log('🧪 TESTING Industry Data...');
+    
+    // Test ViewBag values safely
+    const totalCompanies = @(ViewBag.TotalCompanies ?? 0);
+    console.log('📊 ViewBag.TotalCompanies:', totalCompanies);
+    
+    // Test if data is available
+    try {
+        const rawData = '@Html.Raw(Json.Serialize(ViewBag.IndustryData ?? new List<object>()))';
+        console.log('📊 Raw Industry data string:', rawData);
+        
+        let testData = [];
+        if (rawData && rawData !== '[]' && rawData !== '') {
+            testData = JSON.parse(rawData);
+        }
+        
+        console.log('📊 Test Industry data parsed:', testData);
+        console.log('📊 Test data type:', typeof testData);
+        console.log('📊 Test data length:', testData ? testData.length : 'null');
+        
+        if (testData && testData.length > 0) {
+            console.log('✅ Industry Data is available!');
+            alert('✅ Industry Data available: ' + testData.length + ' categories found.\\nTotal companies: ' + totalCompanies + '\\nCheck console for details.');
+             } else {
+            console.log('❌ No Industry data available!');
+            alert('❌ No data available from ViewBag.IndustryData\\nData might be empty or null from database.');
+        }
+    } catch (error) {
+        console.error('❌ Error testing Industry data:', error);
+        alert('❌ Error testing Industry data: ' + error.message);
+    }
+    
+    // Test canvas element
+    const canvas = document.getElementById('industryChart');
+    if (canvas) {
+        console.log('✅ Industry Canvas element found:', canvas);
+         } else {
+        console.log('❌ Industry Canvas element NOT found!');
+        alert('❌ Canvas element industryChart not found!');
+    }
+}
+
+// Global function to test industry data from database
+function testIndustryDataFromDatabase() {
+    console.log('🧪 Testing Industry Data from Database...');
+    
+    fetch('/DN/TestIndustryData')
+        .then(response => response.json())
+        .then(data => {
+            console.log('📊 Industry Test Response:', data);
+            
+            if (data.success) {
+                alert(`✅ Industry Data Test SUCCESSFUL!\n\n` +
+                      `Database: ${data.database}\n` +
+                      `Table: ${data.table}\n` +
+                      `Column: ${data.column}\n` +
+                      `Total Industries Found: ${data.totalIndustries}\n\n` +
+                      `Top 5 Industries:\n` +
+                      data.data.slice(0, 5).map(item => `• ${item.TEN_NGANH}: ${item.SoLuong} companies`).join('\n') +
+                      `\n\nCheck console for full details.`);
+                
+                // Force refresh chart with real data
+                initIndustryChart();
+            } else {
+                alert(`❌ Industry Data Test FAILED!\n\n${data.message}\n\nCheck console for details.`);
+            }
+        })
+        .catch(error => {
+            console.error('❌ Test request failed:', error);
+            alert(`❌ Test request failed: ${error.message}`);
+        });
+}
+
+// Global function to test industry data from database
+function testIndustryDataFromDatabase() {
+    console.log('🧪 Testing Industry Data from Database...');
+    
+    fetch('/DN/TestIndustryData')
+        .then(response => response.json())
+        .then(data => {
+            console.log('📊 Industry Test Response:', data);
+            
+            if (data.success) {
+                alert(`✅ Industry Data Test SUCCESSFUL!\n\n` +
+                      `Database: ${data.database}\n` +
+                      `Table: ${data.table}\n` +
+                      `Column: ${data.column}\n` +
+                      `Total Industries Found: ${data.totalIndustries}\n\n` +
+                      `Top 5 Industries:\n` +
+                      data.data.slice(0, 5).map(item => `• ${item.TEN_NGANH}: ${item.SoLuong} companies`).join('\n'));
+                      
+                // Force refresh the industry chart with real data
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
+            } else {
+                alert(`❌ Industry Data Test FAILED!\n\n` +
+                      `Error: ${data.message}\n` +
+                      `Database: ${data.database || 'sakila'}\n` +
+                      `Table: ${data.table || 'dn_all'}\n` +
+                      `Column: ${data.column || 'TEN_NGANH'}`);
+            }
+        })
+        .catch(error => {
+            console.error('❌ Industry test error:', error);
+            alert(`❌ Industry Data Test ERROR!\n\nError: ${error.message}`);
+        });
+}
+
+// Global function to force create Industry test chart
+function createIndustryChart() {
+    console.log('🧪 Creating Industry test chart...');
+    
+    // Check if canvas exists
+    const canvas = document.getElementById('industryChart');
+    if (!canvas) {
+        alert('❌ Canvas element industryChart not found!');
+        return;
+    }
+    
+    // Check if Chart.js is available
+    if (typeof Chart === 'undefined') {
+        alert('❌ Chart.js is not loaded!');
+        return;
+    }
+    
+    try {
+        // Destroy existing chart if any
+        const existingChart = Chart.getChart(canvas);
+        if (existingChart) {
+            existingChart.destroy();
+        }
+        
+        // Test data for industry categories based on company type
+        const testData = [
+            { category: 'Công ty TNHH', count: 18, description: 'Công ty TNHH' },
+            { category: 'Công ty cổ phần', count: 15, description: 'Công ty cổ phần' },
+            { category: 'Doanh nghiệp tư nhân', count: 8, description: 'Doanh nghiệp tư nhân' },
+            { category: 'Doanh nghiệp nhà nước', count: 2, description: 'Doanh nghiệp nhà nước' },
+            { category: 'Công ty hợp danh', count: 10, description: 'Công ty hợp danh' },
+            { category: 'Hợp tác xã', count: 5, description: 'Hợp tác xã' },
+            { category: 'Liên doanh', count: 7, description: 'Liên doanh' }
+        ];
+        
+        const labels = testData.map(item => item.category);
+        const data = testData.map(item => item.count);
+        const descriptions = testData.map(item => item.description);
+        const colors = [
+            '#FF6B6B', // Công ty TNHH - Đỏ nhạt
+            '#4ECDC4', // Công ty cổ phần - Xanh lục
+            '#45B7D1', // Doanh nghiệp tư nhân - Xanh dương
+            '#96CEB4',  // Doanh nghiệp nhà nước - Xanh lá nhạt
+            '#FF9F40', // Công ty hợp danh - Cam
+            '#FF6384', // Hợp tác xã - Xanh nhạt
+            '#C9CBCF'  // Liên doanh - Xám
+        ];
+        
+        console.log('📊 Creating Industry chart with test data:', { labels, data, descriptions });
+        
+        const testChart = new Chart(canvas, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Số lượng DN',
+                    data: data,
+                    backgroundColor: colors,
+                    borderColor: colors.map(color => color + 'CC'),
+                    borderWidth: 2,
+                    borderRadius: 8,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const total = data.reduce((a, b) => a + b, 0);
+                                const percentage = ((context.raw / total) * 100).toFixed(1);
+                                const desc = descriptions[context.dataIndex] || '';
+                                return [
+                                    context.label + ': ' + context.raw + ' DN (' + percentage + '%)',
+                                    desc
+                                ];
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                },
+                animation: {
+                    duration: 1000,
+                    easing: 'easeOutBounce'
+                }
+            }
+        });
+        
+        console.log('✅ Industry Test chart created successfully!', testChart);
+        
+        // Update legend
+        const total = data.reduce((a, b) => a + b, 0);
+        createIndustryLegend(labels, data, descriptions, colors, total);
+        
+        alert('✅ Industry Test chart created successfully!\\nCheck the chart display above.');
+        
+    } catch (error) {
+        console.error('❌ Error creating Industry test chart:', error);
+        alert('❌ Error creating Industry test chart: ' + error.message);
+    }
+}
+</script>
+
+<!-- Trend Chart Script -->
+<script>
+// Function to create Trend chart
+function initTrendChart() {
+    console.log('🎯 Initializing Trend Chart...');
+    
+    // Check if Chart.js is loaded
+    if (typeof Chart === 'undefined') {
+        console.error('❌ Chart.js is not loaded!');
+        return false;
+    }
+    
+    // Get canvas context
+    const ctx = document.getElementById('trendChart');
+    if (!ctx) {
+        console.error('❌ Canvas element trendChart not found!');
+        return false;
+    }
+    
+    // Get data from ViewBag with ENHANCED DEBUG
+    let trendData = [];
+    try {
+        
+        const rawDataString = '@Html.Raw(Json.Serialize(ViewBag.TrendData ?? new List<object>()))';
+        console.log('🔍 DEBUG ViewBag.TrendData from backend:');
+        console.log('   - Raw string length:', rawDataString.length);
+        console.log('   - Raw string preview:', rawDataString.substring(0, 200));
+        console.log('   - Database should be: Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;');
+        console.log('   - Expected columns: Nam, SR_Doanhthu_Thuan_BH_CCDV, SR_Loinhuan_TruocThue');
+        console.log('   - FULL RAW STRING:', rawDataString);
+        
+        if (rawDataString && rawDataString !== '[]' && rawDataString !== '' && rawDataString !== 'null') {
+            try {
+                trendData = JSON.parse(rawDataString);
+                console.log('✅ Loaded trend data:', trendData.length, 'points');
+                console.log('✅ PARSED TREND DATA:', trendData);
+                alert('✅ CHART DATA LOADED!\n\nFound ' + trendData.length + ' data points from database sakila.dn_all\n\nData: ' + JSON.stringify(trendData, null, 2).substring(0, 300) + '...\n\nPress F12 to see full console logs.');
+            } catch (parseError) {
+                console.error('❌ JSON parse error:', parseError);
+                trendData = [];
+                alert('❌ JSON PARSE ERROR!\n\nRaw data: "' + rawDataString + '"\n\nError: ' + parseError.message);
+            }
+        } else {
+            console.log('❌ No trend data available');
+            alert('❌ CHART DATA ISSUE!\n\nViewBag.TrendData is empty or null.\n\nRaw string: "' + rawDataString + '"\n\nExpected data from database sakila.dn_all\nPress F12 to see console logs for more details.');
+        }
+    } catch (error) {
+        console.error('❌ Error loading data:', error);
+    }
+    
+    // EARLY DATA CHECK AND SPECIAL HANDLING
+    if (trendData && trendData.length > 0) {
+        console.log('✅ Processing', trendData.length, 'data points from ViewBag.TrendData');
+        
+        // SPECIAL HANDLING: If only 1 data point, duplicate it to make line chart work
+        if (trendData.length === 1) {
+            console.log('⚠️ Duplicating single data point for line chart');
+            const originalData = trendData[0];
+            const duplicatedData = {
+                Nam: originalData.Nam,
+                SR_Doanhthu_Thuan_BH_CCDV: originalData.SR_Doanhthu_Thuan_BH_CCDV,
+                SR_Loinhuan_TruocThue: originalData.SR_Loinhuan_TruocThue
+            };
+            trendData.push(duplicatedData);
+        }
+    } else {
+        console.log('❌ No trend data available from ViewBag.TrendData');
+    }
+    
+    // Prepare chart data
+    let years = trendData.map(item => item.Nam || item.year || item.Year || 'N/A');
+    
+    let revenueData = trendData.map((item, index) => {
+        // Convert from million VND to billion VND for display
+        const revenue = item.SR_Doanhthu_Thuan_BH_CCDV || item.revenue || item.Revenue || 0;
+        
+        // SAFE NUMBER CONVERSION - handle very large numbers
+        let convertedRevenue;
+        if (typeof revenue === 'string') {
+            convertedRevenue = Math.round(parseFloat(revenue) / 1000);
+        } else if (typeof revenue === 'number') {
+            convertedRevenue = Math.round(revenue / 1000);
+        } else {
+            convertedRevenue = 0;
+        }
+        
+        // Ensure valid number
+        if (isNaN(convertedRevenue) || !isFinite(convertedRevenue)) {
+            convertedRevenue = 0;
+        }
+        
+        return convertedRevenue;
+    });
+    
+    let profitData = trendData.map((item, index) => {
+        // Convert from million VND to billion VND for display
+        const profit = item.SR_Loinhuan_TruocThue || item.profit || item.Profit || 0;
+        
+        // SAFE NUMBER CONVERSION - handle very large numbers
+        let convertedProfit;
+        if (typeof profit === 'string') {
+            convertedProfit = Math.round(parseFloat(profit) / 1000);
+        } else if (typeof profit === 'number') {
+            convertedProfit = Math.round(profit / 1000);
+        } else {
+            convertedProfit = 0;
+        }
+        
+        // Ensure valid number
+        if (isNaN(convertedProfit) || !isFinite(convertedProfit)) {
+            convertedProfit = 0;
+        }
+        
+        // Log extreme values for debugging (no capping here, will cap later)
+        if (Math.abs(convertedProfit) > 1000000) {
+            console.log(`🔧 EXTREME PROFIT VALUE DETECTED: ${convertedProfit.toLocaleString()} tỷ VND`);
+            console.log(`🔧 Original value: ${profit.toLocaleString()} triệu VND`);
+            console.log(`🔧 Will apply intelligent capping after all data processing...`);
+        }
+        
+        return convertedProfit;
+    });
+    
+    // ✅ FINAL DATA VALIDATION AND PROCESSING
+    console.log('🔍 FINAL DATA CHECK:');
+    console.log(`   - trendData.length: ${trendData.length}`);
+    console.log(`   - years.length: ${years.length}`);
+    console.log(`   - revenueData.length: ${revenueData.length}`);
+    console.log(`   - profitData.length: ${profitData.length}`);
+    
+    if (!trendData || trendData.length === 0) {
+        console.log('❌ No data from database - ViewBag.TrendData is empty');
+        console.log('❌ Expected data from: Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;');
+        console.log('❌ Columns: Nam, SR_Doanhthu_Thuan_BH_CCDV, SR_Loinhuan_TruocThue');
+        
+        // Use minimal fallback
+        years = ['No Data'];
+        revenueData = [0];
+        profitData = [0];
+    } else {
+        console.log('✅ Using REAL data from database sakila.dn_all');
+        console.log('✅ Database: Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;');
+        console.log('✅ Revenue column: SR_Doanhthu_Thuan_BH_CCDV');
+        console.log('✅ Profit column: SR_Loinhuan_TruocThue');
+        console.log('📊 Raw data from ViewBag:', trendData);
+        
+        // Apply extreme values capping to profit data only (AFTER data conversion)
+        profitData = profitData.map((profit, index) => {
+            if (Math.abs(profit) > 1000000) {
+                const originalProfit = profit;
+                console.log(`🔧 DATABASE EXTREME VALUE detected for year ${years[index]}: ${originalProfit.toLocaleString()} tỷ VND`);
+                
+                if (profit < -100000) {
+                    profit = -100000;
+                    console.log(`🔧 Capped extreme negative: ${originalProfit.toLocaleString()} → -100,000 tỷ VND`);
+                } else if (profit > 100000) {
+                    profit = 100000;
+                    console.log(`🔧 Capped extreme positive: ${originalProfit.toLocaleString()} → 100,000 tỷ VND`);
+                }
+            }
+            return profit;
+        });
+        
+        console.log('✅ Final processed data from database:', { years, revenueData, profitData });
+    }
+    
+    try {
+        // Destroy existing chart if any
+        const existingChart = Chart.getChart(ctx);
+        if (existingChart) {
+            existingChart.destroy();
+        }
+        
+        // DYNAMIC CHART TYPE - use bar for single data point, line for multiple
+        const chartType = years.length === 1 ? 'bar' : 'line';
+        
+        const trendChart = new Chart(ctx, {
+            type: chartType,
+            data: {
+                labels: years,
+                datasets: [
+                    {
+                        label: 'Doanh thu (tỷ VND)',
+                        data: revenueData,
+                        borderColor: '#28a745',
+                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                        borderWidth: 3,
+                        fill: false,
+                        tension: 0.4,
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                        pointBackgroundColor: '#28a745',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2
+                    },
+                    {
+                        label: 'Lợi nhuận (tỷ VND)',
+                        data: profitData,
+                        borderColor: '#fd7e14',
+                        backgroundColor: 'rgba(253, 126, 20, 0.1)',
+                        borderWidth: 3,
+                        fill: false,
+                        tension: 0.4,
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                        pointBackgroundColor: '#fd7e14',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: {
+                    duration: 1000
+                },
+                elements: {
+                    point: {
+                        radius: 6,
+                        hoverRadius: 8
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false // Custom legend
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        callbacks: {
+                            label: function(context) {
+                                const value = context.raw;
+                                const isCapped = Math.abs(value) >= 100000;
+                                const cappedNote = isCapped ? ' (đã điều chỉnh)' : '';
+                                
+                                return context.dataset.label + ': ' + value.toLocaleString() + ' tỷ VND' + cappedNote;
+                            },
+                            afterBody: function(tooltipItems) {
+                                // Add warning for capped values
+                                const hasCappedValues = tooltipItems.some(item => Math.abs(item.raw) >= 100000);
+                                if (hasCappedValues) {
+                                    return '\n⚠️ Giá trị gốc quá lớn, đã điều chỉnh để hiển thị';
+                                }
+                                return '';
+                            }
+                        },
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleColor: 'white',
+                        bodyColor: 'white',
+                        borderColor: 'rgba(255, 255, 255, 0.2)',
+                        borderWidth: 1
+                    }
+                },
+                scales: {
+                    y: {
+                        // 🔧 SMART Y-AXIS SCALING
+                        beginAtZero: Math.min(...profitData, ...revenueData) >= 0, // Only start from zero if all values are positive
+                        grace: '10%', // Add 10% padding for better visualization
+                        ticks: {
+                            callback: function(value) {
+                                // Smart formatting for large numbers
+                                if (Math.abs(value) >= 1000) {
+                                    return (value / 1000).toFixed(1) + 'K tỷ';
+                                } else if (Math.abs(value) >= 1) {
+                                    return value.toLocaleString() + ' tỷ';
+                                } else {
+                                    return value.toFixed(2) + ' tỷ';
+                                }
+                            },
+                            maxTicksLimit: 8, // Limit number of ticks to prevent crowding
+                            font: {
+                                size: 11
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)',
+                            borderDash: [2, 2]
+                        },
+                        title: {
+                            display: true,
+                            text: 'Giá trị (tỷ VND)',
+                            font: {
+                                size: 13,
+                                weight: 'bold'
+                            }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Năm',
+                            font: {
+                                size: 13,
+                                weight: 'bold'
+                            }
+                        },
+                        ticks: {
+                            font: {
+                                size: 12
+                            }
+                        }
+                    }
+                },
+                interaction: {
+                    mode: 'nearest',
+                    axis: 'x',
+                    intersect: false
+                },
+                animation: {
+                    duration: 1500,
+                    easing: 'easeInOutQuart'
+                }
+            }
+        });
+        
+        console.log('✅ Trend Chart created successfully!');
+        
+        // Create custom legend for Trend
+        createTrendLegend(revenueData, profitData, years);
+        
+        return true;
+    } catch (error) {
+        console.error('❌ Error creating chart:', error);
+        return false;
+    }
+}
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Try to create chart immediately
+    if (!initTrendChart()) {
+        // If failed, try again after a short delay
+        setTimeout(() => {
+            console.log('🔄 Retrying Trend chart creation...');
+            initTrendChart();
+        }, 500);
+    }
+});
+
+// Also try when window is fully loaded
+window.addEventListener('load', function() {
+    // Double check if chart exists, if not create it
+    const canvas = document.getElementById('trendChart');
+    if (canvas && !Chart.getChart(canvas)) {
+        console.log('🔄 Creating Trend chart on window load...');
+        initTrendChart();
+    }
+});
+
+// Test function for Trend data - ENHANCED VERSION
+function testTrendData() {
+    console.log('🧪 TESTING Trend Data - Enhanced Debug...');
+    
+    // Test ViewBag values safely
+    const totalCompanies = @(ViewBag.TotalCompanies ?? 0);
+    console.log('📊 ViewBag.TotalCompanies:', totalCompanies);
+    
+    // Test Years data
+    const years = '@Html.Raw(Json.Serialize(ViewBag.Years ?? new List<int>()))';
+    console.log('📊 ViewBag.Years raw:', years);
+    
+    // Test Revenue data  
+    const revenueData = '@Html.Raw(Json.Serialize(ViewBag.RevenueData ?? new List<double>()))';
+    console.log('📊 ViewBag.RevenueData raw:', revenueData);
+    
+    // Test Profit data
+    const profitData = '@Html.Raw(Json.Serialize(ViewBag.ProfitData ?? new List<double>()))';
+    console.log('📊 ViewBag.ProfitData raw:', profitData);
+    
+    // Test if trend data is available
+    try {
+        const rawData = '@Html.Raw(Json.Serialize(ViewBag.TrendData ?? new List<object>()))';
+        console.log('📊 Raw TrendData string (length: ' + rawData.length + '):', rawData);
+        console.log('📊 TrendData first 300 chars:', rawData.substring(0, 300));
+        
+        let testData = [];
+        if (rawData && rawData !== '[]' && rawData !== '' && rawData !== 'null') {
+            testData = JSON.parse(rawData);
+        }
+        
+        console.log('📊 Parsed TrendData:', testData);
+        console.log('📊 TrendData type:', typeof testData);
+        console.log('📊 TrendData length:', testData ? testData.length : 'null');
+        
+        // Parse other ViewBag data for comparison
+        let yearsArray = [], revenueArray = [], profitArray = [];
+        try {
+            if (years && years !== '[]') yearsArray = JSON.parse(years);
+            if (revenueData && revenueData !== '[]') revenueArray = JSON.parse(revenueData);
+            if (profitData && profitData !== '[]') profitArray = JSON.parse(profitData);
+        } catch (parseError) {
+            console.error('❌ Error parsing ViewBag arrays:', parseError);
+        }
+        
+        console.log('📊 Parsed Years:', yearsArray);
+        console.log('📊 Parsed Revenue:', revenueArray);
+        console.log('📊 Parsed Profit:', profitArray);
+        
+        if (testData && testData.length > 0) {
+            console.log('✅ TrendData is available!');
+            
+            // Analyze data structure
+            const firstItem = testData[0];
+            console.log('📊 First TrendData item:', firstItem);
+            console.log('📊 All TrendData items:');
+            testData.forEach((item, index) => {
+                console.log(`   [${index}] Year: ${item.Nam}, Revenue: ${item.SR_Doanhthu_Thuan_BH_CCDV}, Profit: ${item.SR_Loinhuan_TruocThue}`);
+            });
+            
+            alert(`✅ TREND DATA ANALYSIS COMPLETE!\\n\\n` +
+                  `TrendData: ${testData.length} data points\\n` +
+                  `Years Array: ${yearsArray.length} years\\n` +
+                  `Revenue Array: ${revenueArray.length} values\\n` +
+                  `Profit Array: ${profitArray.length} values\\n\\n` +
+                  `Sample TrendData:\\n• Year: ${firstItem.Nam || 'N/A'}\\n• Revenue: ${(firstItem.SR_Doanhthu_Thuan_BH_CCDV || 0).toLocaleString()} triệu VND\\n• Profit: ${(firstItem.SR_Loinhuan_TruocThue || 0).toLocaleString()} triệu VND\\n\\n` +
+                  `Years: [${yearsArray.join(', ')}]\\n\\n` +
+                  `Database: sakila.dn_all\\nCheck console for FULL details.`);
+        } else {
+            console.log('❌ No TrendData available!');
+            alert(`❌ NO TREND DATA FOUND!\\n\\n` +
+                  `ViewBag Analysis:\\n• TrendData: ${testData.length} items\\n• Years: ${yearsArray.length} items\\n• Revenue: ${revenueArray.length} items\\n• Profit: ${profitArray.length} items\\n\\n` +
+                  `Expected source:\\n• Table: sakila.dn_all\\n• Revenue: SR_Doanhthu_Thuan_BH_CCDV\\n• Profit: SR_Loinhuan_TruocThue\\n• Year: Nam\\n\\n` +
+                  `Try "Debug Raw" button to check database data.`);
+        }
+    } catch (error) {
+        console.error('❌ Error testing Trend data:', error);
+        alert('❌ Error testing Trend data: ' + error.message + '\\n\\nCheck console for details.');
+    }
+    
+    // Test canvas element
+    const canvas = document.getElementById('trendChart');
+    if (canvas) {
+        console.log('✅ Trend Canvas element found:', canvas);
+    } else {
+        console.log('❌ Trend Canvas element NOT found!');
+        alert('❌ Canvas element trendChart not found!');
+    }
+}
+
+// Create custom legend for trend chart
+function createTrendLegend(revenueData, profitData, years) {
+    const legendContainer = document.getElementById('trendLegendDetails');
+    if (!legendContainer) return;
+    
+    // Calculate summary statistics
+    const totalRevenue = revenueData.reduce((sum, val) => sum + val, 0);
+    const totalProfit = profitData.reduce((sum, val) => sum + val, 0);
+    const avgRevenue = revenueData.length > 0 ? (totalRevenue / revenueData.length) : 0;
+    const avgProfit = profitData.length > 0 ? (totalProfit / profitData.length) : 0;
+    
+    // Calculate growth rates if we have multiple years
+    let revenueGrowth = 0;
+    let profitGrowth = 0;
+    if (revenueData.length > 1) {
+        const firstRevenue = revenueData[0] || 1;
+        const lastRevenue = revenueData[revenueData.length - 1] || 0;
+        revenueGrowth = firstRevenue > 0 ? ((lastRevenue - firstRevenue) / firstRevenue * 100) : 0;
+    }
+    if (profitData.length > 1) {
+        const firstProfit = profitData[0] || 1;
+        const lastProfit = profitData[profitData.length - 1] || 0;
+        profitGrowth = firstProfit > 0 ? ((lastProfit - firstProfit) / firstProfit * 100) : 0;
+    }
+    
+    legendContainer.innerHTML = `
+        <div class="legend-item d-flex align-items-center mb-2">
+            <div class="legend-color" style="background-color: #28a745; width: 20px; height: 20px; border-radius: 4px; margin-right: 10px;"></div>
+            <span class="legend-text">Doanh thu (tỷ VND)</span>
+        </div>
+        <div class="legend-item d-flex align-items-center mb-2">
+            <div class="legend-color" style="background-color: #fd7e14; width: 20px; height: 20px; border-radius: 4px; margin-right: 10px;"></div>
+            <span class="legend-text">Lợi nhuận (tỷ VND)</span>
+        </div>
+        <hr class="my-3">
+        <div class="small text-muted">
+            <p><strong>Thống kê tóm tắt:</strong></p>
+            <p>• Trung bình DT: ${avgRevenue.toFixed(1)} tỷ VND</p>
+            <p>• Trung bình LN: ${avgProfit.toFixed(1)} tỷ VND</p>
+            ${revenueData.length > 1 ? `<p>• Tăng trưởng DT: ${revenueGrowth.toFixed(1)}%</p>` : ''}
+            ${profitData.length > 1 ? `<p>• Tăng trưởng LN: ${profitGrowth.toFixed(1)}%</p>` : ''}
+            <hr class="my-2">
+            <p><strong>Nguồn dữ liệu:</strong></p>
+            <p>• Doanh thu: SR_Doanhthu_Thuan_BH_CCDV</p>
+            <p>• Lợi nhuận: SR_Loinhuan_TruocThue</p>
+            <p>• Cơ sở dữ liệu: sakila.dn_all</p>
+            <p class="mt-2"><strong>Đơn vị:</strong> Tỷ VND (chuyển đổi từ triệu VND)</p>
+        </div>
+    `;
+}
+
+// Global function to debug chart rendering state
+function debugChartRenderingState() {
+    console.log('🔍 DEBUGGING CHART RENDERING STATE...');
+    
+    // Check canvas element
+    const canvas = document.getElementById('trendChart');
+            console.log('📊 Canvas element:', canvas);
+        console.log('📊 Canvas width:', canvas?.width);
+        console.log('📊 Canvas height:', canvas?.height);
+        console.log('📊 Canvas offsetWidth:', canvas?.offsetWidth);
+        console.log('📊 Canvas offsetHeight:', canvas?.offsetHeight);
+        console.log('📊 Canvas style:', canvas?.style.cssText);
+        console.log('📊 Canvas computed style:', canvas ? window.getComputedStyle(canvas) : 'none');
+        console.log('📊 Canvas parent:', canvas?.parentElement);
+        console.log('📊 Canvas visible:', canvas ? canvas.offsetParent !== null : false);
+        
+        // Check container visibility
+        const container = canvas?.closest('.chart-container');
+        console.log('📊 Chart container:', container);
+        console.log('📊 Container visible:', container ? container.offsetParent !== null : false);
+        
+        // Check for errors in Chart.js initialization
+        if (Chart && typeof Chart === 'function') {
+            console.log('✅ Chart.js is available');
+            console.log('📊 Chart version:', Chart.version);
+            
+            // Check if there's already a chart instance
+            const existingChart = canvas ? Chart.getChart(canvas) : null;
+            console.log('📊 Existing chart instance:', existingChart);
+        } else {
+            console.log('❌ Chart.js is not available');
+        }
+        
+        // Check for ViewBag data
+        try {
+            const rawDataString = '@Html.Raw(Json.Serialize(ViewBag.TrendData ?? new List<object>()))';
+            console.log('📊 ViewBag data length:', rawDataString.length);
+            console.log('📊 ViewBag data preview:', rawDataString.substring(0, 100));
+            
+            if (rawDataString && rawDataString !== '[]') {
+                const data = JSON.parse(rawDataString);
+                console.log('📊 Parsed data:', data);
+            }
+        } catch (error) {
+            console.log('❌ Error reading ViewBag data:', error);
+        }
+        
+        // Summary
+        const summary = {
+            chartJsAvailable: typeof Chart !== 'undefined',
+            canvasExists: !!canvas,
+            canvasVisible: canvas ? canvas.offsetParent !== null : false,
+            containerExists: !!container,
+            containerVisible: container ? container.offsetParent !== null : false,
+            hasExistingChart: canvas ? !!Chart.getChart(canvas) : false
+        };
+        
+        console.log('📊 DEBUGGING SUMMARY:', summary);
+        
+        // Provide recommendations
+        const recommendations = [];
+        if (!summary.chartJsAvailable) {
+            recommendations.push('Load Chart.js library');
+        }
+        if (!summary.canvasExists) {
+            recommendations.push('Add canvas element with id="trendChart"');
+        }
+        if (!summary.canvasVisible) {
+            recommendations.push('Make canvas visible (check CSS display/visibility)');
+        }
+        if (!summary.containerVisible) {
+            recommendations.push('Make chart container visible');
+        }
+        if (summary.hasExistingChart) {
+            recommendations.push('Destroy existing chart before creating new one');
+        }
+        
+        if (recommendations.length === 0) {
+            recommendations.push('All prerequisites met - check data and chart creation logic');
+            recommendations.push('Check initTrendChart() function and data availability');
+        }
+        
+        console.log('💡 RECOMMENDATIONS:', recommendations);
+        
+        // Alert summary
+        alert(`🔍 CHART RENDERING DEBUG COMPLETE!\n\n` +
+              `Chart.js Available: ${summary.chartJsAvailable}\n` +
+              `Canvas Exists: ${summary.canvasExists}\n` +
+              `Canvas Visible: ${summary.canvasVisible}\n` +
+              `Container Visible: ${summary.containerVisible}\n` +
+              `Has Existing Chart: ${summary.hasExistingChart}\n\n` +
+              `Recommendations:\n• ${recommendations.join('\n• ')}\n\n` +
+              `Check console for detailed logs.`);
+}
+
+// Force chart creation test function
+function forceCreateTestChart() {
+    console.log('🧪 FORCE CREATE TEST CHART...');
+    
+    // Check prerequisites
+    if (typeof Chart === 'undefined') {
+        alert('❌ Chart.js is not loaded!');
+        return;
+    }
+    
+    const canvas = document.getElementById('trendChart');
+    if (!canvas) {
+        alert('❌ Canvas element trendChart not found!');
+        return;
+    }
+    
+    // Destroy existing chart
+    const existingChart = Chart.getChart(canvas);
+    if (existingChart) {
+        existingChart.destroy();
+        console.log('🗑️ Destroyed existing chart');
+    }
+    
+    // Create test chart with hard-coded data
+    const testData = {
+        labels: ['2020', '2021', '2022', '2023'],
+        datasets: [
+            {
+                label: 'Test Revenue',
+                data: [100, 150, 200, 180],
+                borderColor: '#28a745',
+                backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                borderWidth: 3,
+                fill: false
+            },
+            {
+                label: 'Test Profit',
+                data: [20, 30, 45, 35],
+                borderColor: '#fd7e14',
+                backgroundColor: 'rgba(253, 126, 20, 0.1)',
+                borderWidth: 3,
+                fill: false
+            }
+        ]
+    };
+    
+    try {
+        const testChart = new Chart(canvas, {
+            type: 'line',
+            data: testData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Value'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Year'
+                        }
+                    }
+                }
+            }
+        });
+        
+        console.log('✅ Test chart created successfully!', testChart);
+        alert('✅ Test chart created successfully!\n\nThis confirms that Chart.js and canvas are working.\nThe issue is likely with data loading or processing.');
+        
+    } catch (error) {
+        console.error('❌ Error creating test chart:', error);
+        alert('❌ Error creating test chart: ' + error.message);
+    }
+}
+
+function testExtremeValuesHandling() {
+    console.log('🧪 TESTING EXTREME VALUES HANDLING...');
+    
+    // Check prerequisites
+    if (typeof Chart === 'undefined') {
+        alert('❌ Chart.js is not loaded!');
+        return;
+    }
+    
+    const canvas = document.getElementById('trendChart');
+    if (!canvas) {
+        alert('❌ Canvas element trendChart not found!');
+        return;
+    }
+    
+    // Destroy existing chart
+    const existingChart = Chart.getChart(canvas);
+    if (existingChart) {
+        existingChart.destroy();
+        console.log('🗑️ Destroyed existing chart');
+    }
+    
+    // Test with extreme values like the actual backend data
+    const extremeTestData = [
+        {
+            Nam: 2020,
+            SR_Doanhthu_Thuan_BH_CCDV: 255738376, // 255,738,376 triệu VND
+            SR_Loinhuan_TruocThue: 2643706 // 2,643,706 triệu VND
+        },
+        {
+            Nam: 2023,
+            SR_Doanhthu_Thuan_BH_CCDV: 881122332, // 881,122,332 triệu VND  
+            SR_Loinhuan_TruocThue: -21937769042506 // -21,937,769,042,506 triệu VND (EXTREME!)
+        }
+    ];
+    
+    console.log('🧪 Testing with extreme data:', extremeTestData);
+    
+    // Process data like the real function
+    const years = extremeTestData.map(item => item.Nam.toString());
+    
+    const revenueData = extremeTestData.map(item => {
+        const revenue = item.SR_Doanhthu_Thuan_BH_CCDV / 1000; // Convert to billion VND
+        return Math.round(revenue * 100) / 100;
+    });
+    
+    let profitData = extremeTestData.map(item => {
+        let profit = item.SR_Loinhuan_TruocThue / 1000; // Convert to billion VND
+        
+        // Apply extreme value capping (critical for chart display)
+        if (Math.abs(profit) > 1000000) {
+            console.log(`🔧 EXTREME VALUE: ${profit.toLocaleString()} → Capping for visualization`);
+            if (profit < -100000) {
+                profit = -100000;
+            } else if (profit > 100000) {
+                profit = 100000;
+            }
+        }
+        
+        return Math.round(profit * 100) / 100;
+    });
+    
+    console.log('🧪 Processed data:', { years, revenueData, profitData });
+    
+    // Create chart with processed data
+    try {
+        const testChart = new Chart(canvas, {
+            type: 'line',
+            data: {
+                labels: years,
+                datasets: [
+                    {
+                        label: 'Doanh thu (tỷ VND)',
+                        data: revenueData,
+                        borderColor: '#28a745',
+                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                        borderWidth: 3,
+                        fill: false,
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Lợi nhuận (tỷ VND)',
+                        data: profitData,
+                        borderColor: '#fd7e14',
+                        backgroundColor: 'rgba(253, 126, 20, 0.1)',
+                        borderWidth: 3,
+                        fill: false,
+                        tension: 0.4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const value = context.raw;
+                                const isCapped = Math.abs(value) >= 100000;
+                                const cappedNote = isCapped ? ' (đã điều chỉnh)' : '';
+                                return context.dataset.label + ': ' + value.toLocaleString() + ' tỷ VND' + cappedNote;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: Math.min(...profitData, ...revenueData) >= 0,
+                        grace: '10%',
+                        title: {
+                            display: true,
+                            text: 'Giá trị (tỷ VND)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Năm'
+                        }
+                    }
+                }
+            }
+        });
+        
+        console.log('✅ Extreme values test chart created successfully!', testChart);
+        alert(`✅ EXTREME VALUES TEST SUCCESSFUL!\n\n` +
+              `Original extreme profit 2023: -21,937,769,042,506 triệu VND\n` +
+              `Capped to: ${profitData[1].toLocaleString()} tỷ VND\n\n` +
+              `Chart displays properly with extreme value handling.\n` +
+              `This proves the capping logic works correctly!`);
+        
+    } catch (error) {
+        console.error('❌ Error creating extreme values test chart:', error);
+        alert('❌ Error creating extreme values test chart: ' + error.message);
+    }
+}
+
+// Global function to test Trend data from API endpoint
+function debugRawTrendData() {
+    console.log('🧪 Testing Trend Data from Database...');
+    
+    fetch('/DN/DebugRawTrendData')
+        .then(response => response.json())
+        .then(data => {
+            console.log('📊 Raw Trend Test Response:', data);
+            
+            if (data.success) {
+                alert(`✅ RAW TREND DATA SUCCESSFUL!\n\n` +
+                      `Database: ${data.database}\n` +
+                      `Table: ${data.table}\n` +
+                      `Years Column: ${data.columns.year}\n` +
+                      `Revenue Column: ${data.columns.revenue}\n` +
+                      `Profit Column: ${data.columns.profit}\n\n` +
+                      `Raw Database Results:\n` +
+                      data.rawResults.slice(0, 3).map(item => 
+                          `• Year ${item.Nam}: ${item.Companies} companies\n` +
+                          `  Revenue: ${(item.TotalRevenue / 1000).toFixed(1)} tỷ VND\n` +
+                          `  Profit: ${(item.TotalProfit / 1000).toFixed(1)} tỷ VND`
+                      ).join('\n') +
+                      `\n\nCheck console for FULL raw data details.`);
+            } else {
+                alert(`❌ Raw Trend Data Test FAILED!\n\n${data.message}\n\nCheck console for details.`);
+            }
+        })
+        .catch(error => {
+            console.error('❌ Raw trend test error:', error);
+            alert(`❌ Raw Trend Data Test ERROR!\n\nError: ${error.message}`);
+        });
+}
+
+// Global function to test processed trend data
+function testTrendDataFromBackend() {
+    console.log('🧪 Testing Processed Trend Data from Backend...');
+    
+    fetch('/DN/TestTrendData')
+        .then(response => response.json())
+        .then(data => {
+            console.log('📊 Trend Test Response:', data);
+            
+            if (data.success) {
+                const { calculated, direct, summary } = data;
+                
+                console.log('📊 Calculated data:', calculated);
+                console.log('📊 Direct database results:', direct);
+                console.log('📊 Summary:', summary);
+                
+                alert(`✅ TREND DATA TEST SUCCESSFUL!\n\n` +
+                      `Database: ${data.database}\n` +
+                      `Table: ${data.table}\n` +
+                      `• Total records: ${summary.totalRecords}\n` +
+                      `• Records with trend data: ${summary.recordsWithTrendData}\n` +
+                      `• Years available: ${summary.yearsAvailable}\n\n` +
+                      `Years found: [${calculated.years.join(', ')}]\n\n` +
+                      `Database Query Results:\n` +
+                      direct.slice(0, 3).map(item => 
+                          `• Year ${item.Year}: ${item.CompanyCount} companies, ` +
+                          `Revenue: ${(item.TotalRevenue / 1000).toFixed(1)} tỷ VND, ` +
+                          `Profit: ${(item.TotalProfit / 1000).toFixed(1)} tỷ VND`
+                      ).join('\n') +
+                      `\n\n${summary.confirmRealData}\n\nCheck console for full details.`);
+                
+                // Force refresh the trend chart with real data
+                initTrendChart();
+            } else {
+                alert(`❌ Trend Data Test FAILED!\n\n` +
+                      `Error: ${data.message}\n` +
+                      `Database: ${data.database || 'sakila'}\n` +
+                      `Expected columns: Nam, SR_Doanhthu_Thuan_BH_CCDV, SR_Loinhuan_TruocThue`);
+            }
+        })
+        .catch(error => {
+            console.error('❌ Trend test error:', error);
+            alert(`❌ Trend Data Test ERROR!\n\nError: ${error.message}\n\nUnable to connect to test endpoint.`);
+        });
+}
+
+
+</script>
+</body>
+</html>

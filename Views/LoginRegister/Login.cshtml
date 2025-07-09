@@ -1,0 +1,100 @@
+﻿
+@{
+    ViewData["Title"] = "Login";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<link href="~/adminpanel/css/style.css" rel="stylesheet" />
+<script src="~/adminpanel/js/script.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="initial-scale=1, maximum-scale=1">
+<!-- site metas -->
+<title>4uhost</title>
+<meta name="keywords" content="">
+<meta name="description" content="">
+<meta name="author" content="">
+<!-- bootstrap css -->
+
+<link href="~/css(4u)/bootstrap.min.css" rel="stylesheet" />
+<!-- style css -->
+
+<link href="~/css(4u)/style.css" rel="stylesheet" />
+<!-- Responsive-->
+<link href="~/css(4u)/responsive.css" rel="stylesheet" />
+
+<!-- fevicon -->
+<!-- Tweaks for older IEs-->
+<link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css">
+<style>
+    .login-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        margin: 200px auto; /* Tăng lề trên và dưới */
+        padding: 20px;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        width: 350px; /* Chiều rộng của biểu mẫu */
+    }
+
+    h2 {
+        margin-bottom: 20px;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    input {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+    button {
+        width: 100%;
+        padding: 10px;
+        background-color: #007bff; /* Màu nền nút */
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+        button:hover {
+            background-color: #0056b3; /* Màu khi di chuột qua nút */
+        }
+
+    .error-message {
+        color: red;
+        text-align: center;
+        margin-top: 10px;
+    }
+</style>
+
+
+
+
+<div class="login-container">
+    <h2>Đăng nhập nhân viên</h2>
+@if (ViewBag.ErrorMessage != null)
+{
+        <div style="color:red;">@ViewBag.ErrorMessage</div>
+}
+
+<form method="post" asp-action="Login" asp-controller="LoginRegister">
+    <div>
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required />
+    </div>
+    <div>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required />
+    </div>
+    <button type="submit">Login</button>
+</form>
+ </div>

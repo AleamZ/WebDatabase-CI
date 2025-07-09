@@ -1,0 +1,157 @@
+﻿@model CIResearch.Models.User
+@{
+    ViewData["Title"] = "Register";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<link href="~/adminpanel/css/style.css" rel="stylesheet" />
+<script src="~/adminpanel/js/script.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="initial-scale=1, maximum-scale=1">
+<!-- site metas -->
+<title>4uhost</title>
+<meta name="keywords" content="">
+<meta name="description" content="">
+<meta name="author" content="">
+<!-- bootstrap css -->
+
+<link href="~/css(4u)/bootstrap.min.css" rel="stylesheet" />
+<!-- style css -->
+
+<link href="~/css(4u)/style.css" rel="stylesheet" />
+<!-- Responsive-->
+<link href="~/css(4u)/responsive.css" rel="stylesheet" />
+
+<!-- fevicon -->
+<!-- Tweaks for older IEs-->
+<link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css">
+
+<style>
+    body {
+        /* Màu nền nhẹ nhàng */
+        font-family: Arial, sans-serif;
+        margin: 0; /* Đảm bảo không có margin */
+        padding: 0; /* Đảm bảo không có padding */
+    }
+
+    .login-container {
+        background-color: #ffffff; /* Màu nền cho form */
+        padding: 30px; /* Padding cho form */
+        border-radius: 10px; /* Bo tròn góc */
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Đổ bóng */
+        width: 400px; /* Chiều rộng cố định */
+        margin: 50px auto; /* Căn giữa */
+        text-align: center; /* Canh giữa nội dung */
+    }
+
+    h2 {
+        color: #333; /* Màu chữ tiêu đề */
+        margin-bottom: 20px; /* Khoảng cách dưới tiêu đề */
+    }
+
+    .form-group {
+        margin-bottom: 15px; /* Khoảng cách giữa các trường */
+    }
+
+    label {
+        display: block; /* Hiển thị label như block */
+        margin-bottom: 5px; /* Khoảng cách dưới label */
+        color: #555; /* Màu chữ label */
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="date"],
+    select {
+        width: 100%; /* Chiều rộng 100% */
+        padding: 10px; /* Padding cho input */
+        border: 1px solid #ccc; /* Biên cho input */
+        border-radius: 5px; /* Bo tròn góc */
+        transition: border-color 0.3s; /* Hiệu ứng chuyển đổi màu biên */
+    }
+
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    input[type="password"]:focus,
+    input[type="date"]:focus,
+    select:focus {
+        border-color: #007bff; /* Màu biên khi focus */
+        outline: none; /* Ẩn outline */
+    }
+
+    button {
+        width: 100%; /* Chiều rộng 100% */
+        padding: 10px; /* Padding cho nút */
+        background-color: #007bff; /* Màu nền nút */
+        color: white; /* Màu chữ nút */
+        border: none; /* Không có biên */
+        border-radius: 5px; /* Bo tròn góc nút */
+        cursor: pointer; /* Con trỏ thành tay khi hover */
+        transition: background-color 0.3s; /* Hiệu ứng chuyển đổi màu nền */
+    }
+
+    button:hover {
+        background-color: #0056b3; /* Màu nền khi hover */
+    }
+
+    .error-message {
+        color: red; /* Màu chữ cho thông báo lỗi */
+        margin-bottom: 20px; /* Khoảng cách dưới thông báo */
+    }
+</style>
+
+<div class="login-container">
+    <h2>Đăng Ký Tài Khoản</h2>
+
+    @if (ViewBag.ErrorMessage != null)
+    {
+        <div class="error-message">@ViewBag.ErrorMessage</div>
+    }
+
+    <form method="post" asp-action="Register" asp-controller="LoginRegister">
+        <div class="form-group">
+            <label for="Username">Tên đăng nhập:</label>
+            <input type="text" id="Username" name="Username" required />
+        </div>
+        <div class="form-group">
+            <label for="Password">Mật khẩu:</label>
+            <input type="password" id="Password" name="Password" required />
+        </div>
+        <div class="form-group">
+            <label for="Role">Vai trò:</label>
+            <select id="Role" name="Role" required>
+                <option value="">Chọn vai trò</option>
+                <option value="Admin">Admin</option>
+                <option value="Manager">Manager </option>
+                <option value="Execute">Execute </option>
+                <option value="Assistant">Assistant</option>
+                
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="Email">Email:</label>
+            <input type="email" id="Email" name="Email" required />
+        </div>
+        <div class="form-group">
+            <label for="FullName">Họ và tên:</label>
+            <input type="text" id="FullName" name="FullName" required />
+        </div>
+        <div class="form-group">
+            <label for="Phone">Số điện thoại:</label>
+            <input type="text" id="Phone" name="Phone" />
+        </div>
+        <div class="form-group">
+            <label for="Address">Địa chỉ:</label>
+            <input type="text" id="Address" name="Address" required />
+        </div>
+        <div class="form-group">
+            <label for="DateOfBirth">Ngày sinh:</label>
+            <input type="date" id="DateOfBirth" name="DateOfBirth" />
+        </div>
+        <div class="form-group">
+            <label for="Phongban">Phòng ban:</label>
+            <input type="text" id="Phongban" name="Phongban" />
+        </div>
+        <button type="submit">Đăng Ký</button>
+    </form>
+</div>

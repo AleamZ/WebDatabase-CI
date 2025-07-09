@@ -1,0 +1,82 @@
+﻿@{
+    ViewData["Title"] = "Import Excel Data";
+}
+<link href="~/adminpanel/css/style.css" rel="stylesheet" />
+<script src="~/adminpanel/js/script.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="initial-scale=1, maximum-scale=1">
+<!-- site metas -->
+<title>4uhost</title>
+<meta name="keywords" content="">
+<meta name="description" content="">
+<meta name="author" content="">
+<!-- bootstrap css -->
+
+<link href="~/css(4u)/bootstrap.min.css" rel="stylesheet" />
+<!-- style css -->
+
+<link href="~/css(4u)/style.css" rel="stylesheet" />
+<!-- Responsive-->
+<link href='https://unpkg.com/boxicons@2.0.9/css/boxicons.min.css' rel='stylesheet'>
+<link href="~/css(4u)/responsive.css" rel="stylesheet" />
+
+<!-- fevicon -->
+<!-- Tweaks for older IEs-->
+<link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css">
+
+<h2 class="text-center mb-4">Import Excel Data</h2>
+
+@if (ViewBag.Message != null)
+{
+    <div class="alert alert-info text-center">@ViewBag.Message</div>
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <!-- Form for file upload -->
+            <form asp-action="Index" asp-controller="AllData" method="post" enctype="multipart/form-data">
+                <div class="card">
+                    <div class="card-header bg-primary text-white text-center">
+                        <h4>Upload Excel File</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label for="file">Choose Excel File</label>
+                            <input type="file" name="file" class="form-control-file" accept=".xls,.xlsx" required />
+                        </div>
+                    </div>
+                    <div class="card-footer text-center">
+                        <button type="submit" class="btn btn-primary">Import</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Custom styles */
+    .form-group label {
+        font-weight: bold;
+    }
+
+    .card {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        margin-top: 30px;
+    }
+
+    .card-header {
+        font-size: 1.2rem;
+    }
+
+    .btn-primary {
+        width: 100%;
+        font-size: 1rem;
+    }
+
+    .alert-info {
+        font-size: 1rem;
+    }
+</style>

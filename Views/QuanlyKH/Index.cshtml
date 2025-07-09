@@ -1,0 +1,78 @@
+﻿@model IEnumerable<CIResearch.Models.QuanLyKH>
+
+@{
+    ViewData["Title"] = "Danh Sách Khách Hàng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2 class="mb-4">@ViewData["Title"]</h2>
+
+<div class="d-flex mb-3">
+
+    <div class="d-flex mb-3">
+        <input type="number" id="sttInput" class="form-control me-2" placeholder="Nhập STT cần kiểm toán" style="width: 200px;">
+        <button id="btnKiemToan" class="btn btn-warning me-2">Kiểm Toán</button>
+    </div>
+
+  
+    <button id="btnThemDuLieu" class="btn btn-success me-2" style="display:none;">Thêm Dữ Liệu</button>
+    <button id="btnXoaDuLieu" class="btn btn-danger" style="display:none;">Xóa Dữ Liệu</button>
+</div>
+
+<table class="table table-bordered table-striped">
+    <thead class="table-dark text-center">
+        <tr>
+            <th>STT</th>
+            <th>Code Quốc Tế</th>
+            <th>Code Việt Nam</th>
+            <th>Khách Hàng</th>
+            <th>Trạng Thái</th>
+            <th>Hợp Đồng</th>
+            <th>Tạm Ứng</th>
+            <th>Số Tiền Còn Lại</th>
+            <th>Kiem Toan Note</th>
+            <th>Thao Tác</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Stt</td>
+                <td>@item.CodeQuocte</td>
+                <td>@item.CodeVietNam</td>
+                <td>@item.KhachHang</td>
+                <td>@item.Status</td>
+                <td>@item.HopDong</td>
+                <td>@item.TamUng</td>
+                <td>@item.SoTienConLai</td>
+                <td class="kiemtoan-note">@item.KiemToanNote</td>
+                <td>
+                    <a href="@Url.Action("Edit", new { id = item.Stt })" class="btn btn-sm btn-primary">Sửa</a>
+                    <form asp-action="Delete" asp-controller="QuanlyKH" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn xóa?');">
+                        <input type="hidden" name="id" value="@item.Stt" />
+                        <button type="submit" class="btn btn-danger">Xóa</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a href="@Url.Action("Create")" class="btn btn-primary">Thêm Mới</a>
+
+<script>
+          document.getElementById("btnKiemToan").addEventListener("click", function () {
+        var sttValue = document.getElementById("sttInput").value.trim();
+
+        if (!sttValue) {
+            alert("Vui lòng nhập STT cần kiểm toán!");
+            return;
+        }
+
+        // Chuyển hướng sang trang Edit với STT nhập vào
+        window.location.href = '@Url.Action("Edit", "QuanlyKH")' + '?id=' + sttValue;
+    });
+
+
+</script>

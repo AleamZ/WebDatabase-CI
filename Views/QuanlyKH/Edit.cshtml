@@ -1,0 +1,55 @@
+﻿@model CIResearch.Models.QuanLyKH
+
+
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+
+
+<h2>Chỉnh sửa khách hàng</h2>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="Stt" />
+
+    <div class="form-group">
+        <label asp-for="KhachHang"></label>
+        <input asp-for="KhachHang" class="form-control" />
+        <span asp-validation-for="KhachHang" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="TenDuAn"></label>
+        <input asp-for="TenDuAn" class="form-control" />
+        <span asp-validation-for="TenDuAn" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="KhachHang"></label>
+        <input asp-for="KhachHang" class="form-control" />
+        <span asp-validation-for="KhachHang" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="HopDong"></label>
+        <input asp-for="HopDong" class="form-control" />
+        <span asp-validation-for="HopDong" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Status"></label>
+        <input asp-for="Status"  class="form-control" />
+        <span asp-validation-for="Status" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="GhiChu"></label>
+        <textarea asp-for="GhiChu" class="form-control"></textarea>
+        <span asp-validation-for="GhiChu" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Lưu</button>
+    <a asp-action="Index" class="btn btn-secondary">Hủy</a>
+</form>

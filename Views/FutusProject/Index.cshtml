@@ -1,0 +1,1170 @@
+﻿@model List<CIResearch.Models.ALLDATA>
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link href="~/adminpanel/css/style.css" rel="stylesheet" />
+    <script src="~/adminpanel/js/script.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1">
+    <!-- site metas -->
+    <title>4uhost</title>
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <!-- bootstrap css -->
+
+    <link href="~/css(4u)/bootstrap.min.css" rel="stylesheet" />
+    <!-- style css -->
+
+    <link href="~/css(4u)/style.css" rel="stylesheet" />
+    <!-- Responsive-->
+    <link href="~/css(4u)/responsive.css" rel="stylesheet" />
+
+    <!-- fevicon -->
+    <!-- Tweaks for older IEs-->
+ 
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <style>
+        #map {
+            height: 500px;
+            width: 100%;
+        }
+        .table-container {
+            border: 1px solid #ddd;
+            padding: 10px;
+            max-height: 400px; /* Giới hạn chiều cao nếu bảng quá dài */
+            overflow-y: auto; /* Thêm thanh cuộn dọc nếu bảng quá dài */
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table-bordered {
+            border: 1px solid #ddd;
+        }
+
+        .table th, .table td {
+            padding: 8px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+         <style>
+        /* Thêm CSS tùy chỉnh cho giao diện */
+        .admin-page {
+            display: flex;
+        }
+
+        .sidebar {
+            width: 200px;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+
+        .content {
+            flex: 1;
+            padding: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .filter-select {
+            width: 100%;
+            padding: 5px;
+            box-sizing: border-box;
+            margin-bottom: 10px; /* Thêm khoảng cách giữa các dropdown */
+        }
+
+        .filter-form {
+            margin-bottom: 20px;
+            
+        }
+
+        .custom-multi-select {
+            position: relative;
+            width: 215px;
+        }
+
+        .select-box {
+            padding: 10px;
+            border: 1px solid #ccc;
+            cursor: pointer;
+            background-color: #fff;
+            position: relative;
+        }
+
+        .selected-options {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .arrow {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: solid #666;
+            border-width: 0 2px 2px 0;
+            padding: 3px;
+            transform: rotate(45deg);
+        }
+
+        .dropdown-options {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            max-height: 150px;
+            overflow-y: auto;
+            z-index: 1;
+        }
+
+        
+        .selected-options {
+            width: 100%; /* Đặt độ rộng tối đa cho ô hiển thị */
+            overflow: hidden; /* Ẩn phần văn bản bị tràn */
+            text-overflow: ellipsis; /* Hiển thị dấu ... khi văn bản quá dài */
+            white-space: nowrap; /* Ngăn không cho văn bản xuống dòng */
+        }
+    
+
+
+            .dropdown-options label {
+                display: block;
+                padding: 5px;
+                cursor: pointer;
+            }
+
+                .dropdown-options label:hover {
+                    background-color: #f0f0f0;
+                }
+    </style>
+
+    
+
+    <title>CI RESEARCH - Dashboard</title>
+    <!-- Add Leaflet CSS -->
+    
+
+    <!-- Add Leaflet JS -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@3.0.0"></script>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css">
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@1.0.1/dist/chartjs-plugin-zoom.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Custom fonts for this template-->
+    <link href="~/trangadmin/accses/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" />
+  @*   <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css"> *@
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"rel="stylesheet">
+    <link href="~/trangadmin/accses/css/sb-admin-2.css" rel="stylesheet" />
+    <link href="~/trangadmin/accses/css/sb-admin-2.min.css" rel="stylesheet" />
+ 
+
+    <!-- Custom styles for this template-->
+   @*  <link href="css/sb-admin-2.min.css" rel="stylesheet"> *@
+
+</head>
+
+
+<body id="page-top">
+    
+                <!-- Begin Page Content -->
+                <div class="container-fluid">
+
+                    <!-- Page Heading -->
+                    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                        
+                               
+         <form method="get" action="@Url.Action("Index", "FutusProject")" class="filter-form">
+                <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+
+
+
+                    <div class="custom-multi-select">
+                        <div class="select-box" onclick="toggleDropdown(this)">
+                            <span class="selected-options" data-placeholder="Chọn tỉnh">Chọn trạng thái </span>
+                            <i class="arrow"></i>
+                        </div>
+                        <div class="dropdown-options" onchange="limitSelection(this, 10)">
+
+                            <label><input type="checkbox" name="qc" value="Canceled" @(ViewBag.Status?.Contains("Canceled") == true ? "checked" : "") /> Canceled</label>
+                            <label><input type="checkbox" name="qc" value="Requires Approval" @(ViewBag.Status?.Contains("Requires Approval") == true ? "checked" : "") /> Requires Approval</label>
+                            <label><input type="checkbox" name="qc" value="Approved" @(ViewBag.Status?.Contains("Approved") == true ? "checked" : "") /> Approved</label>
+
+
+                        </div>
+                    </div>
+
+               
+
+                    <div class="custom-multi-select">
+                        <div class="select-box" onclick="toggleDropdown(this)">
+                            <span class="selected-options" data-placeholder="Chọn tỉnh">Chọn thành phố</span>
+                            <i class="arrow"></i>
+                        </div>
+                        <div class="dropdown-options" onchange="limitSelection(this, 10)">
+
+                            <label><input type="checkbox" name="city" value="Đà Nẵng" @(ViewBag.City?.Contains("Đà Nẵng") == true ? "checked" : "") /> Đà Nẵng</label>
+                            <label><input type="checkbox" name="city" value="Hồ Chí Minh" @(ViewBag.City?.Contains("Hồ Chí Minh") == true ? "checked" : "") /> Hồ Chí Minh</label>
+                            <label><input type="checkbox" name="city" value="Cần Thơ" @(ViewBag.City?.Contains("Cần Thơ") == true ? "checked" : "") /> Cần Thơ</label>
+                            <label><input type="checkbox" name="city" value="Hải Phòng" @(ViewBag.City?.Contains("Hải Phòng") == true ? "checked" : "") /> Hải Phòng</label>
+                            <label><input type="checkbox" name="city" value="Hà Nội" @(ViewBag.City?.Contains("Hà Nội") == true ? "checked" : "") /> Hà Nội</label>
+                           
+                        </div>
+                    </div>
+
+
+
+
+
+                    
+                    <div class="custom-multi-select">
+                        <div class="select-box" onclick="toggleDropdown(this)">
+                            <span class="selected-options" data-placeholder="Chọn tỉnh">Chọn Quận</span>
+                            <i class="arrow"></i>
+                        </div>
+                        <div class="dropdown-options" onchange="limitSelection(this, 10)">
+
+                            <!-- Đà Nẵng -->
+<label><input type="checkbox" name="district" value="Quận Hải Châu" @(ViewBag.City?.Contains("Quận Hải Châu") == true ? "checked" : "") />Quận Hải Châu</label>
+<label><input type="checkbox" name="district" value="Quận Thanh Khê" @(ViewBag.City?.Contains("Quận Thanh Khê") == true ? "checked" : "") />Quận Thanh Khê</label>
+<label><input type="checkbox" name="district" value="Quận Cẩm Lệ" @(ViewBag.City?.Contains("Quận Cẩm Lệ") == true ? "checked" : "") />Quận Cẩm Lệ</label>
+<label><input type="checkbox" name="district" value="Quận Ngũ Hành Sơn" @(ViewBag.City?.Contains("Quận Ngũ Hành Sơn") == true ? "checked" : "") />Quận Ngũ Hành Sơn</label>
+<label><input type="checkbox" name="district" value="Quận Sơn Trà" @(ViewBag.City?.Contains("Quận Sơn Trà") == true ? "checked" : "") />Quận Sơn Trà</label>
+<label><input type="checkbox" name="district" value="Quận Liên Chiểu" @(ViewBag.City?.Contains("Quận Liên Chiểu") == true ? "checked" : "") />Quận Liên Chiểu</label>
+
+<!-- Hồ Chí Minh -->
+<label><input type="checkbox" name="district" value="Quận 1" @(ViewBag.City?.Contains("Quận 1") == true ? "checked" : "") /> Quận 1</label>
+<label><input type="checkbox" name="district" value="Quận 3" @(ViewBag.City?.Contains("Quận 3") == true ? "checked" : "") /> Quận 3</label>
+<label><input type="checkbox" name="district" value="Quận 4" @(ViewBag.City?.Contains("Quận 4") == true ? "checked" : "") /> Quận 4</label>
+<label><input type="checkbox" name="district" value="Quận 5" @(ViewBag.City?.Contains("Quận 5") == true ? "checked" : "") /> Quận 5</label>
+<label><input type="checkbox" name="district" value="Quận 6" @(ViewBag.City?.Contains("Quận 6") == true ? "checked" : "") /> Quận 6</label>
+<label><input type="checkbox" name="district" value="Quận 7" @(ViewBag.City?.Contains("Quận 7") == true ? "checked" : "") /> Quận 7</label>
+<label><input type="checkbox" name="district" value="Quận 8" @(ViewBag.City?.Contains("Quận 8") == true ? "checked" : "") /> Quận 8</label>
+<label><input type="checkbox" name="district" value="Quận 10" @(ViewBag.City?.Contains("Quận 10") == true ? "checked" : "") /> Quận 10</label>
+<label><input type="checkbox" name="district" value="Quận 11" @(ViewBag.City?.Contains("Quận 11") == true ? "checked" : "") /> Quận 11</label>
+<label><input type="checkbox" name="district" value="Quận 12" @(ViewBag.City?.Contains("Quận 12") == true ? "checked" : "") /> Quận 12</label>
+<label><input type="checkbox" name="district" value="Quận Tân Bình" @(ViewBag.City?.Contains("Quận Tân Bình") == true ? "checked" : "") />Quận Tân Bình</label>
+<label><input type="checkbox" name="district" value="Quận Tân Phú" @(ViewBag.City?.Contains("Quận Tân Phú") == true ? "checked" : "") />Quận Tân Phú</label>
+<label><input type="checkbox" name="district" value="Quận Gò Vấp" @(ViewBag.City?.Contains("Quận Gò Vấp") == true ? "checked" : "") />Quận Gò Vấp</label>
+<label><input type="checkbox" name="district" value="Quận Bình Thạnh" @(ViewBag.City?.Contains("Quận Bình Thạnh") == true ? "checked" : "") />Quận Bình Thạnh</label>
+<label><input type="checkbox" name="district" value="Quận Phú Nhuận" @(ViewBag.City?.Contains("Quận Phú Nhuận") == true ? "checked" : "") />Quận Phú Nhuận</label>
+
+<label><input type="checkbox" name="district" value="Quận Bình Tân" @(ViewBag.City?.Contains("Quận Bình Tân") == true ? "checked" : "") />Quận Bình Tân</label>
+<label><input type="checkbox" name="district" value="Thành Phố Thủ Đức" @(ViewBag.City?.Contains("Thành Phố Thủ Đức") == true ? "checked" : "") /> Thành Phố Thủ Đức</label>
+
+<!-- Cần Thơ -->
+<label><input type="checkbox" name="district" value="Quận Ninh Kiều" @(ViewBag.City?.Contains("Quận Ninh Kiều") == true ? "checked" : "") />Quận Ninh Kiều</label>
+<label><input type="checkbox" name="district" value="Quận Cái Răng" @(ViewBag.City?.Contains("Quận Cái Răng") == true ? "checked" : "") />Quận Cái Răng</label>
+<label><input type="checkbox" name="district" value="Quận Bình Thủy" @(ViewBag.City?.Contains("Quận Bình Thủy") == true ? "checked" : "") />Quận Bình Thủy</label>
+<label><input type="checkbox" name="district" value="Quận Ô Môn" @(ViewBag.City?.Contains("Quận Ô Môn") == true ? "checked" : "") />Quận Ô Môn</label>
+<label><input type="checkbox" name="district" value="Quận Thốt Nốt" @(ViewBag.City?.Contains("Quận Thốt Nốt") == true ? "checked" : "") />Quận Thốt Nốt</label>
+
+<!-- Hải Phòng -->
+<label><input type="checkbox" name="district" value="Quận Hồng Bàng" @(ViewBag.City?.Contains("Quận Hồng Bàng") == true ? "checked" : "") />Quận Hồng Bàng</label>
+<label><input type="checkbox" name="district" value="Quận Lê Chân" @(ViewBag.City?.Contains("Quận Lê Chân") == true ? "checked" : "") />Quận Lê Chân</label>
+<label><input type="checkbox" name="district" value="Quận Ngô Quyền" @(ViewBag.City?.Contains("Quận Ngô Quyền") == true ? "checked" : "") />Quận Ngô Quyền</label>
+<label><input type="checkbox" name="district" value="Quận Hải An" @(ViewBag.City?.Contains("Quận Hải An") == true ? "checked" : "") />Quận Hải An</label>
+<label><input type="checkbox" name="district" value="Quận Kiến An" @(ViewBag.City?.Contains("Quận Kiến An") == true ? "checked" : "") />Quận Kiến An</label>
+<label><input type="checkbox" name="district" value="Quận Dương Kinh" @(ViewBag.City?.Contains("Quận Dương Kinh") == true ? "checked" : "") />Quận Dương Kinh</label>
+
+<!-- Hà Nội -->
+<label><input type="checkbox" name="district" value="Quận Ba Đình" @(ViewBag.City?.Contains("Quận Ba Đình") == true ? "checked" : "") />Quận Ba Đình</label>
+<label><input type="checkbox" name="district" value="Quận Hoàn Kiếm" @(ViewBag.City?.Contains("Quận Hoàn Kiếm") == true ? "checked" : "") />Quận Hoàn Kiếm</label>
+<label><input type="checkbox" name="district" value="Quận Hai Bà Trưng" @(ViewBag.City?.Contains("Quận Hai Bà Trưng") == true ? "checked" : "") />Quận Hai Bà Trưng</label>
+<label><input type="checkbox" name="district" value="Quận Đống Đa" @(ViewBag.City?.Contains("Quận Đống Đa") == true ? "checked" : "") />Quận Đống Đa</label>
+<label><input type="checkbox" name="district" value="Quận Tây Hồ" @(ViewBag.City?.Contains("Quận Tây Hồ") == true ? "checked" : "") />Quận Tây Hồ</label>
+<label><input type="checkbox" name="district" value="Quận Cầu Giấy" @(ViewBag.City?.Contains("Quận Cầu Giấy") == true ? "checked" : "") />Quận Cầu Giấy</label>
+<label><input type="checkbox" name="district" value="Quận Thanh Xuân" @(ViewBag.City?.Contains("Quận Thanh Xuân") == true ? "checked" : "") />Quận Thanh Xuân</label>
+<label><input type="checkbox" name="district" value="Quận Hoàng Mai" @(ViewBag.City?.Contains("Quận Hoàng Mai") == true ? "checked" : "") />Quận Hoàng Mai</label>
+<label><input type="checkbox" name="district" value="Quận Long Biên" @(ViewBag.City?.Contains("Quận Long Biên") == true ? "checked" : "") />Quận Long Biên</label>
+<label><input type="checkbox" name="district" value="Quận Bắc Từ Liêm" @(ViewBag.City?.Contains("Quận Bắc Từ Liêm") == true ? "checked" : "") />Quận Bắc Từ Liêm</label>
+<label><input type="checkbox" name="district" value="Quận Nam Từ Liêm" @(ViewBag.City?.Contains("Quận Nam Từ Liêm") == true ? "checked" : "") />Quận Nam Từ Liêm</label>
+<label><input type="checkbox" name="district" value="Quận Hà Đông" @(ViewBag.City?.Contains("Quận Hà Đông") == true ? "checked" : "") />Quận Hà Đông</label>
+<label><input type="checkbox" name="district" value="Quận Tây Hồ" @(ViewBag.City?.Contains("Quận Tây Hồ") == true ? "checked" : "") />Quận Tây Hồ</label>
+
+                           
+                           
+                        </div>
+                    </div>
+
+
+
+
+
+
+                    <!-- Sex Multi-select -->
+                   
+                </div>
+                <P>        &nbsp     </P>
+
+                <button type="submit" class="btn btn-primary">  Lọc</button>
+
+
+
+
+
+
+
+                <button type="button" class="btn btn-danger" onclick="window.location.href='@Url.Action("Index", "FutusProject")'">
+                    Xóa bộ lọc
+                </button>
+
+
+
+            </form>
+
+                           
+                        
+                    </div>
+
+                    <!-- Content Row -->
+                    <div class="row">
+
+
+                        <!--Tổng số lượng dự án -->
+                           <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-primary shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <h6 class="m-0 font-weight-bold text-primary">Số mẫu của dự án FUTUS</h6>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">@ViewBag.TotalProjects /2300 mẫu  đã thực hiện </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800"> &nbsp;  </div>
+
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                    <h4 class="small font-weight-bold text-gray-800">
+
+
+                                        Tiến độ dự án: @((ViewBag.TotalProjects * 100) / 2300)%
+
+                                    </h4>
+                                    <div class="progress mb-4">
+                                        <div class="progress-bar" role="progressbar"
+                                             style="width: @((ViewBag.TotalProjects * 100) / 2300)%"
+                                             aria-valuenow="@((ViewBag.TotalProjects * 100) / 2300)"
+                                             aria-valuemin="0"
+                                             aria-valuemax="100">
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+                        <!-- tổng số lượng mẫu -->
+                        <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-primary shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <h6 class="m-0 font-weight-bold text-primary">Số mẫu các khu vực</h6>
+                                 <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">
+                                @foreach (var province in ViewBag.SamplesByCity as Dictionary<string, int>)
+                                {
+                                <li>@province.Key: @province.Value mẫu</li>
+                                }
+                                </div> 
+                            </div>
+                            <div class="col-auto">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+                      
+                <!-- Số mẫu hiện có -->
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-primary shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <h6 class="m-0 font-weight-bold text-primary">Số mẫu các khu vực</h6>
+                                 <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">
+                                @foreach (var loaihinh in ViewBag.loaihinhch as Dictionary<string, int>)
+                                {
+                                <li>@loaihinh.Key: @loaihinh.Value mẫu</li>
+                                }
+                                </div> 
+                            </div>
+                            <div class="col-auto">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+                       <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-primary shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <h6 class="m-0 font-weight-bold text-primary">Đối tượng phỏng vấn</h6>
+                                 <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">
+                                @foreach (var chuch in ViewBag.chu as Dictionary<string, int>)
+                                {
+                                <li>@chuch.Key: @chuch.Value mẫu</li>
+                                }
+                                </div> 
+                            </div>
+                            <div class="col-auto">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+          </div>
+
+                    <!-- Content Row -->
+
+
+
+                    <div class="row">
+
+                        <!-- SL dự án qua từng năm  -->
+                        <div class="col-xl-8 col-lg-7">
+                            <div class="card shadow mb-4">
+                                <!-- Card Header - Dropdown -->
+                                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                    <h6 class="m-0 font-weight-bold text-primary">Thành phố đang thực hiện</h6>
+                                  
+                                </div>
+                                <!-- Card Body -->
+                                <div class="card-body">
+                                    <div class="chart-area">
+                                        <canvas id="provinceBarChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Số lượng nam nữ -->
+                        <div class="col-xl-4 col-lg-5">
+                            <div class="card shadow mb-4">
+                                <!-- Card Header - Dropdown -->
+                                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                    <h6 class="m-0 font-weight-bold text-primary">Loại hình cừa hàng</h6>
+                                   
+                                </div>
+                                <!-- Card Body -->
+                                <div class="card-body">
+                                    <div class="chart-pie pt-4 pb-2">
+                            <canvas id="q5DoughnutChart"></canvas>
+                                    </div>
+                        <p>&emsp;</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    
+                    <div class="row">
+
+                        <!-- số mẫu qua từng n  -->
+                        <div class="col-xl-8 col-lg-7">
+                            <div class="card shadow mb-4">
+                                <!-- Card Header - Dropdown -->
+                                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                    <h6 class="m-0 font-weight-bold text-primary">Các quận đang thực hiện</h6>
+                                    
+                                </div>
+                                <!-- Card Body -->
+                                <div class="card-body">
+                                    <div class="chart-area">
+                            <canvas id="districtBarChart"></canvas>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Số lượng nam nữ -->
+                        <div class="col-xl-4 col-lg-5">
+                            <div class="card shadow mb-4">
+                                <!-- Card Header - Dropdown -->
+                                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                    <h6 class="m-0 font-weight-bold text-primary">Đối tượng phỏng vấn</h6>
+                                  
+                                </div>
+                                <!-- Card Body -->
+                                <div class="card-body">
+                                    <div class="chart-pie pt-4 pb-2">
+                            <canvas id="chDoughnutChart"></canvas>
+                                    </div>
+                        <p>&emsp;</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+
+
+        <div class="row">
+
+           
+            <div class="col-xl-8 col-lg-7">
+                <div class="card shadow mb-4">
+                    <!-- Card Header - Dropdown -->
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-primary">Các loại trái cây( nhập khẩu ) của các cửa hàng đang bán</h6>
+                      
+                    </div>
+                    <!-- Card Body -->
+                    <div class="card-body">
+                        <div class="chart-area">
+                            <canvas id="q13BarChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+         
+            <div class="col-xl-4 col-lg-5">
+                <div class="card shadow mb-4">
+                    <!-- Card Header - Dropdown -->
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-primary">Trái cây được nhập khẩu từ nước nào</h6>
+                    
+                    </div>
+                    <!-- Card Body -->
+                    <div class="card-body">
+                        <div class="chart-pie pt-4 pb-2">
+                            <canvas id="q13aDoughnutChart"></canvas>
+                        </div>
+                        <p>&emsp;</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+
+
+            <div class="col-xl-8 col-lg-7">
+                <div class="card shadow mb-4">
+                    <!-- Card Header - Dropdown -->
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-primary">Ghi nhận loại trái cây được bày bán tại cửa hàng</h6>
+
+                    </div>
+                    <!-- Card Body -->
+                    <div class="card-body">
+                        <div class="chart-area">
+                            <canvas id="q8BarChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="col-xl-4 col-lg-5">
+                <div class="card shadow mb-4">
+                    <!-- Card Header - Dropdown -->
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-primary">Trái cây được nhập từ các nguồn nào</h6>
+
+                    </div>
+                    <!-- Card Body -->
+                    <div class="card-body">
+                        <div class="chart-pie pt-4 pb-2">
+                            <canvas id="q28DoughnutChart"></canvas>
+                        </div>
+                        <p>&emsp;</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+         <div class="row">
+
+
+            <div class="col-xl-8 col-lg-7">
+                <div class="card shadow mb-4">
+                    <!-- Card Header - Dropdown -->
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-primary">Tổng doanh thu từ việc bán trái cây nhập khẩu trong năm qua</h6>
+
+                    </div>
+                    <!-- Card Body -->
+                    <div class="card-body">
+                        <div class="chart-area">
+                            <canvas id="q23BarChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="col-xl-4 col-lg-5">
+                <div class="card shadow mb-4">
+                    <!-- Card Header - Dropdown -->
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-primary">Vị trí cừa hàng</h6>
+
+                    </div>
+                    <!-- Card Body -->
+                    <div class="card-body">
+                        <div class="chart-pie pt-4 pb-2">
+                            <canvas id="q3DoughnutChart"></canvas>
+                        </div>
+                        <p>&emsp;</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+
+
+
+        
+
+  
+        <script src="~/trangadmin/accses/vendor/jquery/jquery.js"></script>
+        <script src="~/trangadmin/accses/vendor/jquery/jquery.min.js"></script>
+        <script src="~/trangadmin/accses/vendor/jquery/jquery.slim.js"></script>
+        <script src="~/trangadmin/accses/vendor/jquery/jquery.slim.min.js"></script>
+
+
+        <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+        <!-- Core plugin JavaScript-->
+        <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+        <script src="~/trangadmin/accses/vendor/jquery-easing/jquery.easing.compatibility.js"></script>
+        <script src="~/trangadmin/accses/vendor/jquery-easing/jquery.easing.js"></script>
+        <script src="~/trangadmin/accses/vendor/jquery-easing/jquery.easing.min.js"></script>
+        <!-- Custom scripts for all pages-->
+        <script src="js/sb-admin-2.min.js"></script>
+        <script src="~/trangadmin/accses/js/sb-admin-2.js"></script>
+        <script src="~/trangadmin/accses/js/sb-admin-2.min.js"></script>
+        <!-- Page level plugins -->
+        <script src="vendor/chart.js/Chart.min.js"></script>
+        <script src="~/trangadmin/accses/vendor/chart.js/chart.min.js"></script>
+        <!-- Page level custom scripts -->
+
+
+     
+
+
+  <script>
+           
+
+
+
+    // Đóng dropdown khi click bên ngoài
+    document.addEventListener('click', function (event) {
+        const isClickInside = event.target.closest('.custom-multi-select');
+        if (!isClickInside) {
+            document.querySelectorAll('.dropdown-options').forEach(dropdown => {
+                dropdown.style.display = 'none';
+            });
+        }
+    });
+
+    // Thêm sự kiện thay đổi cho các checkbox trong mỗi dropdown
+    document.querySelectorAll('.custom-multi-select').forEach(container => {
+        container.querySelectorAll('.dropdown-options input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', function () {
+                const selectedCheckboxes = Array.from(container.querySelectorAll('input[type="checkbox"]:checked'));
+                const selectedOptions = selectedCheckboxes.map(input => input.value);
+
+                // Đặt giới hạn hiển thị
+                const displayText = selectedOptions.length > 1
+                    ? `${selectedOptions.length} mục được chọn`
+                    : selectedOptions.join(', ');
+
+                container.querySelector('.selected-options').textContent = displayText || container.querySelector('.selected-options').dataset.placeholder;
+            });
+        });
+    });
+
+
+     function toggleDropdown(element) {
+        const dropdown = element.nextElementSibling;
+        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+    }
+
+    
+
+// Hàm để kiểm tra và thay đổi trạng thái của checkbox
+function toggleCheckbox(id) {
+    var checkbox = document.getElementById(id);
+    checkbox.checked = !checkbox.checked;  // Đảo ngược trạng thái của checkbox
+}
+
+        function toggleAgeSelection(groupCheckbox) {
+            const startAge = parseInt(groupCheckbox.getAttribute('data-start-age'));
+            const endAge = parseInt(groupCheckbox.getAttribute('data-end-age'));
+
+            // Lấy tất cả các checkbox trong nhóm tuổi này
+            const ageCheckboxes = document.querySelectorAll(`input[name="age"]`);
+
+            ageCheckboxes.forEach(checkbox => {
+                const age = parseInt(checkbox.value);
+                if (age >= startAge && age <= endAge) {
+                    checkbox.checked = groupCheckbox.checked; // Đánh dấu tất cả các checkbox trong nhóm
+                }
+            });
+        }
+
+        // Khi form được gửi, thu thập tất cả các giá trị đã chọn
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', function () {
+                const selectedAges = [];
+
+                // Lấy tất cả các checkbox đã chọn và thu thập giá trị
+                document.querySelectorAll('input[name="age"]:checked').forEach(checkedCheckbox => {
+                    selectedAges.push(checkedCheckbox.value);
+                });
+
+                // Gửi các giá trị đã chọn qua form
+                console.log(selectedAges); // selectedAges chứa các giá trị tuổi đã chọn, ví dụ: [10, 11, 12, 13, 14, 15]
+            });
+        });
+  
+
+
+
+     
+
+
+
+
+
+      
+
+
+         
+         
+
+        
+            // Lấy dữ liệu từ ViewBag và chuyển đổi thành JSON
+            var provinceData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.SamplesByCity));
+
+            // Tách keys (tỉnh) và values (số lượng mẫu)
+            var provinceLabels = Object.keys(provinceData); // Tên các tỉnh
+            var provinceValues = Object.values(provinceData); // Số lượng mẫu
+
+            // Cấu hình và vẽ biểu đồ
+            var ctx = document.getElementById('provinceBarChart').getContext('2d');
+            var provinceBarChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: provinceLabels,
+                    datasets: [{
+                        label: 'Số lượng mẫu',
+                        data: provinceValues,
+                       backgroundColor: 'rgba(255, 140, 0, 0.6)', // Màu nền cam đối lập với xanh
+borderColor: 'rgba(255, 140, 0, 1)',
+                        borderWidth: 1 // Độ dày viền
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true // Trục y bắt đầu từ 0
+                        }
+                    }
+                }
+            });
+
+
+
+
+               // Dữ liệu từ ViewBag
+            var q5data = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.loaihinhch));
+            var q5Labels = Object.keys(q5data); // Danh sách câu trả lời
+            var q5Values = Object.values(q5data).map(Number); // Chuyển đổi thành số
+
+           
+
+            // Lấy context của canvas để vẽ biểu đồ
+            var ctx = document.getElementById('q5DoughnutChart').getContext('2d');
+
+            // Biểu đồ Doughnut
+            var q5DoughnutChart = new Chart(ctx, {
+                type: 'doughnut', // Loại biểu đồ là Doughnut
+                data: {
+                    labels: q5Labels, // Nhãn trên trục X (dùng các câu trả lời)
+                    datasets: [{
+                        label: 'Số lượng câu trả lời',
+                        data: q5Values, // Số lượng mẫu cho mỗi câu trả lời
+                        backgroundColor: ['rgba(0, 102, 204, 0.6)', 'rgba(255, 99, 132, 0.6)', 'rgba(75, 192, 192, 0.6)', 'rgba(153, 102, 255, 0.6)', 'rgba(255, 159, 64, 0.6)'], // Màu nền cho từng phần
+                        borderColor: ['rgba(0, 102, 204, 1)', 'rgba(255, 99, 132, 1)', 'rgba(75, 192, 192, 1)', 'rgba(153, 102, 255, 1)', 'rgba(255, 159, 64, 1)'], // Màu viền
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top', // Vị trí hiển thị legend (chú thích)
+                        },
+                        tooltip: {
+                            callbacks: {
+                                
+                            }
+                        }
+                    }
+                }
+            });
+
+
+
+
+
+     var districtData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.SamplesByDistrict));
+
+    // Tách keys (quận) và values (số lượng mẫu)
+    var districtLabels = Object.keys(districtData); // Tên các quận
+    var districtValues = Object.values(districtData); // Số lượng mẫu
+
+    // Cấu hình và vẽ biểu đồ cột
+    var ctx = document.getElementById('districtBarChart').getContext('2d');
+    var districtBarChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: districtLabels, // Tên quận
+            datasets: [{
+                label: 'Số lượng mẫu',
+                data: districtValues, // Số lượng mẫu
+                backgroundColor: 'rgba(0, 51, 153, 0.6)', // Màu nền cột xanh đậm hơn
+ borderColor: 'rgba(0, 51, 153, 1)', // Màu viền
+                borderWidth: 1 // Độ dày viền
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true // Trục Y bắt đầu từ 0
+                }
+            }
+        }
+    });
+
+
+
+           // Dữ liệu từ ViewBag
+            var chdata = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.chu));
+            var chLabels = Object.keys(chdata); // Danh sách câu trả lời
+            var chValues = Object.values(chdata).map(Number); // Chuyển đổi thành số
+
+           
+
+            // Lấy context của canvas để vẽ biểu đồ
+            var ctx = document.getElementById('chDoughnutChart').getContext('2d');
+
+            // Biểu đồ Doughnut
+            var choughnutChart = new Chart(ctx, {
+                type: 'doughnut', // Loại biểu đồ là Doughnut
+                data: {
+                    labels: chLabels, // Nhãn trên trục X (dùng các câu trả lời)
+                    datasets: [{
+                        label: 'Số lượng câu trả lời',
+                        data: chValues, // Số lượng mẫu cho mỗi câu trả lời
+                        backgroundColor: ['rgba(0, 102, 204, 0.6)', 'rgba(255, 99, 132, 0.6)', 'rgba(75, 192, 192, 0.6)', 'rgba(153, 102, 255, 0.6)', 'rgba(255, 159, 64, 0.6)'], // Màu nền cho từng phần
+                        borderColor: ['rgba(0, 102, 204, 1)', 'rgba(255, 99, 132, 1)', 'rgba(75, 192, 192, 1)', 'rgba(153, 102, 255, 1)', 'rgba(255, 159, 64, 1)'], // Màu viền
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top', // Vị trí hiển thị legend (chú thích)
+                        },
+                        tooltip: {
+                            callbacks: {
+                                
+                            }
+                        }
+                    }
+                }
+            });
+       
+
+    var q13data = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.SamplesBySource));
+
+    // Tách keys (quận) và values (số lượng mẫu)
+    var q13Labels = Object.keys(q13data); // Tên các quận
+    var q13Values = Object.values(q13data); // Số lượng mẫu
+
+    // Cấu hình và vẽ biểu đồ cột
+    var ctx = document.getElementById('q13BarChart').getContext('2d');
+    var q13BarChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: q13Labels, // Tên quận
+            datasets: [{
+                label: 'Số lượng mẫu',
+                data: q13Values, // Số lượng mẫu
+                 backgroundColor: 'rgba(255, 140, 0, 0.6)', // Màu nền cam đối lập với xanh
+borderColor: 'rgba(255, 140, 0, 1)', // Màu viền
+                borderWidth: 1 // Độ dày viền
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true // Trục Y bắt đầu từ 0
+                }
+            }
+        }
+    });
+
+
+
+      // Dữ liệu từ ViewBag
+            var Q13a = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.q13aa));
+            var q13aLabels = Object.keys(Q13a); // Danh sách câu trả lời
+            var q13aValues = Object.values(Q13a).map(Number); // Chuyển đổi thành số
+
+           
+
+            // Lấy context của canvas để vẽ biểu đồ
+            var ctx = document.getElementById('q13aDoughnutChart').getContext('2d');
+
+            // Biểu đồ Doughnut
+            var q13oughnutChart = new Chart(ctx, {
+                type: 'doughnut', // Loại biểu đồ là Doughnut
+                data: {
+                    labels: q13aLabels, // Nhãn trên trục X (dùng các câu trả lời)
+                    datasets: [{
+                        label: 'Số lượng câu trả lời',
+                        data: q13aValues, // Số lượng mẫu cho mỗi câu trả lời
+                        backgroundColor: ['rgba(0, 102, 204, 0.6)', 'rgba(255, 99, 132, 0.6)', 'rgba(75, 192, 192, 0.6)', 'rgba(153, 102, 255, 0.6)', 'rgba(255, 159, 64, 0.6)'], // Màu nền cho từng phần
+                        borderColor: ['rgba(0, 102, 204, 1)', 'rgba(255, 99, 132, 1)', 'rgba(75, 192, 192, 1)', 'rgba(153, 102, 255, 1)', 'rgba(255, 159, 64, 1)'], // Màu viền
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top', // Vị trí hiển thị legend (chú thích)
+                        },
+                        tooltip: {
+                            callbacks: {
+                                
+                            }
+                        }
+                    }
+                }
+            });
+
+
+
+
+            
+    var q8data = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.q8answer));
+
+    // Tách keys (quận) và values (số lượng mẫu)
+    var q8Labels = Object.keys(q8data); // Tên các quận
+    var q8Values = Object.values(q8data); // Số lượng mẫu
+
+    // Cấu hình và vẽ biểu đồ cột
+    var ctx = document.getElementById('q8BarChart').getContext('2d');
+    var q8BarChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: q8Labels, // Tên quận
+            datasets: [{
+                label: 'Số lượng mẫu',
+                data: q8Values, // Số lượng mẫu
+                backgroundColor: 'rgba(0, 51, 153, 0.6)', // Màu nền cột xanh đậm hơn
+ borderColor: 'rgba(0, 51, 153, 1)', // Màu viền
+                borderWidth: 1 // Độ dày viền
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true // Trục Y bắt đầu từ 0
+                }
+            }
+        }
+    });
+
+
+
+       // Dữ liệu từ ViewBag
+            var q28data = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.q28answer));
+            var q28Labels = Object.keys(q28data); // Danh sách câu trả lời
+            var q28Values = Object.values(q28data).map(Number); // Chuyển đổi thành số
+
+           
+
+            // Lấy context của canvas để vẽ biểu đồ
+            var ctx = document.getElementById('q28DoughnutChart').getContext('2d');
+
+            // Biểu đồ Doughnut
+            var q28oughnutChart = new Chart(ctx, {
+                type: 'doughnut', // Loại biểu đồ là Doughnut
+                data: {
+                    labels: q28Labels, // Nhãn trên trục X (dùng các câu trả lời)
+                    datasets: [{
+                        label: 'Số lượng câu trả lời',
+                        data: q28Values, // Số lượng mẫu cho mỗi câu trả lời
+                        backgroundColor: ['rgba(0, 102, 204, 0.6)', 'rgba(255, 99, 132, 0.6)', 'rgba(75, 192, 192, 0.6)', 'rgba(153, 102, 255, 0.6)', 'rgba(255, 159, 64, 0.6)'], // Màu nền cho từng phần
+                        borderColor: ['rgba(0, 102, 204, 1)', 'rgba(255, 99, 132, 1)', 'rgba(75, 192, 192, 1)', 'rgba(153, 102, 255, 1)', 'rgba(255, 159, 64, 1)'], // Màu viền
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top', // Vị trí hiển thị legend (chú thích)
+                        },
+                        tooltip: {
+                            callbacks: {
+                                
+                            }
+                        }
+                    }
+                }
+            });
+
+
+            var q23data = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.q238answer));
+// Dữ liệu từ ViewBag
+var q23labels = Object.keys(q23data); // Danh sách câu trả lời
+var q23values = Object.values(q23data); // Số lượng câu trả lời
+
+var ctx = document.getElementById('q23BarChart').getContext('2d');
+// Biểu đồ ngang (Horizontal Bar Chart)
+var q23BarChart = new Chart(ctx, {
+    type: 'horizontalBar', // Loại biểu đồ ngang
+    data: {
+        labels: q23labels, // Nhãn trên trục X (dùng các câu trả lời)
+        datasets: [{
+            label: 'Cửa hàng',
+            data: q23values, // Số lượng mẫu cho mỗi câu trả lời
+            backgroundColor: 'rgba(255, 140, 0, 0.6)', // Màu nền cam đối lập với xanh
+borderColor: 'rgba(255, 140, 0, 1)',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            x: {
+                beginAtZero: true // Đảm bảo trục X bắt đầu từ 0
+            },
+            y: {
+                beginAtZero: true // Đảm bảo trục Y bắt đầu từ 0
+            }
+        }
+    }
+});
+
+
+
+
+
+               // Dữ liệu từ ViewBag
+            var q3data = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.q3answer));
+            var q3Labels = Object.keys(q3data); // Danh sách câu trả lời
+            var q3Values = Object.values(q3data).map(Number); // Chuyển đổi thành số
+
+           
+
+            // Lấy context của canvas để vẽ biểu đồ
+            var ctx = document.getElementById('q3DoughnutChart').getContext('2d');
+
+            // Biểu đồ Doughnut
+            var q3DoughnutChart = new Chart(ctx, {
+                type: 'doughnut', // Loại biểu đồ là Doughnut
+                data: {
+                    labels: q3Labels, // Nhãn trên trục X (dùng các câu trả lời)
+                    datasets: [{
+                        label: 'Số lượng câu trả lời',
+                        data: q3Values, // Số lượng mẫu cho mỗi câu trả lời
+                        backgroundColor: ['rgba(0, 102, 204, 0.6)', 'rgba(255, 99, 132, 0.6)', 'rgba(75, 192, 192, 0.6)', 'rgba(153, 102, 255, 0.6)', 'rgba(255, 159, 64, 0.6)'], // Màu nền cho từng phần
+                        borderColor: ['rgba(0, 102, 204, 1)', 'rgba(255, 99, 132, 1)', 'rgba(75, 192, 192, 1)', 'rgba(153, 102, 255, 1)', 'rgba(255, 159, 64, 1)'], // Màu viền
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top', // Vị trí hiển thị legend (chú thích)
+                        },
+                        tooltip: {
+                            callbacks: {
+                                
+                            }
+                        }
+                    }
+                }
+            });
+
+           
+
+
+
+
+</script>
+
+
+
+
+
+
+
+
+</body>
+
+</html>
