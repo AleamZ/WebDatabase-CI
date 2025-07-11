@@ -1273,8 +1273,6 @@ D:\Projects\Webdatabase-CI\obj\Debug\net8.0\CIResearch.MvcApplicationPartsAssemb
 D:\Projects\Webdatabase-CI\obj\Debug\net8.0\CIResearch.RazorAssemblyInfo.cache
 D:\Projects\Webdatabase-CI\obj\Debug\net8.0\CIResearch.RazorAssemblyInfo.cs
 D:\Projects\Webdatabase-CI\obj\Debug\net8.0\CIResearch.sourcelink.json
-D:\Projects\Webdatabase-CI\bin\Debug\net8.0\TEST\SurveyToGoReadReplicaCreator.exe.config
-D:\Projects\Webdatabase-CI\bin\Debug\net8.0\TEST\SurveyToGoReadReplicaCreator.vshost.exe.config
 D:\Projects\Webdatabase-CI\bin\Debug\net8.0\appsettings.Development.json
 D:\Projects\Webdatabase-CI\bin\Debug\net8.0\appsettings.json
 D:\Projects\Webdatabase-CI\bin\Debug\net8.0\CIResearch.staticwebassets.runtime.json

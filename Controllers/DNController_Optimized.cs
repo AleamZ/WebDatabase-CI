@@ -27,7 +27,7 @@ namespace CIResearch.Controllers
     public class DNController_Optimized : Controller
     {
         private readonly IMemoryCache _cache;
-        private string _connectionString = "Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;";
+        private string _connectionString = "Server=localhost;Database=sakila;User=root;Password=1234;";
         private const string DATA_CACHE_KEY = "dn_all_data";
         private const int CACHE_DURATION_MINUTES = 30;
 
@@ -621,13 +621,6 @@ namespace CIResearch.Controllers
 
         #endregion
 
-        public async Task<ActionResult> ViewRawData(string stt = "", List<string> Nam = null,
-            List<string> MaTinh_Dieutra = null, List<string> Masothue = null,
-            List<string> Loaihinhkte = null, List<string> Vungkinhte = null)
-        {
-            var allData = await GetCachedDataAsync();
-            var filteredData = ApplyFiltersOptimized(allData, stt, Nam, MaTinh_Dieutra, Masothue, Loaihinhkte, Vungkinhte);
-            return View(filteredData);
-        }
+
     }
 }

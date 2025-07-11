@@ -602,9 +602,7 @@
         max-height: 350px;
     }
 
-    #revenueChartContainer .chart-container {
-        max-height: 300px;
-    }
+
 
     .tooltip-container .custom-tooltip strong {
         color: #1565c0;
@@ -1582,66 +1580,7 @@
                 </div>
             </div>
 
-            <!-- Revenue and Profit Charts Row -->
-            <div class="row">
-                <!-- Top 3 Revenue Chart -->
-                <div class="col-lg-6 mb-4">
-                    <div class="card shadow h-100">
-                        <div class="card-header py-3 text-center" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
-                            <h6 class="m-0 font-weight-bold text-white">
-                                <i class="fas fa-chart-line me-2"></i>
-                                Top 3 Doanh Nghiệp - Doanh Thu Cao Nhất
-                            </h6>
-                            <small class="text-white-50">Trung bình cộng qua các năm</small>
-                        </div>
-                        <div class="card-body p-3">
-                            <div class="row">
-                                <div class="col-12">
-                                    <div class="chart-container" style="position: relative; height: 350px; width: 100%; background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 8px; padding: 10px;">
-                                        <canvas id="revenueChart" style="width: 100% !important; height: 100% !important; display: block !important;"></canvas>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row mt-3">
-                                <div class="col-12">
-                                    <div id="revenueLegendDetails" style="max-height: 150px; overflow-y: auto;">
-                                        <!-- Revenue legend will be populated by JavaScript -->
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Top 3 Profit Chart -->
-                <div class="col-lg-6 mb-4">
-                    <div class="card shadow h-100">
-                        <div class="card-header py-3 text-center" style="background: linear-gradient(135deg, #fd7e14 0%, #e83e8c 100%);">
-                            <h6 class="m-0 font-weight-bold text-white">
-                                <i class="fas fa-chart-line me-2"></i>
-                                Top 3 Doanh Nghiệp - Lợi Nhuận Cao Nhất
-                            </h6>
-                            <small class="text-white-50">Trung bình cộng qua các năm</small>
-                        </div>
-                        <div class="card-body p-3">
-                            <div class="row">
-                                <div class="col-12">
-                                    <div class="chart-container" style="position: relative; height: 350px; width: 100%; background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 8px; padding: 10px;">
-                                        <canvas id="profitChart" style="width: 100% !important; height: 100% !important; display: block !important;"></canvas>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row mt-3">
-                                <div class="col-12">
-                                    <div id="profitLegendDetails" style="max-height: 150px; overflow-y: auto;">
-                                        <!-- Profit legend will be populated by JavaScript -->
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
             <!-- Search Results Section (Initially Hidden) -->
             <div id="searchResultsSection" style="display: none;">
@@ -2928,465 +2867,7 @@ function createIndustryLegend(labels, data, descriptions, colors, total) {
 }
 </script>
 
-<!-- Top Companies Charts Script -->
-<script>
-// Function to initialize both revenue and profit charts
-function initTopCompaniesCharts() {
-    console.log('🎯 Initializing Top Companies Charts...');
-    
-    if (typeof Chart === 'undefined') {
-        console.error('❌ Chart.js is not loaded!');
-        return false;
-    }
-    
-    // Initialize both charts
-    initRevenueChart();
-    initProfitChart();
-    
-    return true;
-}
 
-// Function to create Revenue chart
-function initRevenueChart() {
-    console.log('🔍 Initializing Revenue Chart...');
-    
-    const ctx = document.getElementById('revenueChart');
-    if (!ctx) {
-        console.error('❌ Canvas element revenueChart not found!');
-        return false;
-    }
-    
-    fetch('/DN/GetTopCompaniesRevenueChart')
-        .then(response => {
-            console.log('📡 Revenue API Response status:', response.status);
-            return response.json();
-        })
-        .then(apiData => {
-            console.log('📊 Revenue API Response:', apiData);
-            
-            if (apiData.success && apiData.data && apiData.data.datasets && apiData.data.datasets.length > 0) {
-                console.log('✅ Using Revenue API data');
-                console.log('📊 Revenue datasets count:', apiData.data.datasets.length);
-                createChartWithData(ctx, apiData.data, 'revenue');
-                createRevenueLegend(apiData.data.datasets, apiData.metadata);
-            } else {
-                console.log('⚠️ Revenue API failed or no data, showing error message');
-                console.log('⚠️ API response:', apiData);
-                createEmptyRevenueChart(ctx, apiData);
-            }
-        })
-        .catch(error => {
-            console.error('❌ Revenue API call failed:', error);
-            createEmptyRevenueChart(ctx, { message: 'API call failed: ' + error.message });
-        });
-    
-    return true;
-}
-
-// Function to create Profit chart
-function initProfitChart() {
-    console.log('🔍 Initializing Profit Chart...');
-    
-    const ctx = document.getElementById('profitChart');
-    if (!ctx) {
-        console.error('❌ Canvas element profitChart not found!');
-        return false;
-    }
-    
-    fetch('/DN/GetTopCompaniesProfitChart')
-        .then(response => {
-            console.log('📡 Profit API Response status:', response.status);
-            return response.json();
-        })
-        .then(apiData => {
-            console.log('📊 Profit API Response:', apiData);
-            
-            if (apiData.success && apiData.data) {
-                console.log('✅ Using Profit API data');
-                createChartWithData(ctx, apiData.data, 'profit');
-                createProfitLegend(apiData.data.datasets, apiData.metadata);
-            } else {
-                console.log('⚠️ Profit API failed, using fallback');
-                createFallbackProfitChart(ctx);
-            }
-        })
-        .catch(error => {
-            console.error('❌ Profit API call failed:', error);
-            createFallbackProfitChart(ctx);
-        });
-    
-    return true;
-}
-
-// Generic function to create chart with data
-function createChartWithData(ctx, chartData, type) {
-    try {
-        console.log(`📊 Creating ${type} chart with data:`, chartData);
-        
-        // Destroy existing chart if any
-        const existingChart = Chart.getChart(ctx);
-        if (existingChart) {
-            existingChart.destroy();
-            console.log('🗑️ Destroyed existing chart');
-        }
-        
-        const chart = new Chart(ctx, {
-            type: 'line',
-            data: chartData,
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    title: {
-                        display: false,
-                    },
-                    legend: {
-                        display: true,
-                        position: 'top',
-                        labels: {
-                            usePointStyle: true,
-                            padding: 15,
-                            font: {
-                                size: 14
-                            }
-                        }
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                        titleColor: 'white',
-                        bodyColor: 'white',
-                        callbacks: {
-                            label: function(context) {
-                                const value = context.raw;
-                                const formattedValue = value.toFixed(2) + ' tỷ VND';
-                                return context.dataset.label + ': ' + formattedValue;
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grace: '5%',
-                        title: {
-                            display: true,
-                            text: 'Giá trị (tỷ VND)',
-                            font: {
-                                size: 14
-                            }
-                        },
-                        ticks: {
-                            callback: function(value) {
-                                return value.toFixed(1) + ' tỷ';
-                            },
-                            font: {
-                                size: 12
-                            }
-                        }
-                    },
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Năm',
-                            font: {
-                                size: 14
-                            }
-                        },
-                        ticks: {
-                            font: {
-                                size: 12
-                            }
-                        }
-                    }
-                },
-                animation: {
-                    duration: 1200,
-                    easing: 'easeInOutQuart'
-                }
-            }
-        });
-        
-        console.log(`✅ ${type} Chart created successfully!`);
-        return true;
-    } catch (error) {
-        console.error(`❌ Error creating ${type} chart:`, error);
-        return false;
-    }
-}
-
-// Function to create revenue legend
-function createRevenueLegend(datasets, metadata) {
-    const legendContainer = document.getElementById('revenueLegendDetails');
-    if (!legendContainer) return;
-    
-    let legendHTML = `
-        <div class="text-center mb-3">
-            <h6 class="text-success mb-2">
-                <i class="fas fa-chart-line me-1"></i>
-                Top 3 Doanh Thu Cao Nhất
-            </h6>
-            <small class="text-muted">${metadata.unit} • ${metadata.yearsRange}</small>
-        </div>
-    `;
-    
-    datasets.forEach((dataset, index) => {
-        const avgValue = dataset.data.reduce((sum, val) => sum + val, 0) / dataset.data.length;
-        legendHTML += `
-            <div class="legend-item" style="margin-bottom: 10px; padding: 8px; background: white; border-radius: 6px; border-left: 4px solid ${dataset.borderColor};">
-                <div style="font-weight: 600; font-size: 0.85rem; color: ${dataset.borderColor};">
-                    ${dataset.label}
-                </div>
-                <div style="font-size: 0.75rem; color: #6c757d;">
-                    Trung bình: <strong>${avgValue.toFixed(2)} tỷ VND</strong>
-                </div>
-            </div>
-        `;
-    });
-    
-    legendContainer.innerHTML = legendHTML;
-}
-
-// Function to create profit legend
-function createProfitLegend(datasets, metadata) {
-    const legendContainer = document.getElementById('profitLegendDetails');
-    if (!legendContainer) return;
-    
-    let legendHTML = `
-        <div class="text-center mb-3">
-            <h6 class="text-warning mb-2">
-                <i class="fas fa-chart-line me-1"></i>
-                Top 3 Lợi Nhuận Cao Nhất
-            </h6>
-            <small class="text-muted">${metadata.unit} • ${metadata.yearsRange}</small>
-        </div>
-    `;
-    
-    datasets.forEach((dataset, index) => {
-        const avgValue = dataset.data.reduce((sum, val) => sum + val, 0) / dataset.data.length;
-        legendHTML += `
-            <div class="legend-item" style="margin-bottom: 10px; padding: 8px; background: white; border-radius: 6px; border-left: 4px solid ${dataset.borderColor};">
-                <div style="font-weight: 600; font-size: 0.85rem; color: ${dataset.borderColor};">
-                    ${dataset.label}
-                </div>
-                <div style="font-size: 0.75rem; color: #6c757d;">
-                    Trung bình: <strong>${avgValue.toFixed(2)} tỷ VND</strong>
-                </div>
-            </div>
-        `;
-    });
-    
-    legendContainer.innerHTML = legendHTML;
-}
-
-// Fallback charts
-function createEmptyRevenueChart(ctx, errorData) {
-    console.log('🔴 Creating empty revenue chart with error:', errorData);
-    
-    // Destroy existing chart if any
-    const existingChart = Chart.getChart(ctx);
-    if (existingChart) {
-        existingChart.destroy();
-    }
-    
-    // Create empty chart with error message
-    const emptyChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: ['Không có dữ liệu'],
-            datasets: [{
-                label: 'Doanh thu (Lỗi)',
-                data: [0],
-                borderColor: '#dc3545',
-                backgroundColor: 'rgba(220, 53, 69, 0.1)',
-                borderWidth: 2,
-                fill: false
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'Lỗi tải dữ liệu doanh thu',
-                    color: '#dc3545',
-                    font: {
-                        size: 14,
-                        weight: 'bold'
-                    }
-                },
-                legend: {
-                    display: false
-                },
-                tooltip: {
-                    enabled: false
-                }
-            },
-            scales: {
-                y: {
-                    display: false
-                },
-                x: {
-                    display: false
-                }
-            }
-        }
-    });
-    
-    // Update legend with error message
-    const legendContainer = document.getElementById('revenueLegendDetails');
-    if (legendContainer) {
-        let errorMessage = `
-            <div class="text-center">
-                <div class="alert alert-danger" style="margin: 0; padding: 15px;">
-                    <h6 class="text-danger mb-2">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        Không thể tải dữ liệu doanh thu
-                    </h6>
-                    <small>Cột: SR_Doanhthu_Thuan_BH_CCDV</small><br>
-        `;
-        
-        if (errorData && errorData.message) {
-            errorMessage += `<small>Lỗi: ${errorData.message}</small><br>`;
-        }
-        
-        if (errorData && errorData.debug) {
-            errorMessage += `<small>Records: ${errorData.debug.totalRecords || 'N/A'}</small><br>`;
-            errorMessage += `<small>Có doanh thu: ${errorData.debug.withRevenue || 'N/A'}</small><br>`;
-        }
-        
-        errorMessage += `
-                    <hr style="margin: 10px 0;">
-                    <button onclick="debugRevenueData()" class="btn btn-sm btn-outline-danger">
-                        <i class="fas fa-bug me-1"></i>
-                        Debug
-                    </button>
-                    <button onclick="initRevenueChart()" class="btn btn-sm btn-outline-primary">
-                        <i class="fas fa-redo me-1"></i>
-                        Thử lại
-                    </button>
-                </div>
-            </div>
-        `;
-        
-        legendContainer.innerHTML = errorMessage;
-    }
-    
-    console.log('🔴 Empty revenue chart created with error message');
-}
-
-function createFallbackRevenueChart(ctx) {
-    const fallbackData = {
-        labels: ['2020', '2021', '2022', '2023'],
-        datasets: [
-            {
-                label: 'Công ty A (Demo)',
-                data: [150, 180, 200, 220],
-                borderColor: '#FF6B6B',
-                backgroundColor: 'rgba(255, 107, 107, 0.1)',
-                borderWidth: 3,
-                fill: false,
-                tension: 0.4
-            },
-            {
-                label: 'Công ty B (Demo)',
-                data: [120, 140, 160, 190],
-                borderColor: '#4ECDC4',
-                backgroundColor: 'rgba(78, 205, 196, 0.1)',
-                borderWidth: 3,
-                fill: false,
-                tension: 0.4
-            },
-            {
-                label: 'Công ty C (Demo)',
-                data: [100, 130, 150, 170],
-                borderColor: '#45B7D1',
-                backgroundColor: 'rgba(69, 183, 209, 0.1)',
-                borderWidth: 3,
-                fill: false,
-                tension: 0.4
-            }
-        ]
-    };
-    
-    createChartWithData(ctx, fallbackData, 'revenue');
-    document.getElementById('revenueLegendDetails').innerHTML = `
-        <div class="text-center">
-            <h6 class="text-muted">Dữ liệu demo</h6>
-            <small>Kết nối database để xem dữ liệu thực</small>
-        </div>
-    `;
-}
-
-function createFallbackProfitChart(ctx) {
-    const fallbackData = {
-        labels: ['2020', '2021', '2022', '2023'],
-        datasets: [
-            {
-                label: 'Công ty X (Demo)',
-                data: [50, 65, 80, 95],
-                borderColor: '#28A745',
-                backgroundColor: 'rgba(40, 167, 69, 0.1)',
-                borderWidth: 3,
-                fill: false,
-                tension: 0.4
-            },
-            {
-                label: 'Công ty Y (Demo)',
-                data: [40, 55, 70, 85],
-                borderColor: '#FD7E14',
-                backgroundColor: 'rgba(253, 126, 20, 0.1)',
-                borderWidth: 3,
-                fill: false,
-                tension: 0.4
-            },
-            {
-                label: 'Công ty Z (Demo)',
-                data: [30, 45, 60, 75],
-                borderColor: '#6F42C1',
-                backgroundColor: 'rgba(111, 66, 193, 0.1)',
-                borderWidth: 3,
-                fill: false,
-                tension: 0.4
-            }
-        ]
-    };
-    
-    createChartWithData(ctx, fallbackData, 'profit');
-    document.getElementById('profitLegendDetails').innerHTML = `
-        <div class="text-center">
-            <h6 class="text-muted">Dữ liệu demo</h6>
-            <small>Kết nối database để xem dữ liệu thực</small>
-        </div>
-    `;
-}
-
-// Initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', function() {
-    if (!initTopCompaniesCharts()) {
-        setTimeout(() => {
-            console.log('🔄 Retrying Top Companies charts creation...');
-            initTopCompaniesCharts();
-        }, 500);
-    }
-});
-
-// Also try when window is fully loaded
-window.addEventListener('load', function() {
-    const revenueCanvas = document.getElementById('revenueChart');
-    const profitCanvas = document.getElementById('profitChart');
-    
-    if (revenueCanvas && !Chart.getChart(revenueCanvas)) {
-        console.log('🔄 Creating Revenue chart on window load...');
-        initRevenueChart();
-    }
-    
-    if (profitCanvas && !Chart.getChart(profitCanvas)) {
-        console.log('🔄 Creating Profit chart on window load...');
-        initProfitChart();
-    }
-});
-</script>
 
 <!-- Industry Chart Script -->
 <script>
@@ -4326,101 +3807,8 @@ function testSearchFunction() {
     searchCompanyByTaxCode();
 }
 
-// Test function for Top Companies API
-function testTopCompaniesAPI() {
-    console.log('🧪 Testing Top Companies API...');
-    
-    // Test Revenue API
-    fetch('/DN/GetTopCompaniesRevenueChart')
-        .then(response => response.json())
-        .then(data => {
-            console.log('📊 Revenue API Test Result:', data);
-            
-            let message = '';
-            if (data.success) {
-                message += `✅ REVENUE API SUCCESSFUL!\n\n`;
-                message += `Database: sakila\n`;
-                message += `Total Companies: ${data.metadata.totalCompanies}\n`;
-                message += `Years Range: ${data.metadata.yearsRange}\n`;
-                message += `Data Source: ${data.metadata.dataSource}\n`;
-                message += `Unit: ${data.metadata.unit}\n\n`;
-                
-                if (data.data.datasets && data.data.datasets.length > 0) {
-                    message += `Top 3 Companies by Average Revenue:\n`;
-                    data.data.datasets.forEach((dataset, index) => {
-                        const avgRevenue = dataset.data.reduce((sum, val) => sum + val, 0) / dataset.data.length;
-                        message += `${index + 1}. ${dataset.label}: ${avgRevenue.toFixed(2)} tỷ VND avg\n`;
-                    });
-                    message += `\n📊 Chart Labels: ${data.data.labels.join(', ')}\n`;
-                } else {
-                    message += `⚠️ No datasets found in revenue data!\n`;
-                }
-                
-                message += `\nDebug Info:\n`;
-                if (data.debug) {
-                    message += `- Records in DB: ${data.debug.totalRecordsInDatabase}\n`;
-                    message += `- Records with revenue: ${data.debug.recordsWithRevenue}\n`;
-                    message += `- Records with positive revenue: ${data.debug.recordsWithPositiveRevenue}\n`;
-                    message += `- Filtered companies: ${data.debug.filteredCompanies}\n`;
-                    message += `- Top companies found: ${data.debug.topCompaniesFound}\n`;
-                }
-                
-                message += `\nCheck console for full details.`;
-            } else {
-                message = `❌ REVENUE API FAILED!\n\n`;
-                message += `Error: ${data.message}\n`;
-                if (data.debug) {
-                    message += `\nDebug Info:\n`;
-                    message += `- Total Records: ${data.debug.totalRecords}\n`;
-                    message += `- With Revenue: ${data.debug.withRevenue}\n`;
-                    message += `- With Positive Revenue: ${data.debug.withPositiveRevenue}\n`;
-                    message += `- Column: ${data.debug.columnName}\n`;
-                }
-                message += `\nCheck console for details.`;
-            }
-            
-            alert(message);
-            
-            // Test Profit API after Revenue
-            return fetch('/DN/GetTopCompaniesProfitChart');
-        })
-        .then(response => response.json())
-        .then(profitData => {
-            console.log('📊 Profit API Test Result:', profitData);
-            
-            let profitMessage = '\n\n--- PROFIT API TEST ---\n';
-            if (profitData.success) {
-                profitMessage += `✅ PROFIT API SUCCESSFUL!\n\n`;
-                profitMessage += `Total Companies: ${profitData.metadata.totalCompanies}\n`;
-                profitMessage += `Years Range: ${profitData.metadata.yearsRange}\n`;
-                profitMessage += `Data Source: ${profitData.metadata.dataSource}\n`;
-                profitMessage += `Unit: ${profitData.metadata.unit}\n\n`;
-                
-                profitMessage += `Top 3 Companies by Average Profit:\n`;
-                profitData.data.datasets.forEach((dataset, index) => {
-                    const avgProfit = dataset.data.reduce((sum, val) => sum + val, 0) / dataset.data.length;
-                    profitMessage += `${index + 1}. ${dataset.label}: ${avgProfit.toFixed(2)} tỷ VND avg\n`;
-                });
-                
-                profitMessage += `\n📊 Chart Labels: ${profitData.data.labels.join(', ')}\n`;
-            } else {
-                profitMessage += `❌ PROFIT API FAILED!\n\nError: ${profitData.message}`;
-            }
-            
-            // Show combined results
-            alert(profitMessage);
-            
-            // Force refresh charts with new data
-            if (profitData.success) {
-                console.log('🔄 Refreshing charts with test data...');
-                initTopCompaniesCharts();
-            }
-        })
-        .catch(error => {
-            console.error('❌ Top Companies API test error:', error);
-            alert(`❌ Top Companies API Test ERROR!\n\nError: ${error.message}\n\nCheck console for details.`);
-        });
-}
+// Top Companies API test function has been removed
+// The Revenue and Profit charts are no longer available
 
 // Debug function for Revenue data
 function debugRevenueData() {
@@ -4482,8 +3870,8 @@ function debugRevenueData() {
                 
                 // If we have data, try to refresh the revenue chart
                 if (data.topCompaniesByRevenue && data.topCompaniesByRevenue.length > 0) {
-                    console.log('🔄 Revenue data found, refreshing charts...');
-                    initRevenueChart();
+                    console.log('🔄 Revenue data found, but charts have been removed...');
+                    console.log('📊 Revenue chart functionality has been disabled');
                 }
             } else {
                 alert(`❌ REVENUE DEBUG FAILED!\n\nError: ${data.message}\n\nCheck console for details.`);
@@ -5211,9 +4599,8 @@ function refreshAllCharts() {
         refreshMarketShareChart(filters),
         refreshVungKinhTeChart(filters),
         refreshIndustryChart(filters),
-        refreshCompanySizeChart(filters),
-        refreshRevenueChart(filters),
-        refreshProfitChart(filters)
+        refreshCompanySizeChart(filters)
+        // Revenue and Profit charts have been removed
     ]).then(() => {
         hideLoadingIndicators();
         
@@ -5294,37 +4681,8 @@ function refreshCompanySizeChart(filters = null) {
     });
 }
 
-// Function to refresh Revenue chart with filters
-function refreshRevenueChart(filters = null) {
-    if (!filters) filters = getCurrentFilterValues();
-    console.log('🔄 Refreshing Revenue chart...');
-    
-    return new Promise((resolve) => {
-        try {
-            initRevenueChart(); // Re-initialize with updated year
-            resolve();
-        } catch (error) {
-            console.error('❌ Error refreshing Revenue chart:', error);
-            resolve();
-        }
-    });
-}
-
-// Function to refresh Profit chart with filters
-function refreshProfitChart(filters = null) {
-    if (!filters) filters = getCurrentFilterValues();
-    console.log('🔄 Refreshing Profit chart...');
-    
-    return new Promise((resolve) => {
-        try {
-            initProfitChart(); // Re-initialize with updated year
-            resolve();
-        } catch (error) {
-            console.error('❌ Error refreshing Profit chart:', error);
-            resolve();
-        }
-    });
-}
+// Revenue and Profit chart functions have been removed
+// These charts are no longer available in the application
 
 // Helper functions to show/hide loading indicators
 function showLoadingIndicators() {
@@ -5333,7 +4691,8 @@ function showLoadingIndicators() {
     
     const chartContainers = [
         'marketShareChart', 'vungKinhTeChart', 'industryChart', 
-        'quyMoChart', 'revenueChart', 'profitChart'
+        'quyMoChart'
+        // 'revenueChart', 'profitChart' - removed
     ];
     
     chartContainers.forEach(chartId => {
@@ -5372,7 +4731,8 @@ function showLoadingIndicators() {
 function hideLoadingIndicators() {
     const chartContainers = [
         'marketShareChart', 'vungKinhTeChart', 'industryChart', 
-        'quyMoChart', 'revenueChart', 'profitChart'
+        'quyMoChart'
+        // 'revenueChart', 'profitChart' - removed
     ];
     
     chartContainers.forEach(chartId => {

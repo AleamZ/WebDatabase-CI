@@ -1,7 +1,8 @@
-﻿@{
-    ViewData["Title"] = "Dữ liệu chi tiết Doanh nghiệp";
+@model List<CIResearch.Models.QLKH>
+
+@{
+    ViewData["Title"] = "Dữ liệu thô - CI Research";
     Layout = null;
-    @model List<QLKH>
 }
 
 <!DOCTYPE html>
@@ -17,7 +18,7 @@
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <!-- DataTables CSS -->
-    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css" rel="stylesheet">
     <link href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css" rel="stylesheet">
 
     <style>
@@ -29,7 +30,10 @@
         }
 
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-image: url('/IMG(4UU)/STOREAUDIT.jpg');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center center;
             background-attachment: fixed;
             min-height: 100vh;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -39,504 +43,450 @@
 
         /* Header Navigation */
         .top-nav {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             padding: 1rem 0;
-            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             position: sticky;
             top: 0;
             z-index: 1000;
-            border-bottom: 3px solid #667eea;
-        }
-
-        .nav-brand {
-            color: #667eea;
-            font-size: 1.8rem;
-            font-weight: 700;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
             transition: all 0.3s ease;
         }
 
-        .nav-brand:hover {
-            color: #764ba2;
-            text-decoration: none;
-            transform: translateY(-2px);
-        }
-
-        .nav-brand i {
-            margin-right: 0.5rem;
-            font-size: 2rem;
-        }
-
-        .nav-actions {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-        }
-
-        .btn-action {
-            padding: 0.5rem 1.5rem;
-            border-radius: 25px;
-            text-decoration: none;
-            font-weight: 600;
+        /* Navigation Filter Styles */
+        .filter-toggle-btn {
+            border-color: rgba(255, 255, 255, 0.5) !important;
+            color: white !important;
             transition: all 0.3s ease;
-            border: 2px solid transparent;
+            font-size: 0.875rem;
+            padding: 0.375rem 0.75rem;
         }
 
-        .btn-primary-custom {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
+        .filter-toggle-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1) !important;
+            border-color: white !important;
+            color: white !important;
+            transform: translateY(-1px);
         }
 
-        .btn-primary-custom:hover {
-            background: linear-gradient(135deg, #764ba2, #667eea);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-            color: white;
-            text-decoration: none;
+        .filter-toggle-btn:focus {
+            box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25) !important;
+            color: white !important;
         }
 
-        .btn-outline-custom {
-            background: transparent;
-            color: #667eea;
-            border: 2px solid #667eea;
+        #navigationFilterSection {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 0 0 15px 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            animation: slideDown 0.3s ease-out;
         }
 
-        .btn-outline-custom:hover {
-            background: #667eea;
-            color: white;
-            text-decoration: none;
-        }
-
-        /* Main Container */
-        .main-container {
-            padding: 2rem 0;
-            min-height: calc(100vh - 100px);
-        }
-
-        .content-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(15px);
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-            overflow: hidden;
-            margin-bottom: 2rem;
-        }
-
-        .card-header-custom {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 2rem;
-            text-align: center;
-            border: none;
-        }
-
-        .card-header-custom h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-        }
-
-        .card-header-custom p {
-            font-size: 1.1rem;
-            opacity: 0.9;
-            margin: 0;
-        }
-
-        /* Statistics Cards */
-        .stats-section {
-            padding: 2rem;
-            background: #f8f9fa;
-        }
-
-        .stat-card {
-            background: white;
-            border-radius: 15px;
-            padding: 1.5rem;
-            text-align: center;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s ease;
-            border: 1px solid #e9ecef;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-        }
-
-        .stat-value {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: #667eea;
-            margin-bottom: 0.5rem;
-        }
-
-        .stat-label {
-            font-size: 1rem;
-            color: #6c757d;
-            font-weight: 500;
-        }
-
-        /* Table Container */
-        .table-section {
-            padding: 0;
-        }
-
-        .table-container {
-            padding: 2rem;
-            background: white;
-        }
-
-        .table-header {
-            display: flex;
-            justify-content: between;
-            align-items: center;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-
-        .table-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #333;
-            margin: 0;
-        }
-
-        .table-controls {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        /* Enhanced DataTable Styling */
-        .dataTables_wrapper {
-            padding: 0;
-        }
-
-        .dataTables_filter {
-            margin-bottom: 1rem;
-        }
-
-        .dataTables_filter input {
-            border: 2px solid #e9ecef;
-            border-radius: 25px;
-            padding: 0.5rem 1rem;
-            margin-left: 0.5rem;
-            transition: all 0.3s ease;
-        }
-
-        .dataTables_filter input:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .dataTables_length select {
-            border: 2px solid #e9ecef;
-            border-radius: 10px;
-            padding: 0.25rem 0.5rem;
-            margin: 0 0.5rem;
-        }
-
-        /* Table Styling */
-        #dataTable {
-            border-collapse: separate;
-            border-spacing: 0;
-            width: 100% !important;
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-        }
-
-        #dataTable thead th {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            font-weight: 600;
-            padding: 1rem 0.75rem;
-            text-align: center;
-            border: none;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-
-        #dataTable tbody td {
-            padding: 0.75rem;
-            border-bottom: 1px solid #e9ecef;
-            vertical-align: middle;
-            font-size: 0.9rem;
-            transition: background-color 0.2s ease;
-        }
-
-        #dataTable tbody tr {
-            transition: all 0.2s ease;
-        }
-
-        #dataTable tbody tr:hover {
-            background-color: #f8f9fa;
-            transform: scale(1.01);
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        #dataTable tbody tr:nth-child(even) {
-            background-color: #fafbfc;
-        }
-
-        #dataTable tbody tr:nth-child(even):hover {
-            background-color: #f1f3f4;
-        }
-
-        /* Responsive Design */
-        @@media(max - width: 768px) {
-                .nav-brand {
-                    font-size: 1.4rem;
+        @@keyframes slideDown
+        {
+                from {
+                    opacity: 0;
+                    transform: translateY(-20px);
                 }
 
-                .nav-brand i {
-                    font-size: 1.6rem;
-                }
-
-                .card-header-custom h1 {
-                    font-size: 1.8rem;
-                }
-
-                .card-header-custom p {
-                    font-size: 1rem;
-                }
-
-                .table-container {
-                    padding: 1rem;
-                }
-
-                .table-header {
-                    flex-direction: column;
-                    align-items: stretch;
-                }
-
-                .table-controls {
-                    justify-content: center;
-                }
-
-                #dataTable {
-                    font-size: 0.8rem;
-                }
-
-                #dataTable thead th,
-                #dataTable tbody td {
-                    padding: 0.5rem 0.25rem;
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
                 }
             }
 
-            /* Custom Scrollbar */
-            .table-responsive::-webkit-scrollbar {
-                height: 8px;
-            }
-
-            .table-responsive::-webkit-scrollbar-track {
-                background: #f1f1f1;
+            .nav-filter-container {
+                padding: 1rem;
                 border-radius: 10px;
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.1);
             }
 
-            .table-responsive::-webkit-scrollbar-thumb {
-                background: linear-gradient(135deg, #667eea, #764ba2);
-                border-radius: 10px;
+            .nav-filter-header {
+                margin-bottom: 1rem;
+                padding-bottom: 0.5rem;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.2);
             }
 
-            .table-responsive::-webkit-scrollbar-thumb:hover {
-                background: linear-gradient(135deg, #764ba2, #667eea);
+            .nav-filter-body .custom-multi-select {
+                width: 100%;
+                margin: 0;
             }
 
-            /* Loading Animation */
-            .loading {
-                text-align: center;
-                padding: 3rem;
-                color: #667eea;
+            .nav-filter-body .select-box {
+                background-color: rgba(255, 255, 255, 0.9);
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                border-radius: 6px;
+                color: #333;
+                font-size: 0.875rem;
+                padding: 0.5rem;
             }
 
-            .spinner {
-                border: 4px solid #f3f3f3;
-                border-top: 4px solid #667eea;
-                border-radius: 50%;
-                width: 40px;
-                height: 40px;
-                animation: spin 1s linear infinite;
-                margin: 0 auto 1rem;
+            .nav-filter-body .select-box:hover {
+                background-color: white;
+                border-color: #007bff;
             }
 
-            @@keyframes spin {
-                    0% {
-                        transform: rotate(0deg);
+            .nav-filter-body .dropdown-options {
+                background-color: white;
+                border: 1px solid rgba(0, 0, 0, 0.1);
+                border-radius: 6px;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+                z-index: 10000;
+            }
+
+            .nav-filter-body .btn {
+                font-size: 0.875rem;
+                padding: 0.4rem 0.8rem;
+                border-radius: 6px;
+                transition: all 0.2s ease;
+            }
+
+            .nav-filter-body .btn-outline-light {
+                border-color: rgba(255, 255, 255, 0.5);
+                color: white;
+            }
+
+            .nav-filter-body .btn-outline-light:hover {
+                background-color: white;
+                color: #333;
+                border-color: white;
+            }
+
+            .nav-filter-body .btn-light {
+                background-color: white;
+                color: #333;
+                border-color: white;
+            }
+
+            .nav-filter-body .btn-light:hover {
+                background-color: #f8f9fa;
+                transform: translateY(-1px);
+            }
+
+            .nav-filter-body .btn-success {
+                background-color: #28a745;
+                border-color: #28a745;
+            }
+
+            .nav-filter-body .btn-success:hover {
+                background-color: #218838;
+                transform: translateY(-1px);
+            }
+
+            .nav-filter-body .btn-info {
+                background-color: #17a2b8;
+                border-color: #17a2b8;
+            }
+
+            .nav-filter-body .btn-info:hover {
+                background-color: #138496;
+                transform: translateY(-1px);
+            }
+
+            .nav-filter-body .btn-warning {
+                background-color: #ffc107;
+                border-color: #ffc107;
+                color: #333;
+            }
+
+            .nav-filter-body .btn-warning:hover {
+                background-color: #e0a800;
+                transform: translateY(-1px);
+            }
+
+            /* Chevron animation */
+            #filterChevron {
+                transition: transform 0.3s ease;
+            }
+
+            #filterChevron.rotated {
+                transform: rotate(180deg);
+            }
+
+            /* Mobile responsiveness for navigation filter */
+            @@media (max-width: 768px) {
+                    .nav-filter-body .row .col-lg-2 {
+                        margin-bottom: 0.5rem;
                     }
 
-                    100% {
-                        transform: rotate(360deg);
+                    .filter-toggle-btn {
+                        font-size: 0.75rem;
+                        padding: 0.25rem 0.5rem;
+                    }
+
+                    .filter-toggle-btn span {
+                        display: none;
+                    }
+
+                    .nav-filter-container {
+                        padding: 0.75rem;
+                    }
+
+                    .nav-filter-body .btn {
+                        font-size: 0.75rem;
+                        padding: 0.3rem 0.6rem;
                     }
                 }
 
-                /* Performance optimizations */
-                * {
-                    will-change: auto;
-                }
-
-                .stat-value {
-                    will-change: contents;
-                }
-
-                #dataTable {
-                    contain: layout style;
-                }
-
-                .table-responsive {
-                    contain: layout style;
-                    scroll-behavior: smooth;
-                }
-
-                /* Optimize animation performance */
-                .stat-card:hover {
-                    will-change: transform, box-shadow;
-                }
-
-                .btn-action:hover {
-                    will-change: transform, background-color;
-                }
-
-                /* Lazy loading indicators */
-                .skeleton-loader {
-                    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-                    background-size: 200% 100%;
-                    animation: loading 1.5s infinite;
-                }
-
-                @@keyframes loading {
-                        0% {
-                            background-position: 200% 0;
+                @@media(max - width: 576px) {
+                        .top-nav {
+                            padding: 0.75rem 0;
                         }
 
-                        100% {
-                            background-position: -200% 0;
+                        .nav-brand {
+                            font-size: 1.2rem;
+                        }
+
+                        .user-info {
+                            font-size: 0.8rem;
                         }
                     }
 
-                    /* No Data State */
-                    .no-data {
-                        text-align: center;
-                        padding: 4rem 2rem;
-                        color: #6c757d;
-                    }
-
-                    .no-data i {
-                        font-size: 4rem;
-                        color: #dee2e6;
-                        margin-bottom: 1rem;
-                    }
-
-                    .no-data h3 {
-                        color: #495057;
-                        margin-bottom: 1rem;
-                    }
-
-                    /* Pagination Styling */
-                    .dataTables_paginate .paginate_button {
-                        border-radius: 5px !important;
-                        margin: 0 2px !important;
-                        padding: 0.5rem 0.75rem !important;
-                        border: 1px solid #dee2e6 !important;
-                        background: white !important;
-                        color: #667eea !important;
-                    }
-
-                    .dataTables_paginate .paginate_button:hover {
-                        background: #667eea !important;
-                        color: white !important;
-                        border-color: #667eea !important;
-                    }
-
-                    .dataTables_paginate .paginate_button.current {
-                        background: #667eea !important;
-                        color: white !important;
-                        border-color: #667eea !important;
-                    }
-
-                    /* DataTables Info */
-                    .dataTables_info {
-                        color: #6c757d;
-                        font-size: 0.9rem;
-                        padding-top: 1rem;
-                    }
-
-                    /* Export Buttons */
-                    .export-buttons {
+                    .nav-brand {
+                        color: white;
+                        font-size: 1.5rem;
+                        font-weight: 700;
+                        text-decoration: none;
                         display: flex;
-                        gap: 0.5rem;
-                        flex-wrap: wrap;
-                    }
-
-                    .btn-export {
-                        padding: 0.4rem 1rem;
-                        border-radius: 20px;
-                        border: none;
-                        font-size: 0.85rem;
-                        font-weight: 600;
-                        transition: all 0.3s ease;
-                        text-decoration: none;
-                        display: inline-flex;
                         align-items: center;
-                        gap: 0.5rem;
                     }
 
-                    .btn-excel {
-                        background: #28a745;
-                        color: white;
-                    }
-
-                    .btn-excel:hover {
-                        background: #218838;
-                        transform: translateY(-2px);
-                        color: white;
+                    .nav-brand:hover {
+                        color: #f8f9fa;
                         text-decoration: none;
                     }
 
-                    .btn-pdf {
-                        background: #dc3545;
-                        color: white;
+                    .nav-brand i {
+                        margin-right: 0.5rem;
                     }
 
-                    .btn-pdf:hover {
-                        background: #c82333;
-                        transform: translateY(-2px);
+                    .user-info {
                         color: white;
-                        text-decoration: none;
+                        font-weight: 500;
                     }
 
-                    .btn-print {
-                        background: #6f42c1;
-                        color: white;
+                    /* Filter styles */
+                    .custom-multi-select {
+                        position: relative;
+                        width: 100%;
+                        margin: 0 auto;
                     }
 
-                    .btn-print:hover {
-                        background: #5a32a3;
-                        transform: translateY(-2px);
-                        color: white;
-                        text-decoration: none;
+                    .select-box {
+                        padding: 10px;
+                        border: 1px solid #ccc;
+                        cursor: pointer;
+                        background-color: #fff;
+                        position: relative;
+                        border-radius: 8px;
                     }
 
-                    /* Footer */
-                    .footer {
-                        background: rgba(255, 255, 255, 0.9);
+                    .selected-options {
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        width: 100%;
+                    }
+
+                    .arrow {
+                        position: absolute;
+                        right: 10px;
+                        top: 50%;
+                        transform: translateY(-50%) rotate(45deg);
+                        border: solid #666;
+                        border-width: 0 2px 2px 0;
+                        padding: 3px;
+                    }
+
+                    .dropdown-options {
+                        display: none;
+                        position: absolute;
+                        top: 100%;
+                        left: 0;
+                        right: 0;
+                        background-color: #fff;
+                        border: 1px solid #ccc;
+                        max-height: 200px;
+                        overflow-y: auto;
+                        z-index: 9999;
+                        border-radius: 8px;
+                        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+                    }
+
+                    .custom-multi-select.active {
+                        z-index: 10000;
+                    }
+
+                    .dropdown-options label {
+                        display: block;
+                        padding: 8px;
+                        cursor: pointer;
+                        transition: background-color 0.2s;
+                    }
+
+                    .dropdown-options label:hover {
+                        background-color: #f0f0f0;
+                    }
+
+                    .search-box {
+                        width: 100%;
+                        padding: 8px;
+                        border: 1px solid #ddd;
+                        border-bottom: 2px solid #007bff;
+                        font-size: 14px;
+                        outline: none;
+                        border-radius: 8px 8px 0 0;
+                    }
+
+                    .search-box:focus {
+                        border-color: #007bff;
+                        box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+                    }
+
+                    /* Container chính */
+                    .main-container {
+                        width: 100%;
+                        min-height: calc(100vh - 80px);
+                        padding: 0;
+                        margin: 0;
+                    }
+
+                    /* Content wrapper */
+                    .content-wrapper {
+                        width: 100%;
+                        padding: 2rem;
+                        background: rgba(255, 255, 255, 0.95);
                         backdrop-filter: blur(10px);
-                        padding: 1rem 0;
+                        min-height: calc(100vh - 80px);
+                    }
+
+                    /* DataTable custom styles */
+                    .table-container {
+                        background: white;
+                        border-radius: 15px;
+                        padding: 20px;
+                        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                        margin-top: 20px;
+                    }
+
+                    .dataTables_wrapper .dataTables_length,
+                    .dataTables_wrapper .dataTables_filter,
+                    .dataTables_wrapper .dataTables_info,
+                    .dataTables_wrapper .dataTables_paginate {
+                        margin-bottom: 10px;
+                    }
+
+                    .dataTables_wrapper .dataTables_paginate .paginate_button {
+                        border-radius: 6px;
+                        margin: 0 2px;
+                    }
+
+                    .table-striped>tbody>tr:nth-child(odd)>td {
+                        background-color: rgba(0, 0, 0, 0.02);
+                    }
+
+                    /* Limit options styles */
+                    .limit-options {
+                        background: white;
+                        border-radius: 12px;
+                        padding: 20px;
+                        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+                        margin-bottom: 20px;
+                        border: 1px solid #e5e7eb;
+                    }
+
+                    .limit-option {
+                        display: flex;
+                        align-items: center;
+                        margin-bottom: 10px;
+                        padding: 8px;
+                        border-radius: 6px;
+                        transition: background-color 0.2s;
+                    }
+
+                    .limit-option:hover {
+                        background-color: #f8f9fa;
+                    }
+
+                    .limit-option input[type="radio"] {
+                        margin-right: 10px;
+                    }
+
+                    .custom-range-inputs {
+                        display: none;
+                        margin-top: 10px;
+                        padding: 10px;
+                        background-color: #f8f9fa;
+                        border-radius: 6px;
+                        border: 1px solid #dee2e6;
+                    }
+
+                    .custom-range-inputs.show {
+                        display: block;
+                    }
+
+                    .form-control-sm {
+                        font-size: 0.875rem;
+                    }
+
+                    /* Error message styles */
+                    .alert {
+                        border-radius: 8px;
+                        border: none;
+                        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                    }
+
+                    .alert-danger {
+                        background: linear-gradient(45deg, #dc3545, #c82333);
+                        color: white;
+                    }
+
+                    .alert-success {
+                        background: linear-gradient(45deg, #28a745, #218838);
+                        color: white;
+                    }
+
+                    .alert-info {
+                        background: linear-gradient(45deg, #17a2b8, #138496);
+                        color: white;
+                    }
+
+                    /* Button styles */
+                    .btn {
+                        border-radius: 8px;
+                        transition: all 0.3s ease;
+                        font-weight: 500;
+                    }
+
+                    .btn:hover {
+                        transform: translateY(-1px);
+                        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+                    }
+
+                    /* Statistics section */
+                    .statistics-section {
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        color: white;
+                        border-radius: 12px;
+                        padding: 20px;
+                        margin-bottom: 20px;
+                        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                    }
+
+                    .stat-item {
                         text-align: center;
-                        color: #6c757d;
-                        margin-top: 2rem;
+                        padding: 10px;
+                    }
+
+                    .stat-number {
+                        font-size: 2rem;
+                        font-weight: 700;
+                        margin-bottom: 5px;
+                    }
+
+                    .stat-label {
+                        font-size: 0.9rem;
+                        opacity: 0.9;
                     }
                 </style>
             </head>
@@ -544,24 +494,179 @@
             <body>
                 <!-- Top Navigation -->
                 <nav class="top-nav">
-                    <div class="container-fluid">
+                    <div class="container-fluid px-3">
                         <div class="row align-items-center">
-                            <div class="col-md-8">
+                            <div class="col-md-6">
                                 <a href="@Url.Action("Index", "DN")" class="nav-brand">
-                                    <i class="fas fa-database"></i>
-                                    Dữ liệu Chi tiết Doanh nghiệp
+                                    <i class="fas fa-table"></i>
+                                    ViewRawData - Dữ liệu thô
                                 </a>
                             </div>
-                            <div class="col-md-4">
-                                <div class="nav-actions">
-                                    <a href="@Url.Action("Index", "DN")" class="btn-action btn-outline-custom">
-                                        <i class="fas fa-arrow-left me-2"></i>
-                                        Quay lại Dashboard
-                                    </a>
-                                    <button onclick="window.print()" class="btn-action btn-primary-custom">
-                                        <i class="fas fa-print me-2"></i>
-                                        In
+                            <div class="col-md-6 text-end">
+                                <div class="d-flex align-items-center justify-content-end gap-3">
+                                    <div class="user-info">
+                                        <i class="fas fa-calendar-alt me-2"></i>
+                                        @DateTime.Now.ToString("dd/MM/yyyy HH:mm")
+                                    </div>
+
+                                    <!-- Filter Toggle Button -->
+                                    <button class="btn btn-outline-light btn-sm filter-toggle-btn"
+                                        onclick="toggleNavigationFilter()" id="filterToggleBtn">
+                                        <i class="fas fa-filter me-1" id="filterToggleIcon"></i>
+                                        <span id="filterToggleText">Bộ lọc</span>
+                                        <i class="fas fa-chevron-down ms-1" id="filterChevron"></i>
                                     </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Collapsible Filter Section -->
+                        <div class="row mt-3" id="navigationFilterSection" style="display: none;">
+                            <div class="col-12">
+                                <div class="nav-filter-container">
+                                    <div class="nav-filter-header">
+                                        <h6 class="mb-0 text-white">
+                                            <i class="fas fa-filter me-2"></i>
+                                            Bộ lọc dữ liệu doanh nghiệp
+                                        </h6>
+                                    </div>
+                                    <div class="nav-filter-body">
+                                        <form method="get" action="@Url.Action("ViewRawData", "DN")" class="filter-form">
+                                            <div class="row g-2">
+                                                <!-- Năm Multi-select -->
+                                                <div class="col-lg-2 col-md-4 col-sm-6">
+                                                    <div class="custom-multi-select" id="yearFilter">
+                                                        <div class="select-box" onclick="toggleDropdown(this)">
+                                                            <span class="selected-options" data-placeholder="Năm">Năm</span>
+                                                            <i class="arrow"></i>
+                                                        </div>
+                                                        <div class="dropdown-options">
+                                                            <input type="text" class="search-box" placeholder="Tìm kiếm năm"
+                                                                oninput="filterOptions(this)">
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Tỉnh/Thành phố Multi-select -->
+                                                <div class="col-lg-2 col-md-4 col-sm-6">
+                                                    <div class="custom-multi-select" id="provinceFilter">
+                                                        <div class="select-box" onclick="toggleDropdown(this)">
+                                                            <span class="selected-options"
+                                                                data-placeholder="Tỉnh/Thành phố">Tỉnh/Thành phố</span>
+                                                            <i class="arrow"></i>
+                                                        </div>
+                                                        <div class="dropdown-options">
+                                                            <input type="text" class="search-box" placeholder="Tìm kiếm tỉnh thành"
+                                                                oninput="filterOptions(this)">
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Loại hình kinh tế Multi-select -->
+                                                <div class="col-lg-2 col-md-4 col-sm-6">
+                                                    <div class="custom-multi-select" id="businessTypeFilter">
+                                                        <div class="select-box" onclick="toggleDropdown(this)">
+                                                            <span class="selected-options" data-placeholder="Loại hình kinh tế">Loại
+                                                                hình kinh tế</span>
+                                                            <i class="arrow"></i>
+                                                        </div>
+                                                        <div class="dropdown-options">
+                                                            <input type="text" class="search-box" placeholder="Tìm kiếm loại hình"
+                                                                oninput="filterOptions(this)">
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Vùng kinh tế Multi-select -->
+                                                <div class="col-lg-2 col-md-4 col-sm-6">
+                                                    <div class="custom-multi-select" id="economicZoneFilter">
+                                                        <div class="select-box" onclick="toggleDropdown(this)">
+                                                            <span class="selected-options" data-placeholder="Vùng kinh tế">Vùng kinh
+                                                                tế</span>
+                                                            <i class="arrow"></i>
+                                                        </div>
+                                                        <div class="dropdown-options">
+                                                            <input type="text" class="search-box"
+                                                                placeholder="Tìm kiếm vùng kinh tế" oninput="filterOptions(this)">
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Giới hạn dữ liệu - Custom dropdown -->
+                                                <div class="col-lg-2 col-md-4 col-sm-6">
+                                                    <div class="custom-multi-select" id="limitTypeFilter">
+                                                        <div class="select-box" onclick="toggleDropdown(this)">
+                                                            <span class="selected-options" data-placeholder="Giới hạn">Giới
+                                                                hạn</span>
+                                                            <i class="arrow"></i>
+                                                        </div>
+                                                        <div class="dropdown-options">
+                                                            <!-- No search box for limit options -->
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Quick Actions -->
+                                                <div class="col-lg-2 col-md-4 col-sm-6">
+                                                    <div class="d-flex gap-1">
+                                                        <button type="button" class="btn btn-outline-light btn-sm flex-fill"
+                                                            onclick="clearAllFilters()" title="Xóa bộ lọc">
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
+                                                        <button type="button" class="btn btn-outline-light btn-sm flex-fill"
+                                                            onclick="debugFilters()" title="Debug filters">
+                                                            <i class="fas fa-bug"></i>
+                                                        </button>
+                                                        <button type="button" class="btn btn-outline-light btn-sm flex-fill"
+                                                            onclick="testExportExcel()" title="Test Export Excel">
+                                                            <i class="fas fa-file-excel"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Action Buttons Row -->
+                                            <div class="row mt-2">
+                                                <div class="col-12">
+                                                    <div class="d-flex flex-wrap gap-1 justify-content-center">
+                                                        <button type="submit" class="btn btn-light btn-sm">
+                                                            <i class="fas fa-search me-1"></i>
+                                                            Áp dụng bộ lọc
+                                                        </button>
+                                                        <a href="@Url.Action("Index", "DN")" class="btn btn-success btn-sm">
+                                                            <i class="fas fa-chart-bar me-1"></i>
+                                                            Dashboard
+                                                        </a>
+                                                        <button type="button" class="btn btn-info btn-sm" onclick="exportToExcel()">
+                                                            <i class="fas fa-file-excel me-1"></i>
+                                                            Export Excel
+                                                        </button>
+                                                        <button type="button" class="btn btn-warning btn-sm"
+                                                            onclick="showFilterGuide()">
+                                                            <i class="fas fa-question-circle me-1"></i>
+                                                            Hướng dẫn
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Hidden inputs for limit options -->
+                                            <input type="hidden" name="limitType" id="limitTypeInput"
+                                                value="@ViewBag.CurrentLimitType">
+                                            <input type="hidden" name="customStart" id="customStartInput"
+                                                value="@ViewBag.CurrentCustomStart">
+                                            <input type="hidden" name="customEnd" id="customEndInput"
+                                                value="@ViewBag.CurrentCustomEnd">
+                                            <input type="hidden" name="customFilter" id="customFilterInput"
+                                                value="@ViewBag.CurrentCustomFilter">
+                                            <input type="hidden" name="evenStart" id="evenStartInput"
+                                                value="@ViewBag.CurrentEvenStart">
+                                            <input type="hidden" name="evenEnd" id="evenEndInput" value="@ViewBag.CurrentEvenEnd">
+                                            <input type="hidden" name="oddStart" id="oddStartInput"
+                                                value="@ViewBag.CurrentOddStart">
+                                            <input type="hidden" name="oddEnd" id="oddEndInput" value="@ViewBag.CurrentOddEnd">
+                                        </form>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -570,757 +675,769 @@
 
                 <!-- Main Container -->
                 <div class="main-container">
-                    <div class="container-fluid">
-                        <div class="content-card">
-                            <!-- Header -->
-                            <div class="card-header-custom">
-                                <h1><i class="fas fa-table me-3"></i>Dữ liệu Chi tiết Doanh nghiệp</h1>
-                                <p>Xem toàn bộ dữ liệu doanh nghiệp với đầy đủ thông tin chi tiết</p>
-                            </div>
+                    <div class="content-wrapper">
 
-                            <!-- Statistics Section -->
-                            <div class="stats-section">
-                                <div class="row">
-                                    <div class="col-md-3 col-sm-6 mb-3">
-                                        <div class="stat-card">
-                                            <div class="stat-value" id="totalRecords">
-                                                <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-                                            </div>
-                                            <div class="stat-label">Tổng số bản ghi</div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3 col-sm-6 mb-3">
-                                        <div class="stat-card">
-                                            <div class="stat-value" id="withTaxCode">
-                                                <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-                                            </div>
-                                            <div class="stat-label">Có mã số thuế</div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3 col-sm-6 mb-3">
-                                        <div class="stat-card">
-                                            <div class="stat-value" id="withEmail">
-                                                <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-                                            </div>
-                                            <div class="stat-label">Có email</div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3 col-sm-6 mb-3">
-                                        <div class="stat-card">
-                                            <div class="stat-value" id="withPhone">
-                                                <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-                                            </div>
-                                            <div class="stat-label">Có điện thoại</div>
-                                        </div>
+                        <!-- Page Header -->
+                        <div class="statistics-section">
+                            <div class="row text-center">
+                                <div class="col-md-3">
+                                    <div class="stat-item">
+                                        <div class="stat-number">@String.Format("{0:N0}", ViewBag.TotalRecords ?? 0)</div>
+                                        <div class="stat-label">Tổng records</div>
                                     </div>
                                 </div>
-                            </div>
-
-                            <!-- Table Section -->
-                            <div class="table-section">
-                                <div class="table-container">
-                                    <div class="table-header">
-                                        <h3 class="table-title">
-                                            <i class="fas fa-list me-2"></i>
-                                            Bảng dữ liệu (<span id="recordCount">Loading...</span> bản ghi)
-                                        </h3>
-                                        <div class="table-controls">
-                                            <div class="export-buttons">
-                                                <button onclick="exportToExcel()" class="btn-export btn-excel">
-                                                    <i class="fas fa-file-excel"></i>
-                                                    Excel
-                                                </button>
-                                                <button onclick="exportToPDF()" class="btn-export btn-pdf">
-                                                    <i class="fas fa-file-pdf"></i>
-                                                    PDF
-                                                </button>
-                                                <button onclick="printTable()" class="btn-export btn-print">
-                                                    <i class="fas fa-print"></i>
-                                                    In
-                                                </button>
-                                            </div>
+                                <div class="col-md-3">
+                                    <div class="stat-item">
+                                        <div class="stat-number">@String.Format("{0:N0}", ViewBag.FilteredRecords ?? 0)</div>
+                                        <div class="stat-label">Sau lọc</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="stat-item">
+                                        <div class="stat-number">@String.Format("{0:N0}", ViewBag.DisplayedRecords ?? 0)</div>
+                                        <div class="stat-label">Hiển thị</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="stat-item">
+                                        <div class="stat-number">
+                                            @{
+                                                var currentLimitType = ViewBag.CurrentLimitType?.ToString() ?? "first1000";
+                                                var limitDisplayText = currentLimitType switch
+                                                {
+                                                    "first1000" => "1000 đầu",
+                                                    "last1000" => "1000 cuối",
+                                                    "even" => "STT chẵn",
+                                                    "odd" => "STT lẻ",
+                                                    "random" => "Random",
+                                                    "custom" => "Tự chọn",
+                                                    "all" => "Tất cả",
+                                                    _ => "1000 đầu"
+                                                };
+                                            }
+                                            @limitDisplayText
                                         </div>
-                                    </div>
-
-                                    <!-- Loading State -->
-                                    <div id="tableLoading" class="loading">
-                                        <div class="spinner"></div>
-                                        <p>Đang tải dữ liệu...</p>
-                                    </div>
-
-                                    <!-- Table Container -->
-                                    <div id="tableContainer" class="table-responsive" style="display: none;">
-                                        <table id="dataTable" class="table table-striped table-hover">
-                                            <thead>
-                                                <tr>
-                                                    <th>STT</th>
-                                                    <th>Năm</th>
-                                                    <th>Mã số thuế</th>
-                                                    <th>Tên doanh nghiệp</th>
-                                                    <th>Loại hình KT</th>
-                                                    <th>Tỉnh/TP</th>
-                                                    <th>Huyện/Quận</th>
-                                                    <th>Xã/Phường</th>
-                                                    <th>Địa chỉ</th>
-                                                    <th>Điện thoại</th>
-                                                    <th>Email</th>
-                                                    <th>Vùng KT</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <!-- Data will be loaded via AJAX -->
-                                            </tbody>
-                                        </table>
-                                    </div>
-
-                                    <!-- Error State -->
-                                    <div id="tableError" class="no-data" style="display: none;">
-                                        <i class="fas fa-exclamation-triangle"></i>
-                                        <h3>Lỗi tải dữ liệu</h3>
-                                        <p>Không thể tải dữ liệu từ server. Vui lòng thử lại sau.</p>
-                                        <button onclick="location.reload()" class="btn-action btn-primary-custom mt-3">
-                                            <i class="fas fa-refresh me-2"></i>
-                                            Thử lại
-                                        </button>
+                                        <div class="stat-label">Giới hạn</div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Error Message -->
+                        @if (!string.IsNullOrEmpty(ViewBag.Error?.ToString()))
+                        {
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                @ViewBag.Error
+                            </div>
+                        }
+
+                        <!-- Success Message -->
+                        @if (TempData["SuccessMessage"] != null)
+                        {
+                            <div class="alert alert-success">
+                                <i class="fas fa-check-circle me-2"></i>
+                                @TempData["SuccessMessage"]
+                            </div>
+                        }
+
+                        <!-- Data Table -->
+                        <div class="table-container">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-table me-2"></i>
+                                    Bảng dữ liệu doanh nghiệp
+                                </h5>
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="refreshTable()">
+                                        <i class="fas fa-sync-alt me-1"></i>
+                                        Làm mới
+                                    </button>
+                                                            <button type="button" class="btn btn-outline-success btn-sm" onclick="exportToExcel()" title="Tải về file Excel với dữ liệu hiện tại">
+                            <i class="fas fa-file-excel me-1"></i>
+                            Export Excel
+                        </button>
+                                </div>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table id="dataTable" class="table table-striped table-hover">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>STT</th>
+                                            <th>Năm</th>
+                                            <th>Mã số thuế</th>
+                                            <th>Tên DN</th>
+                                            <th>Loại hình KT</th>
+                                            <th>Mã tỉnh</th>
+                                            <th>Mã huyện</th>
+                                            <th>Mã xã</th>
+                                            <th>Địa chỉ</th>
+                                            <th>Điện thoại</th>
+                                            <th>Email</th>
+                                            <th>Vùng KT</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model)
+                                        {
+                                            <tr>
+                                                <td>@item.STT</td>
+                                                <td>@item.Nam</td>
+                                                <td>@(item.Masothue ?? "N/A")</td>
+                                                <td>@(item.TenDN ?? "N/A")</td>
+                                                <td>@(item.Loaihinhkte ?? "N/A")</td>
+                                                <td>@(item.MaTinh_Dieutra ?? "N/A")</td>
+                                                <td>@(item.MaHuyen_Dieutra ?? "N/A")</td>
+                                                <td>@(item.MaXa_Dieutra ?? "N/A")</td>
+                                                <td>@(item.Diachi ?? "N/A")</td>
+                                                <td>@(item.Dienthoai ?? "N/A")</td>
+                                                <td>@(item.Email ?? "N/A")</td>
+                                                <td>@(item.Region ?? "N/A")</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
 
-                <!-- Footer -->
-                <div class="footer">
-                    <div class="container">
-                        <p>&copy; @DateTime.Now.Year Công ty TNHH CI Research. Hệ thống quản lý dữ liệu doanh nghiệp.</p>
-                    </div>
-                </div>
-
-                <!-- Scripts -->
+                <!-- Bootstrap JS Bundle -->
                 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-                <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-                <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-                <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+                <!-- jQuery -->
+                <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+                <!-- DataTables JS -->
+                <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+                <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
                 <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
                 <script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
 
+                <!-- Navigation Filter JavaScript Functions -->
                 <script>
-                    let dataTable;
+                    // Navigation Filter Toggle Function
+                    function toggleNavigationFilter() {
+                        const filterSection = document.getElementById('navigationFilterSection');
+                        const filterChevron = document.getElementById('filterChevron');
+                        const toggleText = document.getElementById('filterToggleText');
+                        const toggleIcon = document.getElementById('filterToggleIcon');
 
-                    $(document).ready(function () {
-                        // Load summary statistics first
-                        loadSummaryStats();
+                        if (filterSection.style.display === 'none' || !filterSection.style.display) {
+                            // Show filter
+                            filterSection.style.display = 'block';
+                            filterChevron.classList.add('rotated');
+                            toggleText.textContent = 'Thu gọn';
+                            toggleIcon.className = 'fas fa-chevron-up me-1';
 
-                        // Initialize DataTable with server-side processing
-                        setTimeout(function () {
-                            initializeDataTable();
-                        }, 1000); // Small delay to show loading state
+                            // Save state to localStorage
+                            localStorage.setItem('navigationFilterExpanded', 'true');
+
+                            console.log('📖 Navigation filter expanded');
+                        } else {
+                            // Hide filter
+                            filterSection.style.display = 'none';
+                            filterChevron.classList.remove('rotated');
+                            toggleText.textContent = 'Bộ lọc';
+                            toggleIcon.className = 'fas fa-filter me-1';
+
+                            // Save state to localStorage
+                            localStorage.setItem('navigationFilterExpanded', 'false');
+
+                            // Close any open dropdowns when hiding
+                            document.querySelectorAll('.dropdown-options').forEach(dropdown => {
+                                dropdown.style.display = 'none';
+                            });
+
+                            console.log('📝 Navigation filter collapsed');
+                        }
+                    }
+
+                    // Toggle dropdown visibility
+                    function toggleDropdown(element) {
+                        const dropdown = element.nextElementSibling;
+                        const isVisible = dropdown.style.display === 'block';
+
+                        // Close all other dropdowns first
+                        document.querySelectorAll('.dropdown-options').forEach(d => {
+                            if (d !== dropdown) d.style.display = 'none';
+                        });
+
+                        // Toggle current dropdown
+                        dropdown.style.display = isVisible ? 'none' : 'block';
+
+                        // Update selected display
+                        updateSelectedDisplay(element);
+                    }
+
+                    // Filter options based on search input
+                    function filterOptions(searchInput) {
+                        const filter = searchInput.value.toLowerCase();
+                        const dropdown = searchInput.parentElement;
+                        const labels = dropdown.querySelectorAll('label');
+
+                        labels.forEach(label => {
+                            const text = label.textContent.toLowerCase();
+                            if (text.includes(filter)) {
+                                label.style.display = 'block';
+                            } else {
+                                label.style.display = 'none';
+                            }
+                        });
+                    }
+
+                    // Update selected options display
+                    function updateSelectedDisplay(selectBox) {
+                        const dropdown = selectBox.nextElementSibling;
+                        const selectedSpan = selectBox.querySelector('.selected-options');
+                        const checkedInputs = dropdown.querySelectorAll('input[type="checkbox"]:checked, input[type="radio"]:checked');
+                        const placeholder = selectedSpan.getAttribute('data-placeholder');
+
+                        if (checkedInputs.length === 0) {
+                            selectedSpan.textContent = placeholder;
+                        } else if (checkedInputs.length === 1) {
+                            selectedSpan.textContent = checkedInputs[0].nextSibling.textContent.trim();
+                        } else {
+                            selectedSpan.textContent = `${checkedInputs.length} mục đã chọn`;
+                        }
+                    }
+
+                    // Clear all filters
+                    function clearAllFilters() {
+                        // Uncheck all checkboxes and radio buttons
+                        document.querySelectorAll('input[type="checkbox"], input[type="radio"]').forEach(input => {
+                            input.checked = false;
+                        });
+
+                        // Reset all select displays
+                        document.querySelectorAll('.select-box').forEach(selectBox => {
+                            updateSelectedDisplay(selectBox);
+                        });
+
+                        // Clear hidden inputs
+                        document.querySelectorAll('input[type="hidden"]').forEach(input => {
+                            input.value = '';
+                        });
+
+                        console.log('🧹 All filters cleared');
+                    }
+
+                    // Close dropdowns when clicking outside
+                    document.addEventListener('click', function (event) {
+                        if (!event.target.closest('.custom-multi-select')) {
+                            document.querySelectorAll('.dropdown-options').forEach(dropdown => {
+                                dropdown.style.display = 'none';
+                            });
+                        }
                     });
 
-                    function loadSummaryStats() {
-                        console.log('🔍 Loading summary statistics...');
+                    // Initialize filter UI and load dynamic data
+                    document.addEventListener('DOMContentLoaded', function () {
+                        console.log('🔧 Initializing ViewRawData filter UI...');
 
-                        $.get('/DN/GetDataSummary')
-                            .done(function (response) {
-                                if (response.success) {
-                                    console.log('✅ Summary stats loaded:', response);
+                        // Check saved state
+                        const isExpanded = localStorage.getItem('navigationFilterExpanded') === 'true';
 
-                                    // Update statistics cards with animation
-                                    animateValue('totalRecords', 0, response.totalRecords, 1000);
-                                    animateValue('withTaxCode', 0, response.withTaxCode, 1200);
-                                    animateValue('withEmail', 0, response.withEmail, 1400);
-                                    animateValue('withPhone', 0, response.withPhone, 1600);
+                        if (isExpanded) {
+                            // Expand filter if it was previously expanded
+                            setTimeout(() => {
+                                toggleNavigationFilter();
+                            }, 100);
+                        }
 
-                                    // Update record count in table header
-                                    $('#recordCount').text(response.totalRecords.toLocaleString());
+                        // Load dynamic filter options from database
+                        loadDynamicFilterOptions();
+
+                        // Initialize DataTable
+                        initializeDataTable();
+
+                        document.querySelectorAll('.select-box').forEach(selectBox => {
+                            updateSelectedDisplay(selectBox);
+                        });
+                    });
+
+                    // Load dynamic filter options from database
+                    function loadDynamicFilterOptions() {
+                        console.log('📡 Loading dynamic filter options from database...');
+
+                        fetch('/DN/GetFilterOptions')
+                            .then(response => {
+                                console.log('📡 Filter options response status:', response.status);
+                                return response.json();
+                            })
+                            .then(data => {
+                                console.log('📊 Filter options data:', data);
+
+                                if (data.success) {
+                                    console.log('✅ Filter options loaded successfully');
+
+                                    // Populate each filter dropdown
+                                    populateFilterDropdown('yearFilter', data.filters.years, 'Nam', @Html.Raw(Json.Serialize(ViewBag.CurrentNam ?? new List<string>())));
+                                    populateFilterDropdown('businessTypeFilter', data.filters.businessTypes, 'Loaihinhkte', @Html.Raw(Json.Serialize(ViewBag.CurrentLoaihinhkte ?? new List<string>())));
+                                    populateFilterDropdown('provinceFilter', data.filters.provinces, 'MaTinh_Dieutra', @Html.Raw(Json.Serialize(ViewBag.CurrentMaTinh ?? new List<string>())));
+                                    populateFilterDropdown('economicZoneFilter', data.filters.economicZones, 'Vungkinhte', @Html.Raw(Json.Serialize(ViewBag.CurrentVungkinhte ?? new List<string>())));
+
+                                    // Populate limit type filter (different structure)
+                                    populateLimitTypeFilter();
+
+                                    // Initialize event listeners after options are loaded
+                                    initializeFilterEventListeners();
+
+                                    // Update display for all filters
+                                    document.querySelectorAll('.select-box').forEach(selectBox => {
+                                        updateSelectedDisplay(selectBox);
+                                    });
+
+                                    console.log('✅ All filters populated successfully');
                                 } else {
-                                    console.error('❌ Failed to load summary:', response.error);
-                                    showError('Không thể tải thống kê tổng quan');
+                                    console.error('❌ Failed to load filter options:', data.message);
+                                    console.log('⚠️ Using fallback options');
+                                    loadFallbackFilterOptions();
                                 }
                             })
-                            .fail(function () {
-                                console.error('❌ Summary API call failed');
-                                showError('Lỗi kết nối API thống kê');
+                            .catch(error => {
+                                console.error('❌ Error loading filter options:', error);
+                                console.log('⚠️ Using fallback options');
+                                loadFallbackFilterOptions();
                             });
                     }
 
+                    // Populate individual filter dropdown
+                    function populateFilterDropdown(filterId, options, fieldName, currentValues) {
+                        const filterElement = document.getElementById(filterId);
+                        if (!filterElement) {
+                            console.warn(`⚠️ Filter element ${filterId} not found`);
+                            return;
+                        }
+
+                        const dropdown = filterElement.querySelector('.dropdown-options');
+                        const searchBox = dropdown.querySelector('.search-box');
+
+                        // Clear existing options (except search box)
+                        const existingLabels = dropdown.querySelectorAll('label');
+                        existingLabels.forEach(label => label.remove());
+
+                        // Add new options
+                        let optionsHTML = '';
+                        options.forEach(option => {
+                            const isChecked = currentValues && currentValues.includes(option) ? 'checked' : '';
+                            optionsHTML += `
+                                            <label>
+                                                <input type="checkbox" name="${fieldName}" value="${option}" ${isChecked} /> ${option}
+                                            </label>
+                                        `;
+                        });
+
+                        // Insert after search box
+                        if (searchBox) {
+                            searchBox.insertAdjacentHTML('afterend', optionsHTML);
+                        } else {
+                            dropdown.innerHTML = optionsHTML;
+                        }
+
+                        console.log(`✅ Populated ${filterId} with ${options.length} options`);
+                    }
+
+                    // Populate limit type filter (special handling)
+                    function populateLimitTypeFilter() {
+                        const filterElement = document.getElementById('limitTypeFilter');
+                        if (!filterElement) {
+                            console.warn('⚠️ Limit type filter element not found');
+                            return;
+                        }
+
+                        const dropdown = filterElement.querySelector('.dropdown-options');
+                        const currentLimitType = '@ViewBag.CurrentLimitType' || 'first1000';
+
+                        const limitOptions = [
+                            { value: 'first1000', text: '1000 đầu tiên' },
+                            { value: 'last1000', text: '1000 cuối cùng' },
+                            { value: 'even', text: 'STT chẵn' },
+                            { value: 'odd', text: 'STT lẻ' },
+                            { value: 'random', text: 'Random 1000' },
+                            { value: 'custom', text: 'Tự chọn khoảng' },
+                            { value: 'all', text: 'Tất cả (tối đa 5000)' }
+                        ];
+
+                        let optionsHTML = '';
+                        limitOptions.forEach(option => {
+                            const isChecked = currentLimitType === option.value ? 'checked' : '';
+                            optionsHTML += `
+                                            <label onclick="handleLimitTypeChange('${option.value}')">
+                                                <input type="radio" name="limitTypeRadio" value="${option.value}" ${isChecked} /> ${option.text}
+                                            </label>
+                                        `;
+                        });
+
+                        dropdown.innerHTML = optionsHTML;
+                        console.log('✅ Populated limit type filter');
+                    }
+
+                    // Handle limit type change
+                    function handleLimitTypeChange(limitType) {
+                        console.log('🔄 Limit type changed to:', limitType);
+
+                        // Update hidden input
+                        document.getElementById('limitTypeInput').value = limitType;
+
+                        // Update display
+                        const limitBox = document.getElementById('limitTypeFilter').querySelector('.select-box');
+                        updateSelectedDisplay(limitBox);
+
+                        // Show additional options for custom, even, odd
+                        if (limitType === 'custom') {
+                            promptCustomRange();
+                        } else if (limitType === 'even') {
+                            promptEvenRange();
+                        } else if (limitType === 'odd') {
+                            promptOddRange();
+                        }
+                    }
+
+                    // Prompt for custom range
+                    function promptCustomRange() {
+                        const start = prompt('Nhập STT bắt đầu:', '1');
+                        const end = prompt('Nhập STT kết thúc:', '1000');
+                        const filter = prompt('Bộ lọc (all/even/odd):', 'all');
+
+                        if (start && end) {
+                            document.getElementById('customStartInput').value = start;
+                            document.getElementById('customEndInput').value = end;
+                            document.getElementById('customFilterInput').value = filter || 'all';
+                            console.log('✅ Custom range set:', start, '-', end, filter);
+                        }
+                    }
+
+                    // Prompt for even range
+                    function promptEvenRange() {
+                        const start = prompt('Nhập STT chẵn bắt đầu:', '2');
+                        const end = prompt('Nhập STT chẵn kết thúc:', '1000');
+
+                        if (start && end) {
+                            document.getElementById('evenStartInput').value = start;
+                            document.getElementById('evenEndInput').value = end;
+                            console.log('✅ Even range set:', start, '-', end);
+                        }
+                    }
+
+                    // Prompt for odd range
+                    function promptOddRange() {
+                        const start = prompt('Nhập STT lẻ bắt đầu:', '1');
+                        const end = prompt('Nhập STT lẻ kết thúc:', '999');
+
+                        if (start && end) {
+                            document.getElementById('oddStartInput').value = start;
+                            document.getElementById('oddEndInput').value = end;
+                            console.log('✅ Odd range set:', start, '-', end);
+                        }
+                    }
+
+                    // Initialize event listeners after filters are populated
+                    function initializeFilterEventListeners() {
+                        // Add change event listeners to all checkboxes and radio buttons
+                        document.querySelectorAll('.dropdown-options input[type="checkbox"], .dropdown-options input[type="radio"]').forEach(input => {
+                            input.addEventListener('change', function () {
+                                const selectBox = this.closest('.custom-multi-select').querySelector('.select-box');
+                                updateSelectedDisplay(selectBox);
+                            });
+                        });
+
+                        console.log('✅ Filter event listeners initialized');
+                    }
+
+                    // Fallback options if API fails
+                    function loadFallbackFilterOptions() {
+                        const fallbackData = {
+                            years: ['2018', '2019', '2020', '2021', '2022', '2023', '2024'],
+                            businessTypes: ['Công ty TNHH', 'Công ty cổ phần', 'Doanh nghiệp tư nhân', 'Doanh nghiệp nhà nước'],
+                            provinces: ['Hà Nội', 'Hồ Chí Minh', 'Đà Nẵng', 'Hải Phòng', 'Cần Thơ'],
+                            economicZones: ['Đông Nam Bộ', 'Đồng bằng Sông Hồng', 'Duyên hải Nam Trung Bộ']
+                        };
+
+                        populateFilterDropdown('yearFilter', fallbackData.years, 'Nam', []);
+                        populateFilterDropdown('businessTypeFilter', fallbackData.businessTypes, 'Loaihinhkte', []);
+                        populateFilterDropdown('provinceFilter', fallbackData.provinces, 'MaTinh_Dieutra', []);
+                        populateFilterDropdown('economicZoneFilter', fallbackData.economicZones, 'Vungkinhte', []);
+                        populateLimitTypeFilter();
+
+                        initializeFilterEventListeners();
+                        console.log('✅ Fallback options loaded');
+                    }
+
+                    // Initialize DataTable
                     function initializeDataTable() {
-                        console.log('🔍 Initializing server-side DataTable...');
-
-                        try {
-                            dataTable = $('#dataTable').DataTable({
-                                processing: true,
-                                serverSide: true,
-                                responsive: true,
-                                pageLength: 30, // 30 rows per page as requested
-                                lengthMenu: [[15, 30, 50, 100], [15, 30, 50, 100]],
-                                ajax: {
-                                    url: '/DN/GetPaginatedData',
-                                    type: 'POST',
-                                    error: function (xhr, error, thrown) {
-                                        console.error('❌ DataTable AJAX error:', error, thrown);
-                                        console.error('❌ Response:', xhr.responseText);
-                                        showTableError();
-                                    },
-                                    success: function (response) {
-                                        console.log('✅ AJAX success response:', response);
-                                        if (response.data && response.data.length > 0) {
-                                            console.log('📊 Sample data row:', response.data[0]);
-                                            console.log('📊 Available properties:', Object.keys(response.data[0]));
-
-                                            // IMMEDIATELY SHOW TABLE WHEN DATA RECEIVED
-                                            $('#tableLoading').hide();
-                                            $('#tableContainer').show();
-                                            console.log('🎯 Table shown immediately after AJAX success!');
-                                        }
-                                    }
-                                },
-                                columns: [
-                                    {
-                                        data: 'stt', // Match API response lowercase
-                                        name: 'stt',
-                                        defaultContent: '',
-                                        className: 'text-center',
-                                        render: function (data) {
-                                            return data ? '<strong>' + data + '</strong>' : '';
-                                        }
-                                    },
-                                    {
-                                        data: 'nam', // Match API response lowercase
-                                        name: 'nam',
-                                        defaultContent: '',
-                                        className: 'text-center',
-                                        render: function (data) {
-                                            return data ? '<span class="badge bg-primary">' + data + '</span>' : 'N/A';
-                                        }
-                                    },
-                                    {
-                                        data: 'masothue', // Match API response lowercase
-                                        name: 'masothue',
-                                        defaultContent: 'N/A',
-                                        className: 'text-center font-monospace',
-                                        render: function (data) {
-                                            return '<code>' + (data || 'N/A') + '</code>';
-                                        }
-                                    },
-                                    {
-                                        data: 'tenDN', // Match API response camelCase
-                                        name: 'tenDN',
-                                        defaultContent: 'N/A',
-                                        render: function (data) {
-                                            return '<strong>' + (data || 'N/A') + '</strong>';
-                                        }
-                                    },
-                                    {
-                                        data: 'loaihinhkte', // Match API response lowercase
-                                        name: 'loaihinhkte',
-                                        defaultContent: 'N/A',
-                                        render: function (data) {
-                                            return data && data !== 'N/A' ? '<span class="badge bg-secondary">' + data + '</span>' : 'N/A';
-                                        }
-                                    },
-                                    {
-                                        data: 'maTinh_Dieutra', // Match API response camelCase
-                                        name: 'maTinh_Dieutra',
-                                        defaultContent: 'N/A'
-                                    },
-                                    {
-                                        data: 'maHuyen_Dieutra', // Match API response camelCase
-                                        name: 'maHuyen_Dieutra',
-                                        defaultContent: 'N/A'
-                                    },
-                                    {
-                                        data: 'maXa_Dieutra', // Match API response camelCase
-                                        name: 'maXa_Dieutra',
-                                        defaultContent: 'N/A'
-                                    },
-                                    {
-                                        data: 'diachi', // Match API response lowercase
-                                        name: 'diachi',
-                                        defaultContent: 'N/A'
-                                    },
-                                    {
-                                        data: 'dienthoai', // Match API response lowercase
-                                        name: 'dienthoai',
-                                        defaultContent: 'N/A'
-                                    },
-                                    {
-                                        data: 'email', // Match API response lowercase
-                                        name: 'email',
-                                        defaultContent: 'N/A'
-                                    },
-                                    {
-                                        data: 'region', // Match API response lowercase
-                                        name: 'region',
-                                        defaultContent: 'N/A',
-                                        render: function (data) {
-                                            return data && data !== 'N/A' ? '<span class="badge bg-info">' + data + '</span>' : 'N/A';
-                                        }
-                                    }
-                                ],
-                                language: {
-                                    "sProcessing": '<div class="text-center"><div class="spinner-border text-primary" role="status"><span class="sr-only">Đang tải...</span></div><br>Đang xử lý...</div>',
-                                    "sLengthMenu": "Hiển thị _MENU_ mục",
-                                    "sZeroRecords": "Không tìm thấy dòng nào phù hợp",
-                                    "sInfo": "Đang hiển thị _START_ đến _END_ trong tổng số _TOTAL_ mục",
-                                    "sInfoEmpty": "Đang hiển thị 0 đến 0 trong tổng số 0 mục",
-                                    "sInfoFiltered": "(được lọc từ _MAX_ mục)",
-                                    "sSearch": "Tìm kiếm:",
-                                    "oPaginate": {
-                                        "sFirst": "Đầu",
-                                        "sPrevious": "Trước",
-                                        "sNext": "Tiếp",
-                                        "sLast": "Cuối"
-                                    }
-                                },
-                                order: [[0, 'asc']],
-                                dom: '<"row"<"col-sm-6"l><"col-sm-6"f>>rtip',
-                                initComplete: function (settings, json) {
-                                    console.log('✅ Server-side DataTable initialized successfully');
-                                    console.log('📊 Total records:', json?.recordsTotal);
-
-                                    // FORCE HIDE LOADING AND SHOW TABLE
-                                    $('#tableLoading').hide();
-                                    $('#tableContainer').show();
-                                    console.log('🎯 Table container now visible!');
-                                },
-                                drawCallback: function (settings) {
-                                    console.log('📊 DataTable draw completed. Records:', settings.json?.recordsTotal);
-
-                                    // FORCE SHOW TABLE AFTER EACH DRAW
-                                    $('#tableLoading').hide();
-                                    $('#tableContainer').show();
-
-                                    // Update record count in header
-                                    if (settings.json) {
-                                        $('#recordCount').text(settings.json.recordsTotal.toLocaleString());
-                                    }
-
-                                    // Enhanced row hover effects
-                                    $('#dataTable tbody tr').off('mouseenter mouseleave').hover(
-                                        function () { $(this).addClass('table-hover-effect'); },
-                                        function () { $(this).removeClass('table-hover-effect'); }
-                                    );
+                        $('#dataTable').DataTable({
+                            responsive: true,
+                            pageLength: 25,
+                            order: [[0, 'asc']],
+                            language: {
+                                "sProcessing": "Đang xử lý...",
+                                "sLengthMenu": "Hiển thị _MENU_ mục",
+                                "sZeroRecords": "Không tìm thấy dòng nào phù hợp",
+                                "sInfo": "Hiển thị _START_ đến _END_ trong tổng số _TOTAL_ mục",
+                                "sInfoEmpty": "Hiển thị 0 đến 0 trong tổng số 0 mục",
+                                "sInfoFiltered": "(được lọc từ _MAX_ mục)",
+                                "sSearch": "Tìm kiếm:",
+                                "oPaginate": {
+                                    "sFirst": "Đầu",
+                                    "sPrevious": "Trước",
+                                    "sNext": "Tiếp",
+                                    "sLast": "Cuối"
                                 }
-                            });
-
-                            // FORCE SHOW TABLE IMMEDIATELY AFTER CREATION
-                            setTimeout(function () {
-                                $('#tableLoading').hide();
-                                $('#tableContainer').show();
-                                console.log('🎯 Force showing table after DataTable creation!');
-                            }, 500);
-
-                        } catch (error) {
-                            console.error('❌ DataTable initialization error:', error);
-                            showTableError();
-                        }
-                    }
-
-                    // Utility Functions
-                    function animateValue(elementId, start, end, duration) {
-                        const element = document.getElementById(elementId);
-                        const range = end - start;
-                        const increment = range / (duration / 16);
-                        let current = start;
-
-                        element.innerHTML = start.toLocaleString();
-
-                        const timer = setInterval(function () {
-                            current += increment;
-                            if (current >= end) {
-                                current = end;
-                                clearInterval(timer);
-                            }
-                            element.innerHTML = Math.floor(current).toLocaleString();
-                        }, 16);
-                    }
-
-                    function showError(message) {
-                        // Update statistics cards to show error
-                        ['totalRecords', 'withTaxCode', 'withEmail', 'withPhone'].forEach(function (id) {
-                            $('#' + id).html('<i class="fas fa-exclamation-triangle text-danger"></i>');
+                            },
+                            columnDefs: [
+                                { targets: [0], width: "5%" },
+                                { targets: [1], width: "7%" },
+                                { targets: [2], width: "10%" },
+                                { targets: [3], width: "20%" },
+                                { targets: [4], width: "12%" },
+                                { targets: [5, 6, 7], width: "7%" },
+                                { targets: [8], width: "15%" },
+                                { targets: [9, 10], width: "10%" },
+                                { targets: [11], width: "7%" }
+                            ]
                         });
 
-                        console.error('❌ Error:', message);
+                        console.log('✅ DataTable initialized');
                     }
 
-                    function showTableError() {
-                        $('#tableLoading').hide();
-                        $('#tableContainer').hide();
-                        $('#tableError').show();
+                    // Debug filters function
+                    function debugFilters() {
+                        console.log('🔍 DEBUGGING FILTERS...');
+
+                        const formData = new FormData();
+
+                        // Collect all filter data
+                        document.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => {
+                            formData.append(cb.name, cb.value);
+                        });
+
+                        document.querySelectorAll('input[type="radio"]:checked').forEach(radio => {
+                            formData.append(radio.name, radio.value);
+                        });
+
+                        document.querySelectorAll('input[type="hidden"]').forEach(hidden => {
+                            if (hidden.value) {
+                                formData.append(hidden.name, hidden.value);
+                            }
+                        });
+
+                        // Log all collected data
+                        for (let [key, value] of formData.entries()) {
+                            console.log(`${key}: ${value}`);
+                        }
+
+                        // Call debug endpoint
+                        fetch('/DN/DebugFilters?' + new URLSearchParams(formData))
+                            .then(response => response.json())
+                            .then(data => {
+                                console.log('📊 Debug response:', data);
+                                alert('Debug completed! Check console for details.');
+                            })
+                            .catch(error => {
+                                console.error('❌ Debug error:', error);
+                                alert('Debug failed: ' + error.message);
+                            });
                     }
 
-                    // Export Functions
+                    // Export to Excel function
                     function exportToExcel() {
-                        // Create a simple CSV export
-                        var csv = [];
-                        var rows = document.querySelectorAll("#dataTable tr");
+                        console.log('📊 Exporting to Excel...');
 
-                        for (var i = 0; i < rows.length; i++) {
-                            var row = [], cols = rows[i].querySelectorAll("td, th");
+                        const form = document.querySelector('.filter-form');
 
-                            for (var j = 0; j < cols.length; j++) {
-                                row.push(cols[j].innerText);
+                        if (!form) {
+                            alert('❌ Không tìm thấy form filters. Vui lòng thử lại.');
+                            return;
+                        }
+
+                        const formData = new FormData(form);
+
+                        // Convert to URL parameters
+                        const params = new URLSearchParams();
+
+                        // Add all form data
+                        for (let [key, value] of formData.entries()) {
+                            params.append(key, value);
+                        }
+
+                        // Add hidden input values for limit options
+                        const hiddenInputs = document.querySelectorAll('input[type="hidden"]');
+                        hiddenInputs.forEach(input => {
+                            if (input.value && input.name) {
+                                params.append(input.name, input.value);
                             }
-
-                            csv.push(row.join(","));
-                        }
-
-                        // Download CSV file
-                        var csvFile = new Blob([csv.join("\n")], { type: "text/csv" });
-                        var downloadLink = document.createElement("a");
-                        downloadLink.download = "du-lieu-doanh-nghiep.csv";
-                        downloadLink.href = window.URL.createObjectURL(csvFile);
-                        downloadLink.style.display = "none";
-                        document.body.appendChild(downloadLink);
-                        downloadLink.click();
-                        document.body.removeChild(downloadLink);
-                    }
-
-                    function exportToPDF() {
-                        window.print();
-                    }
-
-                    function printTable() {
-                        var printWindow = window.open('', '', 'height=600,width=800');
-                        printWindow.document.write('<html><head><title>Dữ liệu Doanh nghiệp</title>');
-                        printWindow.document.write('<style>table{width:100%;border-collapse:collapse;}th,td{border:1px solid #ddd;padding:8px;text-align:left;}th{background-color:#f2f2f2;}</style>');
-                        printWindow.document.write('</head><body>');
-                        printWindow.document.write('<h1>Dữ liệu Chi tiết Doanh nghiệp</h1>');
-                        printWindow.document.write(document.getElementById('dataTable').outerHTML);
-                        printWindow.document.write('</body></html>');
-                        printWindow.document.close();
-                        printWindow.print();
-                    }
-
-                    // Add smooth scroll to top
-                    $(window).scroll(function () {
-                        if ($(this).scrollTop() > 100) {
-                            if ($('#scrollToTop').length === 0) {
-                                $('body').append('<button id="scrollToTop" style="position:fixed;bottom:20px;right:20px;background:#667eea;color:white;border:none;border-radius:50%;width:50px;height:50px;cursor:pointer;z-index:1000;"><i class="fas fa-arrow-up"></i></button>');
-                            }
-                        } else {
-                            $('#scrollToTop').remove();
-                        }
-                    });
-
-                    $(document).on('click', '#scrollToTop', function () {
-                        $('html, body').animate({ scrollTop: 0 }, 500);
-                    });
-
-                    // Loading animation on page load
-                    $(window).on('load', function () {
-                        $('.loading').fadeOut(500);
-                    });
-
-                    // Debug functions for testing - call from browser console
-                    window.testPaginationAPI = function () {
-                        console.log('🧪 Testing Pagination API...');
-                        $.get('/DN/TestPaginationAPI')
-                            .done(function (response) {
-                                console.log('✅ Test API Response:', response);
-                                if (response.success && response.sampleData) {
-                                    console.log('📊 Sample data structure:', response.sampleData[0]);
-                                    console.log('📊 Available columns:', Object.keys(response.sampleData[0]));
-                                }
-                            })
-                            .fail(function (xhr) {
-                                console.error('❌ Test API failed:', xhr.responseText);
-                            });
-                    };
-
-                    window.testDirectPagination = function () {
-                        console.log('🧪 Testing Direct Pagination POST...');
-                        $.post('/DN/GetPaginatedData', {
-                            draw: 1,
-                            start: 0,
-                            length: 5,
-                            'search[value]': '',
-                            'order[0][column]': 0,
-                            'order[0][dir]': 'asc'
-                        })
-                            .done(function (response) {
-                                console.log('✅ Direct Pagination Response:', response);
-                                if (response.data && response.data.length > 0) {
-                                    console.log('📊 First row data:', response.data[0]);
-                                    console.log('📊 Available properties:', Object.keys(response.data[0]));
-                                }
-                            })
-                            .fail(function (xhr) {
-                                console.error('❌ Direct Pagination failed:', xhr.responseText);
-                            });
-                    };
-
-                    window.reloadDataTable = function () {
-                        console.log('🔄 Reloading DataTable...');
-                        if (dataTable) {
-                            dataTable.ajax.reload();
-                        } else {
-                            console.log('⚠️ DataTable not initialized yet');
-                        }
-                    };
-
-                    console.log('🔧 Debug functions available:');
-                    console.log('   - testPaginationAPI()');
-                    console.log('   - testDirectPagination()');
-                    console.log('   - reloadDataTable()');
-
-                    // FORCE SHOW TABLE - call this function from browser console to make table visible
-                    window.forceShowTable = function () {
-                        console.log('🔧 Force showing table container...');
-                        $('#tableLoading').hide();
-                        $('#tableError').hide();
-                        $('#tableContainer').show();
-
-                        // Check if table exists
-                        if ($('#dataTable').length > 0) {
-                            console.log('✅ Table HTML exists');
-                            console.log('📊 Table rows:', $('#dataTable tbody tr').length);
-                        } else {
-                            console.log('❌ Table HTML not found');
-                        }
-
-                        // Check DataTable instance
-                        if (dataTable) {
-                            console.log('✅ DataTable instance exists');
-                            console.log('📊 DataTable info:', dataTable.page.info());
-                        } else {
-                            console.log('❌ DataTable instance not found');
-                        }
-                    };
-
-                    // EMERGENCY FIX - call this function from browser console
-                    window.fixDataTable = function () {
-                        console.log('🔧 Applying emergency fix...');
-
-                        // Force show container first
-                        $('#tableLoading').hide();
-                        $('#tableError').hide();
-                        $('#tableContainer').show();
-
-                        // Destroy existing table if it exists
-                        if (dataTable) {
-                            try {
-                                dataTable.destroy();
-                            } catch (e) {
-                                console.log('⚠️ Error destroying table:', e);
-                            }
-                        }
-
-                        // Recreate table HTML
-                        $('#tableContainer').html(`
-                                                                                                                                                                <table id="dataTable" class="table table-striped table-hover">
-                                                                                                                                                                    <thead>
-                                                                                                                                                                        <tr>
-                                                                                                                                                                            <th>STT</th>
-                                                                                                                                                                            <th>Năm</th>
-                                                                                                                                                                            <th>Mã số thuế</th>
-                                                                                                                                                                            <th>Tên doanh nghiệp</th>
-                                                                                                                                                                            <th>Loại hình KT</th>
-                                                                                                                                                                            <th>Tỉnh/TP</th>
-                                                                                                                                                                            <th>Huyện/Quận</th>
-                                                                                                                                                                            <th>Xã/Phường</th>
-                                                                                                                                                                            <th>Địa chỉ</th>
-                                                                                                                                                                            <th>Điện thoại</th>
-                                                                                                                                                                            <th>Email</th>
-                                                                                                                                                                            <th>Vùng KT</th>
-                                                                                                                                                                        </tr>
-                                                                                                                                                                    </thead>
-                                                                                                                                                                    <tbody></tbody>
-                                                                                                                                                                </table>
-                                                                                                                                                            `);
-
-                        // Reinitialize with correct column mapping
-                        try {
-                            dataTable = $('#dataTable').DataTable({
-                                processing: true,
-                                serverSide: true,
-                                responsive: true,
-                                pageLength: 30,
-                                ajax: {
-                                    url: '/DN/GetPaginatedData',
-                                    type: 'POST',
-                                    error: function (xhr, error, thrown) {
-                                        console.error('❌ AJAX Error:', error, thrown);
-                                        console.error('❌ Response:', xhr.responseText);
-                                    },
-                                    success: function (response) {
-                                        console.log('✅ AJAX Success:', response);
-                                    }
-                                },
-                                columns: [
-                                    { data: 'stt', className: 'text-center', render: function (data) { return '<strong>' + (data || '') + '</strong>'; } },
-                                    { data: 'nam', className: 'text-center', render: function (data) { return data ? '<span class="badge bg-primary">' + data + '</span>' : 'N/A'; } },
-                                    { data: 'masothue', className: 'text-center', render: function (data) { return '<code>' + (data || 'N/A') + '</code>'; } },
-                                    { data: 'tenDN', render: function (data) { return '<strong>' + (data || 'N/A') + '</strong>'; } },
-                                    { data: 'loaihinhkte', render: function (data) { return data ? '<span class="badge bg-secondary">' + data + '</span>' : 'N/A'; } },
-                                    { data: 'maTinh_Dieutra', defaultContent: 'N/A' },
-                                    { data: 'maHuyen_Dieutra', defaultContent: 'N/A' },
-                                    { data: 'maXa_Dieutra', defaultContent: 'N/A' },
-                                    { data: 'diachi', defaultContent: 'N/A' },
-                                    { data: 'dienthoai', defaultContent: 'N/A' },
-                                    { data: 'email', defaultContent: 'N/A' },
-                                    { data: 'region', render: function (data) { return data ? '<span class="badge bg-info">' + data + '</span>' : 'N/A'; } }
-                                ],
-                                language: {
-                                    "sProcessing": "Đang xử lý...",
-                                    "sLengthMenu": "Hiển thị _MENU_ mục",
-                                    "sZeroRecords": "Không tìm thấy dòng nào phù hợp",
-                                    "sInfo": "Đang hiển thị _START_ đến _END_ trong tổng số _TOTAL_ mục",
-                                    "sInfoEmpty": "Đang hiển thị 0 đến 0 trong tổng số 0 mục",
-                                    "sInfoFiltered": "(được lọc từ _MAX_ mục)",
-                                    "sSearch": "Tìm kiếm:",
-                                    "oPaginate": {
-                                        "sFirst": "Đầu",
-                                        "sPrevious": "Trước",
-                                        "sNext": "Tiếp",
-                                        "sLast": "Cuối"
-                                    }
-                                },
-                                order: [[0, 'asc']],
-                                initComplete: function () {
-                                    console.log('✅ DataTable fixed and reinitialized!');
-                                }
-                            });
-                        } catch (e) {
-                            console.error('❌ DataTable init error:', e);
-                        }
-                    };
-
-                    // Auto-fix on page load - but show table container first
-                    setTimeout(function () {
-                        console.log('🔧 Auto-fix: Force showing table container...');
-                        $('#tableContainer').show(); // Force show regardless
-
-                        if (typeof dataTable === 'undefined' || !dataTable) {
-                            console.log('🔧 Auto-applying fix...');
-                            window.fixDataTable();
-                        }
-                    }, 2000); // Reduced timeout
-
-                    console.log('🚨 EMERGENCY FIX AVAILABLE:');
-                    console.log('   - populateTableManually() - Show 30 rows from AJAX data');
-                    console.log('   - forceShowTable() - Force show table container');
-                    console.log('   - fixDataTable() - Full reinitialize');
-                    console.log('   - testPaginationAPI() - Test API');
-                    console.log('   - testDirectPagination() - Test direct calls');
-
-                    // MANUAL TABLE POPULATION - use the 30 rows from AJAX response
-                    window.populateTableManually = function () {
-                        console.log('🔧 Manually populating table with AJAX data...');
-
-                        // First test with sample data
-                        testDirectPagination().then(function () {
-                            // The response should be available in the success callback
-                            $.post('/DN/GetPaginatedData', {
-                                draw: 1,
-                                start: 0,
-                                length: 30,
-                                'search[value]': '',
-                                'order[0][column]': 0,
-                                'order[0][dir]': 'asc'
-                            })
-                                .done(function (response) {
-                                    console.log('✅ Got data for manual population:', response);
-
-                                    if (response.data && response.data.length > 0) {
-                                        // Clear existing table
-                                        $('#tableContainer').show();
-                                        $('#tableLoading').hide();
-
-                                        // Build table HTML manually
-                                        let tableHTML = `
-                                                                            <table id="dataTable" class="table table-striped table-hover">
-                                                                                <thead>
-                                                                                    <tr>
-                                                                                        <th>STT</th>
-                                                                                        <th>Năm</th>
-                                                                                        <th>Mã số thuế</th>
-                                                                                        <th>Tên doanh nghiệp</th>
-                                                                                        <th>Loại hình KT</th>
-                                                                                        <th>Tỉnh/TP</th>
-                                                                                        <th>Huyện/Quận</th>
-                                                                                        <th>Xã/Phường</th>
-                                                                                        <th>Địa chỉ</th>
-                                                                                        <th>Điện thoại</th>
-                                                                                        <th>Email</th>
-                                                                                        <th>Vùng KT</th>
-                                                                                    </tr>
-                                                                                </thead>
-                                                                                <tbody>`;
-
-                                        // Add each row
-                                        response.data.forEach(function (row) {
-                                            tableHTML += `
-                                                                                <tr>
-                                                                                    <td class="text-center"><strong>${row.stt || ''}</strong></td>
-                                                                                    <td class="text-center"><span class="badge bg-primary">${row.nam || 'N/A'}</span></td>
-                                                                                    <td class="text-center"><code>${row.masothue || 'N/A'}</code></td>
-                                                                                    <td><strong>${row.tenDN || 'N/A'}</strong></td>
-                                                                                    <td><span class="badge bg-secondary">${row.loaihinhkte || 'N/A'}</span></td>
-                                                                                    <td>${row.maTinh_Dieutra || 'N/A'}</td>
-                                                                                    <td>${row.maHuyen_Dieutra || 'N/A'}</td>
-                                                                                    <td>${row.maXa_Dieutra || 'N/A'}</td>
-                                                                                    <td>${row.diachi || 'N/A'}</td>
-                                                                                    <td>${row.dienthoai || 'N/A'}</td>
-                                                                                    <td>${row.email || 'N/A'}</td>
-                                                                                    <td><span class="badge bg-info">${row.region || 'N/A'}</span></td>
-                                                                                </tr>`;
-                                        });
-
-                                        tableHTML += `
-                                                                                </tbody>
-                                                                            </table>
-                                                                            <div class="mt-3 text-center">
-                                                                                <p class="text-muted">Hiển thị ${response.data.length} bản ghi đầu tiên từ tổng số ${response.recordsTotal.toLocaleString()} bản ghi</p>
-                                                                                <button onclick="fixDataTable()" class="btn btn-primary">Kích hoạt Pagination</button>
-                                                                            </div>`;
-
-                                        // Replace table container content
-                                        $('#tableContainer').html(tableHTML);
-
-                                        console.log('✅ Table populated manually with ' + response.data.length + ' rows!');
-                                    }
-                                })
-                                .fail(function (xhr) {
-                                    console.error('❌ Failed to get data for manual population:', xhr.responseText);
-                                });
                         });
-                    };
+
+                        // Collect checkbox values (for multiple selections)
+                        const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+                        checkboxes.forEach(checkbox => {
+                            if (checkbox.name && checkbox.value) {
+                                params.append(checkbox.name, checkbox.value);
+                            }
+                        });
+
+                        // Collect radio button values
+                        const radios = document.querySelectorAll('input[type="radio"]:checked');
+                        radios.forEach(radio => {
+                            if (radio.name && radio.value) {
+                                params.append(radio.name, radio.value);
+                            }
+                        });
+
+                        console.log('📊 Export parameters:', params.toString());
+
+                        // Create download link
+                        const exportUrl = '/DN/ExportToExcel?' + params.toString();
+
+                        // Show loading message
+                        const originalText = event.target.innerHTML;
+                        event.target.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Đang xuất...';
+                        event.target.disabled = true;
+
+                        // Create a temporary link to trigger download
+                        const link = document.createElement('a');
+                        link.href = exportUrl;
+                        link.style.display = 'none';
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+
+                        // Reset button after a short delay
+                        setTimeout(() => {
+                            event.target.innerHTML = originalText;
+                            event.target.disabled = false;
+
+                            // Show success message
+                            const alertDiv = document.createElement('div');
+                            alertDiv.className = 'alert alert-success alert-dismissible fade show mt-3';
+                            alertDiv.innerHTML = `
+                                <i class="fas fa-check-circle me-2"></i>
+                                <strong>Thành công!</strong> File Excel đang được tải về.
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            `;
+
+                            // Insert alert before table container
+                            const tableContainer = document.querySelector('.table-container');
+                            if (tableContainer) {
+                                tableContainer.parentNode.insertBefore(alertDiv, tableContainer);
+
+                                // Auto remove alert after 5 seconds
+                                setTimeout(() => {
+                                    if (alertDiv.parentNode) {
+                                        alertDiv.remove();
+                                    }
+                                }, 5000);
+                            }
+                        }, 1000);
+                    }
+
+                    // Refresh table function
+                    function refreshTable() {
+                        window.location.reload();
+                    }
+
+                            // Show filter guide
+        function showFilterGuide() {
+            const guide = `🎯 HƯỚNG DẪN SỬ DỤNG BỘ LỌC VIEWRAWDATA
+
+📋 BỘ LỌC NAVIGATION:
+   • Click nút "Bộ lọc" để mở/đóng
+   • Multi-select: Giữ Ctrl + Click để chọn nhiều
+   • Search: Gõ để tìm kiếm trong dropdown
+   • Tự động lưu trạng thái mở/đóng
+
+🔍 CÁC BỘ LỌC:
+   • Năm: Chọn năm dữ liệu
+   • Tỉnh/Thành phố: Lọc theo địa phương  
+   • Loại hình KT: Lọc theo loại hình kinh tế
+   • Vùng KT: Lọc theo vùng kinh tế
+   • Giới hạn: Chọn cách hiển thị dữ liệu
+
+📊 GIỚI HẠN DỮ LIỆU:
+   • 1000 đầu: Hiển thị 1000 records đầu tiên
+   • 1000 cuối: Hiển thị 1000 records cuối cùng
+   • STT chẵn/lẻ: Lọc theo số thứ tự
+   • Tự chọn: Nhập khoảng STT tùy ý
+   • Tất cả: Hiển thị tối đa 5000 records
+
+⚡ TÍNH NĂNG:
+   • Export Excel: Xuất dữ liệu đã lọc
+   • Debug: Kiểm tra bộ lọc
+   • DataTable: Tìm kiếm, sắp xếp, phân trang
+   • Responsive: Tự động điều chỉnh trên mobile
+
+💡 MẸO:
+   • Dùng tìm kiếm trong dropdown để tìm nhanh
+   • Có thể chọn nhiều mục trong cùng bộ lọc
+   • Bộ lọc sẽ nhớ trạng thái khi điều hướng
+
+📥 EXPORT EXCEL:
+   • Click nút "Export Excel" để tải file
+   • File sẽ chứa đúng dữ liệu đang hiển thị
+   • Bao gồm tất cả cột và thông tin filter
+   • Tên file có timestamp và thông tin bộ lọc`;
+            
+            alert(guide);
+        }
+
+        // Test Export Excel function
+        function testExportExcel() {
+            console.log('🧪 TESTING EXPORT EXCEL FUNCTION...');
+            
+            // Check if form exists
+            const form = document.querySelector('.filter-form');
+            console.log('📋 Form found:', form ? 'Yes' : 'No');
+            
+            if (!form) {
+                alert('❌ Form not found for export');
+                return;
+            }
+            
+            // Collect all form data for testing
+            const formData = new FormData(form);
+            const params = new URLSearchParams();
+            
+            console.log('📊 Form elements found:');
+            
+            // Check form inputs
+            const allInputs = form.querySelectorAll('input, select');
+            console.log(`   - Total inputs: ${allInputs.length}`);
+            
+            // Check hidden inputs
+            const hiddenInputs = document.querySelectorAll('input[type="hidden"]');
+            console.log(`   - Hidden inputs: ${hiddenInputs.length}`);
+            hiddenInputs.forEach(input => {
+                if (input.value) {
+                    console.log(`     - ${input.name}: ${input.value}`);
+                    params.append(input.name, input.value);
+                }
+            });
+            
+            // Check checkboxes
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+            console.log(`   - Checked checkboxes: ${checkboxes.length}`);
+            checkboxes.forEach(checkbox => {
+                console.log(`     - ${checkbox.name}: ${checkbox.value}`);
+                params.append(checkbox.name, checkbox.value);
+            });
+            
+            // Check radio buttons
+            const radios = document.querySelectorAll('input[type="radio"]:checked');
+            console.log(`   - Selected radios: ${radios.length}`);
+            radios.forEach(radio => {
+                console.log(`     - ${radio.name}: ${radio.value}`);
+                params.append(radio.name, radio.value);
+            });
+            
+            const exportUrl = '/DN/ExportToExcel?' + params.toString();
+            console.log('🔗 Export URL:', exportUrl);
+            
+            alert(`✅ Export URL generated successfully!\n\nParameters found:\n- Hidden inputs: ${hiddenInputs.length}\n- Checkboxes: ${checkboxes.length}\n- Radio buttons: ${radios.length}\n\nCheck console for details.`);
+            
+            return exportUrl;
+        }
                 </script>
-
-                <!-- Print Styles -->
-                <style media="print">
-                    .top-nav,
-                    .nav-actions,
-                    .export-buttons,
-                    .footer,
-                    .dataTables_filter,
-                    .dataTables_length,
-                    .dataTables_paginate,
-                    .dataTables_info {
-                        display: none !important;
-                    }
-
-                    .content-card {
-                        box-shadow: none !important;
-                        margin: 0 !important;
-                    }
-
-                    #dataTable {
-                        font-size: 10px !important;
-                    }
-
-                    #dataTable th,
-                    #dataTable td {
-                        padding: 4px !important;
-                    }
-
-                    body {
-                        background: white !important;
-                    }
-                </style>
             </body>
 
             </html>
