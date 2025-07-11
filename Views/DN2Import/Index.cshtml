@@ -1,0 +1,834 @@
+@{
+    ViewData["Title"] = "Import DN2 Data";
+}
+
+<style>
+    /* Simple Import Page Styling */
+    .import-page {
+        background-color: #f8f9fa;
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+
+    .import-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    .page-title {
+        text-align: center;
+        color: #333;
+        font-size: 2rem;
+        margin-bottom: 2rem;
+        font-weight: 600;
+    }
+
+    .card-simple {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1.5rem;
+        border: 1px solid #e9ecef;
+    }
+
+    .card-header-simple {
+        background-color: #007bff;
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 8px 8px 0 0;
+        font-weight: 500;
+        font-size: 1.1rem;
+    }
+
+    .card-body-simple {
+        padding: 1.5rem;
+    }
+
+    .upload-area {
+        border: 2px dashed #007bff;
+        border-radius: 6px;
+        padding: 2rem;
+        text-align: center;
+        background-color: #f8f9ff;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .upload-area:hover {
+        border-color: #0056b3;
+        background-color: #e6f3ff;
+    }
+
+    .upload-area.dragover {
+        border-color: #28a745;
+        background-color: #f0fff4;
+    }
+
+    .upload-icon {
+        font-size: 2.5rem;
+        color: #007bff;
+        margin-bottom: 1rem;
+    }
+
+    .upload-text {
+        font-size: 1.1rem;
+        color: #495057;
+        margin-bottom: 0.5rem;
+    }
+
+    .upload-subtext {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+
+    .file-input {
+        display: none;
+    }
+
+    .btn-upload {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 4px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+
+    .btn-upload:hover {
+        background-color: #0056b3;
+    }
+
+    .btn-upload:disabled {
+        background-color: #6c757d;
+        cursor: not-allowed;
+    }
+
+    .alert-simple {
+        padding: 1rem;
+        border-radius: 4px;
+        margin-top: 1rem;
+    }
+
+    .alert-success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .alert-error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .alert-warning {
+        background-color: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+    }
+
+    .alert-info {
+        background-color: #d1ecf1;
+        color: #0c5460;
+        border: 1px solid #bee5eb;
+    }
+
+    .requirements {
+        background-color: #f8f9fa;
+        padding: 1rem;
+        border-radius: 4px;
+        border-left: 4px solid #007bff;
+    }
+
+    .requirements h6 {
+        color: #495057;
+        margin-bottom: 0.5rem;
+    }
+
+    .column-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+
+    .column-item {
+        background-color: #e9ecef;
+        color: #495057;
+        padding: 0.25rem 0.5rem;
+        border-radius: 3px;
+        font-size: 0.8rem;
+    }
+
+    .progress-simple {
+        background-color: #e9ecef;
+        border-radius: 4px;
+        height: 20px;
+        overflow: hidden;
+    }
+
+    .progress-bar-simple {
+        background-color: #007bff;
+        height: 100%;
+        transition: width 0.3s ease;
+    }
+
+    .progress-text {
+        text-align: center;
+        margin-top: 0.5rem;
+        color: #6c757d;
+    }
+
+    .loading {
+        display: none;
+        text-align: center;
+        margin-top: 1rem;
+    }
+
+    .spinner-simple {
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #007bff;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto;
+    }
+
+    .debug-info {
+        background-color: #fff3cd;
+        border: 1px solid #ffeaa7;
+        border-radius: 4px;
+        padding: 1rem;
+        margin-top: 1rem;
+        font-family: monospace;
+        font-size: 0.9rem;
+    }
+
+    /* Error details styling */
+    .error-details {
+        background-color: #f8d7da;
+        border: 1px solid #f1aeb5;
+        border-radius: 6px;
+        margin-top: 1rem;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .error-header {
+        background-color: #dc3545;
+        color: white;
+        padding: 0.75rem 1rem;
+        border-radius: 6px 6px 0 0;
+        font-weight: 500;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .error-header:hover {
+        background-color: #c82333;
+    }
+
+    .error-toggle {
+        font-size: 0.8rem;
+        opacity: 0.8;
+    }
+
+    .error-list {
+        padding: 0;
+        margin: 0;
+        list-style: none;
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .error-item {
+        border-bottom: 1px solid #f1aeb5;
+        padding: 1rem;
+        background-color: #fefefe;
+    }
+
+    .error-item:last-child {
+        border-bottom: none;
+    }
+
+    .error-item:nth-child(even) {
+        background-color: #fff5f5;
+    }
+
+    .error-row-header {
+        font-weight: 600;
+        color: #721c24;
+        margin-bottom: 0.5rem;
+        font-size: 1rem;
+    }
+
+    .error-message {
+        color: #856404;
+        background-color: #fff3cd;
+        padding: 0.5rem;
+        border-radius: 4px;
+        margin-bottom: 0.75rem;
+        border-left: 4px solid #ffc107;
+    }
+
+    .error-data {
+        background-color: #e2e3e5;
+        border-radius: 4px;
+        padding: 0.75rem;
+    }
+
+    .error-data-header {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .data-fields {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 0.5rem;
+    }
+
+    .data-field {
+        background-color: white;
+        padding: 0.4rem 0.6rem;
+        border-radius: 3px;
+        border-left: 3px solid #007bff;
+        font-size: 0.85rem;
+    }
+
+    .field-name {
+        font-weight: 600;
+        color: #495057;
+    }
+
+    .field-value {
+        color: #6c757d;
+        word-break: break-word;
+    }
+
+    .sql-error {
+        background-color: #f8d7da;
+        border: 1px solid #f1aeb5;
+        border-radius: 4px;
+        padding: 0.5rem;
+        margin-top: 0.5rem;
+        font-family: monospace;
+        font-size: 0.8rem;
+    }
+
+    .error-summary {
+        background-color: #e7f3ff;
+        border: 1px solid #b3d9ff;
+        border-radius: 4px;
+        padding: 0.75rem 1rem;
+        margin-bottom: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .export-errors-btn {
+        background-color: #6c757d;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .export-errors-btn:hover {
+        background-color: #5a6268;
+        color: white;
+        text-decoration: none;
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 0.9rem;
+        transition: background-color 0.2s ease;
+    }
+
+    .btn-secondary:hover {
+        background-color: #5a6268;
+        color: white;
+        text-decoration: none;
+    }
+
+    .btn-sm {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.85rem;
+    }
+
+    @@keyframes spin
+    {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Responsive */
+        @@media (max-width: 768px) {
+                .page-title {
+                    font-size: 1.5rem;
+                }
+
+                .upload-area {
+                    padding: 1.5rem 1rem;
+                }
+
+                .upload-icon {
+                    font-size: 2rem;
+                }
+            }
+        </style>
+
+        <div class="import-page">
+            <div class="import-container">
+                <h1 class="page-title">Import DN2 Data</h1>
+
+                <div class="card-simple">
+                    <div class="card-header-simple">
+                        <i class="fas fa-upload me-2"></i>
+                        Upload Excel File
+                    </div>
+                    <div class="card-body-simple">
+                        <!-- Database Status Information -->
+                        @if (ViewBag.DatabaseStatus != null || ViewBag.TableStatus != null)
+                        {
+                            <div class="alert-simple alert-info">
+                                <strong>System Status:</strong><br>
+                                @if (ViewBag.DatabaseStatus != null)
+                                {
+                                    <div>@ViewBag.DatabaseStatus</div>
+                                }
+                                @if (ViewBag.TableStatus != null)
+                                {
+                                    <div>@ViewBag.TableStatus</div>
+                                }
+                            </div>
+                        }
+
+                        <form method="post" enctype="multipart/form-data" id="importForm">
+                            <div class="upload-area" id="uploadArea">
+                                <div class="upload-icon">
+                                    <i class="fas fa-file-excel"></i>
+                                </div>
+                                <div class="upload-text">Click to select Excel file</div>
+                                <div class="upload-subtext">or drag and drop here</div>
+                                <input type="file" class="file-input" id="file" name="file" accept=".xlsx,.xls">
+                            </div>
+
+                            <div class="text-center mt-3">
+                                <button type="submit" class="btn-upload" id="uploadBtn" disabled>
+                                    <i class="fas fa-upload me-2"></i>
+                                    Import Data
+                                </button>
+                            </div>
+
+                            <div class="loading" id="loading">
+                                <div class="spinner-simple"></div>
+                                <div class="mt-2">Processing...</div>
+                            </div>
+                        </form>
+
+                        <!-- Debug Information -->
+                        <div class="debug-info" id="debugInfo" style="display: none;">
+                            <strong>Debug Information:</strong><br>
+                            <div id="debugContent"></div>
+                        </div>
+                    </div>
+                </div>
+
+                @if (ViewBag.Message != null)
+                {
+                    <div class="alert-simple alert-@ViewBag.MessageType">
+                        <strong>@ViewBag.Message</strong>
+
+                        @if (ViewBag.Details != null && ViewBag.Details.Count > 0)
+                        {
+                            var errorCount = ViewBag.Details.Count;
+                            var totalRows = ViewBag.TotalRows ?? 0;
+                            var successRows = totalRows - errorCount;
+
+                            <div class="error-summary">
+                                <div>
+                                    <strong>📊 Tổng kết:</strong>
+                                    <span style="color: #28a745;">✅ Thành công: @successRows hàng</span> |
+                                    <span style="color: #dc3545;">❌ Lỗi: @errorCount hàng</span>
+                                </div>
+                                <button class="export-errors-btn" onclick="exportErrors()">
+                                    <i class="fas fa-download"></i> Xuất lỗi
+                                </button>
+                            </div>
+
+                            <div class="error-details">
+                                <div class="error-header" onclick="toggleErrorList()">
+                                    <span>
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        Chi tiết lỗi (@errorCount hàng)
+                                    </span>
+                                    <span class="error-toggle" id="errorToggle">
+                                        Nhấn để xem ▼
+                                    </span>
+                                </div>
+                                <ul class="error-list" id="errorList" style="display: none;">
+                                    @foreach (var detail in ViewBag.Details)
+                                    {
+                                        var lines = detail.ToString().Split('\n');
+                                        var firstLine = lines[0];
+
+                                        <li class="error-item">
+                                            <div class="error-row-header">@firstLine</div>
+
+                                            @if (lines.Length > 1)
+                                            {
+                                                var dataSection = false;
+                                                var sqlSection = false;
+                                                var dataFields = new List<string>();
+                                                var sqlErrors = new List<string>();
+
+                                                for (int i = 1; i < lines.Length; i++)
+                                                {
+                                                    var line = lines[i].Trim();
+                                                    if (line.Contains("📋 Dữ liệu hàng:"))
+                                                    {
+                                                        dataSection = true;
+                                                        sqlSection = false;
+                                                    }
+                                                    else if (line.Contains("🔍 Lỗi SQL:") || line.Contains("📊 Error Number:"))
+                                                    {
+                                                        sqlSection = true;
+                                                        dataSection = false;
+                                                        sqlErrors.Add(line);
+                                                    }
+                                                    else if (dataSection && line.StartsWith("•"))
+                                                    {
+                                                        dataFields.Add(line.Substring(1).Trim());
+                                                    }
+                                                    else if (sqlSection)
+                                                    {
+                                                        sqlErrors.Add(line);
+                                                    }
+                                                }
+
+                                                @if (dataFields.Any())
+                                                {
+                                                    <div class="error-data">
+                                                        <div class="error-data-header">📋 Dữ liệu hàng bị lỗi:</div>
+                                                        <div class="data-fields">
+                                                            @foreach (var field in dataFields)
+                                                            {
+                                                                var parts = field.Split(':', 2);
+                                                                if (parts.Length == 2)
+                                                                {
+                                                                    <div class="data-field">
+                                                                        <div class="field-name">@parts[0].Trim()</div>
+                                                                        <div class="field-value">@parts[1].Trim().Trim('\'', '"')</div>
+                                                                    </div>
+                                                                }
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                }
+
+                                                @if (sqlErrors.Any())
+                                                {
+                                                    <div class="sql-error">
+                                                        <strong>🔍 Chi tiết lỗi SQL:</strong><br>
+                                                        @foreach (var sqlError in sqlErrors)
+                                                        {
+                                                            <div>@sqlError</div>
+                                                        }
+                                                    </div>
+                                                }
+                                            }
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                        }
+                    </div>
+                }
+
+                <div class="card-simple">
+                    <div class="card-header-simple">
+                        <i class="fas fa-info-circle me-2"></i>
+                        File Requirements
+                    </div>
+                    <div class="card-body-simple">
+                        <div class="requirements">
+                            <h6>Required columns (flexible mapping):</h6>
+                            <div class="column-list">
+                                <span class="column-item" style="background-color: #d1ecf1;">TenDN (Tên doanh nghiệp)</span>
+                                <span class="column-item" style="background-color: #d1ecf1;">Diachi (Địa chỉ)</span>
+                                <span class="column-item" style="background-color: #d1ecf1;">MaTinh_Dieutra (Mã Tỉnh)</span>
+                                <span class="column-item" style="background-color: #d1ecf1;">MaHuyen_Dieutra (Mã Huyện)</span>
+                            </div>
+                            <h6 style="margin-top: 1rem;">Optional columns (auto-mapped if available):</h6>
+                            <div class="column-list">
+                                <span class="column-item">Masothue (Mã số thuế)</span>
+                                <span class="column-item">MaXa_Dieutra</span>
+                                <span class="column-item">Region (auto-detect: Miền Bắc/Trung/Nam if missing)</span>
+                                <span class="column-item">Loaihinhkte</span>
+                                <span class="column-item">Email</span>
+                                <span class="column-item">Dienthoai</span>
+                                <span class="column-item">Nam</span>
+                                <span class="column-item">Vungkinhte (auto-detect from province if missing)</span>
+                                <span class="column-item">MaNganhC5_Chinh</span>
+                                <span class="column-item">TEN_NGANH</span>
+                                <span class="column-item">SR_Doanhthu_Thuan_BH_CCDV</span>
+                                <span class="column-item">SR_Loinhuan_TruocThue</span>
+                                <span class="column-item">SoLaodong_DauNam</span>
+                                <span class="column-item">SoLaodong_CuoiNam</span>
+                                <span class="column-item">Taisan_Tong_CK</span>
+                                <span class="column-item">Taisan_Tong_DK</span>
+                            </div>
+                            <div style="margin-top: 1rem; padding: 0.5rem; background-color: #fff3cd; border-radius: 4px;">
+                                <small><strong>Note:</strong> STT will be auto-generated. Column order doesn't matter - system
+                                    will map by column names.</small>
+                            </div>
+                            <div style="margin-top: 0.5rem; padding: 0.5rem; background-color: #d1ecf1; border-radius: 4px;">
+                                <small><strong>Auto-Detection:</strong> If Region or Vungkinhte columns are missing, system will
+                                    automatically determine them from MaTinh_Dieutra code.</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-simple">
+                    <div class="card-header-simple">
+                        <i class="fas fa-chart-bar me-2"></i>
+                        Progress
+                    </div>
+                    <div class="card-body-simple">
+                        <div class="progress-simple">
+                            <div id="progressBar" class="progress-bar-simple" style="width: 0%"></div>
+                        </div>
+                        <div id="progressText" class="progress-text">Ready to import</div>
+                    </div>
+                </div>
+
+                <!-- Test link for error display -->
+                <div class="text-center mt-3">
+                    <a href="/DN2Import/TestErrors" class="btn btn-secondary btn-sm">
+                        <i class="fas fa-bug"></i> 🧪 Test Error Display
+                    </a>
+                    <small class="text-muted d-block mt-1">Demo hiển thị lỗi chi tiết</small>
+                </div>
+            </div>
+        </div>
+
+        @section Scripts {
+            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+            <script>
+                $(document).ready(function () {
+                    console.log('DNImport page loaded');
+
+                    const fileInput = $('#file');
+                    const uploadArea = $('#uploadArea');
+                    const uploadBtn = $('#uploadBtn');
+                    const importForm = $('#importForm');
+                    const loading = $('#loading');
+                    const progressBar = $('#progressBar');
+                    const progressText = $('#progressText');
+                    const debugInfo = $('#debugInfo');
+                    const debugContent = $('#debugContent');
+
+                    function addDebugInfo(message) {
+                        console.log('DEBUG: ' + message);
+                        debugContent.append(new Date().toLocaleTimeString() + ': ' + message + '<br>');
+                        debugInfo.show();
+                    }
+
+                    addDebugInfo('Page initialized successfully');
+
+                    // Click to upload
+                    uploadArea.on('click', function () {
+                        addDebugInfo('Upload area clicked');
+                        fileInput.click();
+                    });
+
+                    // File selected
+                    fileInput.on('change', function () {
+                        const file = this.files[0];
+                        addDebugInfo('File input changed. File: ' + (file ? file.name : 'none'));
+
+                        if (file) {
+                            addDebugInfo('File selected: ' + file.name + ', Size: ' + file.size + ' bytes, Type: ' + file.type);
+                            $('.upload-text').text(file.name);
+                            $('.upload-subtext').text('File size: ' + (file.size / 1024 / 1024).toFixed(2) + ' MB');
+                            uploadBtn.prop('disabled', false);
+                            addDebugInfo('Upload button enabled');
+                        } else {
+                            $('.upload-text').text('Click to select Excel file');
+                            $('.upload-subtext').text('or drag and drop here');
+                            uploadBtn.prop('disabled', true);
+                            addDebugInfo('Upload button disabled');
+                        }
+                    });
+
+                    // Drag and drop
+                    uploadArea.on('dragover', function (e) {
+                        e.preventDefault();
+                        $(this).addClass('dragover');
+                        addDebugInfo('Drag over detected');
+                    });
+
+                    uploadArea.on('dragleave', function (e) {
+                        e.preventDefault();
+                        $(this).removeClass('dragover');
+                        addDebugInfo('Drag leave detected');
+                    });
+
+                    uploadArea.on('drop', function (e) {
+                        e.preventDefault();
+                        $(this).removeClass('dragover');
+                        addDebugInfo('File dropped');
+
+                        const files = e.originalEvent.dataTransfer.files;
+                        if (files.length > 0) {
+                            addDebugInfo('Dropped file: ' + files[0].name);
+                            fileInput[0].files = files;
+                            fileInput.trigger('change');
+                        }
+                    });
+
+                    // Form submit
+                    importForm.on('submit', function (e) {
+                        addDebugInfo('Form submit triggered');
+
+                        const file = fileInput[0].files[0];
+                        if (!file) {
+                            e.preventDefault();
+                            addDebugInfo('ERROR: No file selected');
+                            alert('Please select a file first!');
+                            return false;
+                        }
+
+                        addDebugInfo('Starting form submission with file: ' + file.name);
+                        uploadBtn.prop('disabled', true);
+                        loading.show();
+                        progressText.text('Starting import...');
+
+                        // Progress simulation
+                        let progress = 0;
+                        const interval = setInterval(function () {
+                            progress += Math.random() * 10;
+                            if (progress > 90) progress = 90;
+
+                            progressBar.css('width', progress + '%');
+                            progressText.text('Processing: ' + Math.round(progress) + '%');
+                            addDebugInfo('Progress: ' + Math.round(progress) + '%');
+
+                            // Check server progress
+                            $.get('/DN2Import/GetProgress', function (data) {
+                                if (data.progress) {
+                                    progressBar.css('width', data.progress + '%');
+                                    progressText.text(data.message || 'Processing: ' + data.progress + '%');
+                                    addDebugInfo('Server progress: ' + data.progress + '%');
+
+                                    if (data.progress >= 100) {
+                                        clearInterval(interval);
+                                        progressText.text('Import completed!');
+                                        addDebugInfo('Import completed successfully');
+                                    }
+                                }
+                            }).fail(function (xhr, status, error) {
+                                addDebugInfo('Progress check failed: ' + error);
+                            });
+                        }, 1000);
+
+                        // Cleanup after 5 minutes
+                        setTimeout(function () {
+                            clearInterval(interval);
+                            addDebugInfo('Progress tracking timeout');
+                        }, 300000);
+                    });
+
+                    // Error handling functions
+                    window.toggleErrorList = function () {
+                        const errorList = $('#errorList');
+                        const errorToggle = $('#errorToggle');
+
+                        if (errorList.is(':visible')) {
+                            errorList.slideUp();
+                            errorToggle.text('Nhấn để xem ▼');
+                        } else {
+                            errorList.slideDown();
+                            errorToggle.text('Ẩn chi tiết ▲');
+                        }
+                    };
+
+                    window.exportErrors = function () {
+                        const errorDetails = [];
+
+                        $('.error-item').each(function () {
+                            const rowHeader = $(this).find('.error-row-header').text();
+                            const dataFields = [];
+
+                            $(this).find('.data-field').each(function () {
+                                const fieldName = $(this).find('.field-name').text();
+                                const fieldValue = $(this).find('.field-value').text();
+                                dataFields.push(fieldName + ': ' + fieldValue);
+                            });
+
+                            const sqlError = $(this).find('.sql-error').text();
+
+                            errorDetails.push({
+                                row: rowHeader,
+                                data: dataFields.join('\n'),
+                                sqlError: sqlError
+                            });
+                        });
+
+                        // Tạo CSV content
+                        let csvContent = 'Hàng lỗi,Dữ liệu,Lỗi SQL\n';
+                        errorDetails.forEach(error => {
+                            const row = '"' + error.row.replace(/"/g, '""') + '"';
+                            const data = '"' + error.data.replace(/"/g, '""') + '"';
+                            const sqlError = '"' + error.sqlError.replace(/"/g, '""') + '"';
+                            csvContent += row + ',' + data + ',' + sqlError + '\n';
+                        });
+
+                        // Download CSV
+                        const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+                        const link = document.createElement('a');
+                        if (link.download !== undefined) {
+                            const url = URL.createObjectURL(blob);
+                            link.setAttribute('href', url);
+                            link.setAttribute('download', 'import_errors_' + new Date().toISOString().slice(0, 10) + '.csv');
+                            link.style.visibility = 'hidden';
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                        }
+                    };
+
+                    // Test form action
+                    addDebugInfo('Form action: ' + importForm.attr('action'));
+                    addDebugInfo('Form method: ' + importForm.attr('method'));
+                    addDebugInfo('Form enctype: ' + importForm.attr('enctype'));
+                });
+            </script>
+        }
