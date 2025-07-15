@@ -238,7 +238,7 @@ namespace CIResearch.Controllers
             }
         };
 
-        private string _connectionString = "Server=localhost;Database=sakila;User=root;Password=1234;CharSet=utf8mb4;SslMode=none;";
+        private string _connectionString = "Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;CharSet=utf8mb4;SslMode=none;";
 
         public DNImportController()
         {
@@ -859,7 +859,7 @@ namespace CIResearch.Controllers
             var columnList = string.Join(", ", columns);
             var paramList = string.Join(", ", columns.Select(c => $"@{c}"));
 
-            return $@"INSERT INTO sakila.dn_all ({columnList}) 
+            return $@"INSERT INTO admin_ciresearch.dn_all ({columnList}) 
                      VALUES ({paramList})";
         }
 

@@ -29,7 +29,7 @@ namespace CIResearch.Controllers
     public class DN2Controller : Controller
     {
         private readonly IMemoryCache _cache;
-        private string _connectionString = "Server=localhost;Database=sakila;User=root;Password=1234;";
+        private string _connectionString = "Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;";
 
         // Multi-level cache keys for comprehensive caching
         private const string DATA_CACHE_KEY = "dn_all2";
@@ -76,14 +76,14 @@ namespace CIResearch.Controllers
 
                 Console.WriteLine($"? Database connection successful! Found {recordCount:N0} records");
 
-                return (true, "? K?t n?i co s? d? li?u thành công!",
-                       $"Server: 127.0.0.1 | Database: sakila | Records: {recordCount:N0}");
+                return (true, "? K?t n?i co s? d? li?u thï¿½nh cï¿½ng!",
+                       $"Server: 127.0.0.1 | Database: admin_ciresearch | Records: {recordCount:N0}");
             }
             catch (MySqlException mysqlEx)
             {
                 Console.WriteLine($"? MySQL Error: {mysqlEx.Message}");
                 return (false, "? L?i k?t n?i MySQL!",
-                       $"Mã l?i: {mysqlEx.Number} | Chi ti?t: {mysqlEx.Message}");
+                       $"Mï¿½ l?i: {mysqlEx.Number} | Chi ti?t: {mysqlEx.Message}");
             }
             catch (Exception ex)
             {
@@ -137,10 +137,10 @@ namespace CIResearch.Controllers
 
                 // Update connection status to show specific error
                 ViewBag.DatabaseConnected = false;
-                ViewBag.DatabaseMessage = "? L?i x? lý d? li?u!";
+                ViewBag.DatabaseMessage = "? L?i x? lï¿½ d? li?u!";
                 ViewBag.DatabaseDetails = $"Chi ti?t l?i: {ex.Message}";
 
-                ViewBag.Error = "Không th? k?t n?i ho?c l?y d? li?u t? database. Vui lòng ki?m tra l?i k?t n?i ho?c d? li?u.";
+                ViewBag.Error = "Khï¿½ng th? k?t n?i ho?c l?y d? li?u t? database. Vui lï¿½ng ki?m tra l?i k?t n?i ho?c d? li?u.";
                 ViewBag.Data = new List<QLKH>();
 
                 // Initialize ALL ViewBag properties with safe defaults when database fails
@@ -428,16 +428,16 @@ namespace CIResearch.Controllers
             {
                 case "custom":
                     if (!customStart.HasValue || !customEnd.HasValue)
-                        return "Vui lòng nh?p d?y d? giá tr? T? và Ð?n cho T? ch?n kho?ng";
+                        return "Vui lï¿½ng nh?p d?y d? giï¿½ tr? T? vï¿½ ï¿½?n cho T? ch?n kho?ng";
 
                     if (customStart.Value <= 0 || customEnd.Value <= 0)
-                        return "Giá tr? STT ph?i l?n hon 0";
+                        return "Giï¿½ tr? STT ph?i l?n hon 0";
 
                     if (customStart.Value > customEnd.Value)
-                        return "Giá tr? 'T?' ph?i nh? hon ho?c b?ng 'Ð?n'";
+                        return "Giï¿½ tr? 'T?' ph?i nh? hon ho?c b?ng 'ï¿½?n'";
 
                     if (customEnd.Value - customStart.Value > 10000)
-                        return "Kho?ng không du?c vu?t quá 10,000 records d? d?m b?o hi?u su?t";
+                        return "Kho?ng khï¿½ng du?c vu?t quï¿½ 10,000 records d? d?m b?o hi?u su?t";
 
                     break;
 
@@ -445,19 +445,19 @@ namespace CIResearch.Controllers
                     if (evenStart.HasValue || evenEnd.HasValue)
                     {
                         if (!evenStart.HasValue || !evenEnd.HasValue)
-                            return "Vui lòng nh?p d?y d? kho?ng STT ch?n";
+                            return "Vui lï¿½ng nh?p d?y d? kho?ng STT ch?n";
 
                         if (evenStart.Value <= 0 || evenEnd.Value <= 0)
-                            return "Giá tr? STT ch?n ph?i l?n hon 0";
+                            return "Giï¿½ tr? STT ch?n ph?i l?n hon 0";
 
                         if (evenStart.Value % 2 != 0 || evenEnd.Value % 2 != 0)
-                            return "Vui lòng ch? nh?p s? ch?n cho kho?ng STT ch?n";
+                            return "Vui lï¿½ng ch? nh?p s? ch?n cho kho?ng STT ch?n";
 
                         if (evenStart.Value > evenEnd.Value)
-                            return "STT ch?n 'T?' ph?i nh? hon ho?c b?ng 'Ð?n'";
+                            return "STT ch?n 'T?' ph?i nh? hon ho?c b?ng 'ï¿½?n'";
 
                         if (evenEnd.Value - evenStart.Value > 10000)
-                            return "Kho?ng STT ch?n không du?c vu?t quá 10,000 d? d?m b?o hi?u su?t";
+                            return "Kho?ng STT ch?n khï¿½ng du?c vu?t quï¿½ 10,000 d? d?m b?o hi?u su?t";
                     }
                     break;
 
@@ -465,19 +465,19 @@ namespace CIResearch.Controllers
                     if (oddStart.HasValue || oddEnd.HasValue)
                     {
                         if (!oddStart.HasValue || !oddEnd.HasValue)
-                            return "Vui lòng nh?p d?y d? kho?ng STT l?";
+                            return "Vui lï¿½ng nh?p d?y d? kho?ng STT l?";
 
                         if (oddStart.Value <= 0 || oddEnd.Value <= 0)
-                            return "Giá tr? STT l? ph?i l?n hon 0";
+                            return "Giï¿½ tr? STT l? ph?i l?n hon 0";
 
                         if (oddStart.Value % 2 == 0 || oddEnd.Value % 2 == 0)
-                            return "Vui lòng ch? nh?p s? l? cho kho?ng STT l?";
+                            return "Vui lï¿½ng ch? nh?p s? l? cho kho?ng STT l?";
 
                         if (oddStart.Value > oddEnd.Value)
-                            return "STT l? 'T?' ph?i nh? hon ho?c b?ng 'Ð?n'";
+                            return "STT l? 'T?' ph?i nh? hon ho?c b?ng 'ï¿½?n'";
 
                         if (oddEnd.Value - oddStart.Value > 10000)
-                            return "Kho?ng STT l? không du?c vu?t quá 10,000 d? d?m b?o hi?u su?t";
+                            return "Kho?ng STT l? khï¿½ng du?c vu?t quï¿½ 10,000 d? d?m b?o hi?u su?t";
                     }
                     break;
             }
@@ -1126,7 +1126,7 @@ namespace CIResearch.Controllers
                     foreach (var company in sampleWithLabor)
                     {
                         Console.WriteLine($"   - {company.TenDN}: {company.SoLaodong_CuoiNam:N0} lao d?ng");
-                        Console.WriteLine($"     Mã s? thu?: {company.Masothue}");
+                        Console.WriteLine($"     Mï¿½ s? thu?: {company.Masothue}");
                     }
                 }
             }
@@ -1209,24 +1209,24 @@ namespace CIResearch.Controllers
             stats.RegionCounts = regionGrouping;
 
             // Map Vungkinhte to 3 main regions for ViewBag compatibility
-            var dongBangSongHong = regionGrouping.GetValueOrDefault("Ð?ng b?ng Sông H?ng", 0);
-            var trungDuMienNui = regionGrouping.GetValueOrDefault("Trung du và Mi?n núi B?c B?", 0);
+            var dongBangSongHong = regionGrouping.GetValueOrDefault("ï¿½?ng b?ng Sï¿½ng H?ng", 0);
+            var trungDuMienNui = regionGrouping.GetValueOrDefault("Trung du vï¿½ Mi?n nï¿½i B?c B?", 0);
             var bacTrungBo = regionGrouping.GetValueOrDefault("B?c Trung B?", 0);
-            var duyenHaiNamTrungBo = regionGrouping.GetValueOrDefault("Duyên h?i Nam Trung B?", 0);
-            var tayNguyen = regionGrouping.GetValueOrDefault("Tây Nguyên", 0);
-            var dongNamBo = regionGrouping.GetValueOrDefault("Ðông Nam B?", 0);
-            var dongBangSongCuuLong = regionGrouping.GetValueOrDefault("Ð?ng b?ng Sông C?u Long", 0);
+            var duyenHaiNamTrungBo = regionGrouping.GetValueOrDefault("Duyï¿½n h?i Nam Trung B?", 0);
+            var tayNguyen = regionGrouping.GetValueOrDefault("Tï¿½y Nguyï¿½n", 0);
+            var dongNamBo = regionGrouping.GetValueOrDefault("ï¿½ï¿½ng Nam B?", 0);
+            var dongBangSongCuuLong = regionGrouping.GetValueOrDefault("ï¿½?ng b?ng Sï¿½ng C?u Long", 0);
 
             ViewBag.MienBacCount = dongBangSongHong + trungDuMienNui;
             ViewBag.MienTrungCount = bacTrungBo + duyenHaiNamTrungBo + tayNguyen;
             ViewBag.MienNamCount = dongNamBo + dongBangSongCuuLong;
 
             Console.WriteLine($"\n? VUNG KINH TE VIEWBAG ASSIGNMENT FOR YEAR {currentYear}:");
-            Console.WriteLine($"   - 7 Vùng Kinh T? found: {regionGrouping.Count}");
+            Console.WriteLine($"   - 7 Vï¿½ng Kinh T? found: {regionGrouping.Count}");
             Console.WriteLine($"   - Mapping to 3 mi?n for ViewBag compatibility:");
-            Console.WriteLine($"     * Mi?n B?c: {ViewBag.MienBacCount} companies (Ð?ng b?ng SH + Trung du mi?n núi)");
-            Console.WriteLine($"     * Mi?n Trung: {ViewBag.MienTrungCount} companies (B?c TB + Duyên h?i NTB + Tây Nguyên)");
-            Console.WriteLine($"     * Mi?n Nam: {ViewBag.MienNamCount} companies (Ðông Nam B? + ÐBSCL)");
+            Console.WriteLine($"     * Mi?n B?c: {ViewBag.MienBacCount} companies (ï¿½?ng b?ng SH + Trung du mi?n nï¿½i)");
+            Console.WriteLine($"     * Mi?n Trung: {ViewBag.MienTrungCount} companies (B?c TB + Duyï¿½n h?i NTB + Tï¿½y Nguyï¿½n)");
+            Console.WriteLine($"     * Mi?n Nam: {ViewBag.MienNamCount} companies (ï¿½ï¿½ng Nam B? + ï¿½BSCL)");
             Console.WriteLine($"   - Total regional: {ViewBag.MienBacCount + ViewBag.MienTrungCount + ViewBag.MienNamCount} companies");
 
             // Business type distribution - FIXED: Use unique companies from current year
@@ -1339,7 +1339,7 @@ namespace CIResearch.Controllers
             // Add the "No Industry Data" category
             if (companiesWithoutIndustry.Any())
             {
-                industryDistribution.Add(new { TEN_NGANH = "Chua có d? li?u ngành ngh?", SoLuong = companiesWithoutIndustry.Count });
+                industryDistribution.Add(new { TEN_NGANH = "Chua cï¿½ d? li?u ngï¿½nh ngh?", SoLuong = companiesWithoutIndustry.Count });
             }
 
             // Validate total companies in distribution
@@ -1545,7 +1545,7 @@ namespace CIResearch.Controllers
                 Console.WriteLine($"   Years present: {string.Join(", ", company.Select(x => x.Nam).OrderBy(x => x))}");
             }
 
-            // Thêm th?ng kê cho tài s?n cu?i k? (Taisan_Tong_CK) - already calculated above
+            // Thï¿½m th?ng kï¿½ cho tï¿½i s?n cu?i k? (Taisan_Tong_CK) - already calculated above
             stats.FinancialStats["TotalAssetsCK"] = stats.FinancialStats["TotalAssets"];
             stats.FinancialStats["CompaniesWithAssetsCK"] = uniqueCompaniesWithAssets.Count;
 
@@ -1651,7 +1651,7 @@ namespace CIResearch.Controllers
             }
             else
             {
-                Console.WriteLine($"? NO TREND DATA FOUND after grouping from database sakila.dn_all");
+                Console.WriteLine($"? NO TREND DATA FOUND after grouping from database admin_ciresearch.dn_all");
                 Console.WriteLine($"? Check if records have valid values in Nam, SR_Doanhthu_Thuan_BH_CCDV, SR_Loinhuan_TruocThue columns");
             }
 
@@ -1687,7 +1687,7 @@ namespace CIResearch.Controllers
                     .GroupBy(x => x.QUY_MO.Trim())
                     .Select(g => new
                     {
-                        QuyMo = GetQuyMoDescription(g.Key), // Use short label (Siêu nh?, Nh?, V?a, L?n)
+                        QuyMo = GetQuyMoDescription(g.Key), // Use short label (Siï¿½u nh?, Nh?, V?a, L?n)
                         SoLuong = g.Count(),
                         MoTa = GetQuyMoDescription(g.Key) // Same as QuyMo for consistency
                     })
@@ -1737,7 +1737,7 @@ namespace CIResearch.Controllers
         {
             return quyMo switch
             {
-                "Doanh nghi?p siêu nh?" => "Siêu nh?",
+                "Doanh nghi?p siï¿½u nh?" => "Siï¿½u nh?",
                 "Doanh nghi?p nh?" => "Nh?",
                 "Doanh nghi?p v?a" => "V?a",
                 "Doanh nghi?p l?n" => "L?n",
@@ -1750,7 +1750,7 @@ namespace CIResearch.Controllers
         {
             return quyMoShort switch
             {
-                "Siêu nh?" => 1,
+                "Siï¿½u nh?" => 1,
                 "Nh?" => 2,
                 "V?a" => 3,
                 "L?n" => 4,
@@ -1763,7 +1763,7 @@ namespace CIResearch.Controllers
         {
             return quyMo switch
             {
-                "Doanh nghi?p siêu nh?" => 1,
+                "Doanh nghi?p siï¿½u nh?" => 1,
                 "Doanh nghi?p nh?" => 2,
                 "Doanh nghi?p v?a" => 3,
                 "Doanh nghi?p l?n" => 4,
@@ -1775,13 +1775,13 @@ namespace CIResearch.Controllers
         private static string MapToSimpleLabel(string quyMoFromDb)
         {
             if (string.IsNullOrWhiteSpace(quyMoFromDb))
-                return "Khác";
+                return "Khï¿½c";
 
             var normalized = quyMoFromDb.Trim().ToLower();
 
             // Map to simple labels that match frontend expectations
-            if (normalized.Contains("siêu nh?") || normalized.Contains("sieu nho"))
-                return "Siêu nh?";
+            if (normalized.Contains("siï¿½u nh?") || normalized.Contains("sieu nho"))
+                return "Siï¿½u nh?";
             else if (normalized.Contains("nh?") || normalized.Contains("nho"))
                 return "Nh?";
             else if (normalized.Contains("v?a") || normalized.Contains("vua"))
@@ -1797,7 +1797,7 @@ namespace CIResearch.Controllers
         {
             return quyMo switch
             {
-                "Siêu nh?" => 1,
+                "Siï¿½u nh?" => 1,
                 "Nh?" => 2,
                 "V?a" => 3,
                 "L?n" => 4,
@@ -1809,17 +1809,17 @@ namespace CIResearch.Controllers
         private static string GetCompanySizeDescription(string quyMo)
         {
             if (string.IsNullOrWhiteSpace(quyMo))
-                return "Không xác d?nh";
+                return "Khï¿½ng xï¿½c d?nh";
 
             var size = quyMo.Trim().ToLower();
 
             return size switch
             {
-                "siêu nh?" or "sieu nho" => "Doanh nghi?p siêu nh?",
+                "siï¿½u nh?" or "sieu nho" => "Doanh nghi?p siï¿½u nh?",
                 "nh?" or "nho" => "Doanh nghi?p nh?",
                 "v?a" or "vua" => "Doanh nghi?p v?a",
                 "l?n" or "lon" => "Doanh nghi?p l?n",
-                _ => $"Quy mô: {quyMo}" // Return original value with prefix
+                _ => $"Quy mï¿½: {quyMo}" // Return original value with prefix
             };
         }
 
@@ -1828,7 +1828,7 @@ namespace CIResearch.Controllers
         {
             return category switch
             {
-                "Doanh nghi?p siêu nh?" => "Doanh nghi?p siêu nh? (DT = 3 t? VND)",
+                "Doanh nghi?p siï¿½u nh?" => "Doanh nghi?p siï¿½u nh? (DT = 3 t? VND)",
                 "Doanh nghi?p nh?" => "Doanh nghi?p nh? (3 t? < DT = 50 t? VND)",
                 "Doanh nghi?p v?a" => "Doanh nghi?p v?a (50 t? < DT = 300 t? VND)",
                 "Doanh nghi?p l?n" => "Doanh nghi?p l?n (DT > 300 t? VND)",
@@ -1841,7 +1841,7 @@ namespace CIResearch.Controllers
         {
             return category switch
             {
-                "Doanh nghi?p siêu nh?" => 1,
+                "Doanh nghi?p siï¿½u nh?" => 1,
                 "Doanh nghi?p nh?" => 2,
                 "Doanh nghi?p v?a" => 3,
                 "Doanh nghi?p l?n" => 4,
@@ -1903,7 +1903,7 @@ namespace CIResearch.Controllers
             ViewBag.CompaniesWithAssets = (int)(financialStats.GetValueOrDefault("CompaniesWithAssets", 0));
             ViewBag.CompaniesWithProfit = (int)(financialStats.GetValueOrDefault("CompaniesWithProfit", 0));
 
-            // Tính t?ng tài s?n cu?i k? (Taisan_Tong_CK) 
+            // Tï¿½nh t?ng tï¿½i s?n cu?i k? (Taisan_Tong_CK) 
             ViewBag.TotalAssetsCK = financialStats.GetValueOrDefault("TotalAssetsCK", 0);
             ViewBag.CompaniesWithAssetsCK = (int)(financialStats.GetValueOrDefault("CompaniesWithAssetsCK", 0));
 
@@ -1923,7 +1923,7 @@ namespace CIResearch.Controllers
             // Region counts for the view - USE DIRECT REGION VALUES FROM DATABASE
             // ViewBag is already assigned correctly in CalculateAllStatistics - DON'T OVERRIDE!
 
-            // Top 3 Business Types (Phân lo?i DN) - l?y t? database th?c t?
+            // Top 3 Business Types (Phï¿½n lo?i DN) - l?y t? database th?c t?
             var top3BusinessTypes = stats.BusinessTypeCounts
                 .OrderByDescending(x => x.Value)
                 .Take(3)
@@ -1938,7 +1938,7 @@ namespace CIResearch.Controllers
                 Console.WriteLine($"   - Top {i + 1}: '{typeName}' ? '{shortName}' ({typeCount} companies)");
             }
 
-            // Gán top 3 lo?i hình doanh nghi?p vào ViewBag v?i tên vi?t t?t
+            // Gï¿½n top 3 lo?i hï¿½nh doanh nghi?p vï¿½o ViewBag v?i tï¿½n vi?t t?t
             ViewBag.TopBusinessType1Name = top3BusinessTypes.Count > 0 ? ShortenBusinessTypeName(top3BusinessTypes[0].Key) : "N/A";
             ViewBag.TopBusinessType1Count = top3BusinessTypes.Count > 0 ? top3BusinessTypes[0].Value : 0;
 
@@ -2098,9 +2098,9 @@ namespace CIResearch.Controllers
                 TotalLabor = stats.TotalLabor,
                 DigitalTech = new
                 {
-                    Internet = stats.BusinessTypeCounts.GetValueOrDefault("Có", 0),
-                    Website = stats.BusinessTypeCounts.GetValueOrDefault("Có", 0),
-                    Software = stats.BusinessTypeCounts.GetValueOrDefault("Có", 0)
+                    Internet = stats.BusinessTypeCounts.GetValueOrDefault("Cï¿½", 0),
+                    Website = stats.BusinessTypeCounts.GetValueOrDefault("Cï¿½", 0),
+                    Software = stats.BusinessTypeCounts.GetValueOrDefault("Cï¿½", 0)
                 },
                 Provinces = stats.ProvinceData.Count,
                 Regions = stats.RegionData.Count,
@@ -2155,11 +2155,11 @@ namespace CIResearch.Controllers
 
                 // Headers - All 25 columns from database
                 var headers = new[] {
-                    "STT", "Tên DN", "Ð?a ch?", "Mã t?nh di?u tra", "Mã huy?n di?u tra", "Mã xã di?u tra",
-                    "DNTB Mã t?nh", "DNTB Mã huy?n", "DNTB Mã xã", "Region", "Lo?i hình KTE",
-                    "Email", "Ði?n tho?i", "Nam", "Mã s? thu?", "Vùng kinh t?", "Quy mô",
-                    "Mã ngành C5 chính", "Tên ngành", "SR Doanh thu thu?n BH CCDV", "SR L?i nhu?n tru?c thu?",
-                    "S? lao d?ng d?u nam", "S? lao d?ng cu?i nam", "Tài s?n t?ng CK", "Tài s?n t?ng DK"
+                    "STT", "Tï¿½n DN", "ï¿½?a ch?", "Mï¿½ t?nh di?u tra", "Mï¿½ huy?n di?u tra", "Mï¿½ xï¿½ di?u tra",
+                    "DNTB Mï¿½ t?nh", "DNTB Mï¿½ huy?n", "DNTB Mï¿½ xï¿½", "Region", "Lo?i hï¿½nh KTE",
+                    "Email", "ï¿½i?n tho?i", "Nam", "Mï¿½ s? thu?", "Vï¿½ng kinh t?", "Quy mï¿½",
+                    "Mï¿½ ngï¿½nh C5 chï¿½nh", "Tï¿½n ngï¿½nh", "SR Doanh thu thu?n BH CCDV", "SR L?i nhu?n tru?c thu?",
+                    "S? lao d?ng d?u nam", "S? lao d?ng cu?i nam", "Tï¿½i s?n t?ng CK", "Tï¿½i s?n t?ng DK"
                 };
 
                 Console.WriteLine($"?? Export columns: {headers.Length} total - {string.Join(", ", headers.Take(5))}... (+{headers.Length - 5} more)");
@@ -2250,7 +2250,7 @@ namespace CIResearch.Controllers
                 };
                 worksheet.Cells[summaryRow + 1, 1].Style.Font.Bold = true;
 
-                worksheet.Cells[summaryRow + 2, 1].Value = "Xu?t lúc:";
+                worksheet.Cells[summaryRow + 2, 1].Value = "Xu?t lï¿½c:";
                 worksheet.Cells[summaryRow + 2, 2].Value = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
                 worksheet.Cells[summaryRow + 2, 1].Style.Font.Bold = true;
 
@@ -2321,65 +2321,65 @@ namespace CIResearch.Controllers
             if (string.IsNullOrEmpty(businessTypeName))
                 return "N/A";
 
-            // T?o tên vi?t t?t cho các lo?i hình doanh nghi?p dài
+            // T?o tï¿½n vi?t t?t cho cï¿½c lo?i hï¿½nh doanh nghi?p dï¿½i
             var shortenedNames = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
-                // Các lo?i hình c? ph?n
-                {"Công ty c? ph?n có v?n Nhà nu?c <= 50%", "CP v?n NN =50%"},
-                {"Công ty c? ph?n không có v?n Nhà nu?c", "CP không v?n NN"},
-                {"Công ty c? ph?n, Công ty TNHH có v?n Nhà nu?c > 50%", "CP/TNHH v?n NN >50%"},
-                {"Công ty c? ph?n", "C? ph?n"},
+                // Cï¿½c lo?i hï¿½nh c? ph?n
+                {"Cï¿½ng ty c? ph?n cï¿½ v?n Nhï¿½ nu?c <= 50%", "CP v?n NN =50%"},
+                {"Cï¿½ng ty c? ph?n khï¿½ng cï¿½ v?n Nhï¿½ nu?c", "CP khï¿½ng v?n NN"},
+                {"Cï¿½ng ty c? ph?n, Cï¿½ng ty TNHH cï¿½ v?n Nhï¿½ nu?c > 50%", "CP/TNHH v?n NN >50%"},
+                {"Cï¿½ng ty c? ph?n", "C? ph?n"},
                 
-                // Các lo?i hình TNHH
-                {"Công ty trách nhi?m h?u h?n m?t thành viên", "TNHH 1TV"},
-                {"Công ty trách nhi?m h?u h?n hai thành viên tr? lên", "TNHH 2TV+"},
-                {"Công ty TNHH m?t thành viên", "TNHH 1TV"},
-                {"Công ty TNHH hai thành viên tr? lên", "TNHH 2TV+"},
-                {"Công ty TNHH", "TNHH"},
+                // Cï¿½c lo?i hï¿½nh TNHH
+                {"Cï¿½ng ty trï¿½ch nhi?m h?u h?n m?t thï¿½nh viï¿½n", "TNHH 1TV"},
+                {"Cï¿½ng ty trï¿½ch nhi?m h?u h?n hai thï¿½nh viï¿½n tr? lï¿½n", "TNHH 2TV+"},
+                {"Cï¿½ng ty TNHH m?t thï¿½nh viï¿½n", "TNHH 1TV"},
+                {"Cï¿½ng ty TNHH hai thï¿½nh viï¿½n tr? lï¿½n", "TNHH 2TV+"},
+                {"Cï¿½ng ty TNHH", "TNHH"},
                 
-                // Các lo?i hình khác
-                {"Doanh nghi?p tu nhân", "DN tu nhân"},
-                {"H? kinh doanh cá th?", "H? KD cá th?"},
-                {"H?p tác xã", "HTX"},
-                {"Liên hi?p h?p tác xã", "Liên hi?p HTX"},
-                {"Doanh nghi?p nhà nu?c", "DN nhà nu?c"},
-                {"Công ty nhà nu?c", "Công ty NN"},
-                {"T?ng công ty nhà nu?c", "T?ng công ty NN"},
+                // Cï¿½c lo?i hï¿½nh khï¿½c
+                {"Doanh nghi?p tu nhï¿½n", "DN tu nhï¿½n"},
+                {"H? kinh doanh cï¿½ th?", "H? KD cï¿½ th?"},
+                {"H?p tï¿½c xï¿½", "HTX"},
+                {"Liï¿½n hi?p h?p tï¿½c xï¿½", "Liï¿½n hi?p HTX"},
+                {"Doanh nghi?p nhï¿½ nu?c", "DN nhï¿½ nu?c"},
+                {"Cï¿½ng ty nhï¿½ nu?c", "Cï¿½ng ty NN"},
+                {"T?ng cï¿½ng ty nhï¿½ nu?c", "T?ng cï¿½ng ty NN"},
                 
-                // Các lo?i hình d?u tu nu?c ngoài
-                {"Doanh nghi?p có v?n d?u tu nu?c ngoài", "DN v?n ngo?i"},
-                {"Công ty có v?n d?u tu nu?c ngoài", "Công ty v?n ngo?i"},
-                {"Doanh nghi?p 100% v?n nu?c ngoài", "DN 100% ngo?i"},
+                // Cï¿½c lo?i hï¿½nh d?u tu nu?c ngoï¿½i
+                {"Doanh nghi?p cï¿½ v?n d?u tu nu?c ngoï¿½i", "DN v?n ngo?i"},
+                {"Cï¿½ng ty cï¿½ v?n d?u tu nu?c ngoï¿½i", "Cï¿½ng ty v?n ngo?i"},
+                {"Doanh nghi?p 100% v?n nu?c ngoï¿½i", "DN 100% ngo?i"},
                 
-                // Các lo?i hình khác
-                {"Ðon v? s? nghi?p có thu", "ÐV s? nghi?p"},
-                {"T? ch?c tín d?ng", "T? ch?c TD"},
-                {"Qu? d?u tu", "Qu? ÐT"}
+                // Cï¿½c lo?i hï¿½nh khï¿½c
+                {"ï¿½on v? s? nghi?p cï¿½ thu", "ï¿½V s? nghi?p"},
+                {"T? ch?c tï¿½n d?ng", "T? ch?c TD"},
+                {"Qu? d?u tu", "Qu? ï¿½T"}
             };
 
-            // Ki?m tra xem có tên vi?t t?t không
+            // Ki?m tra xem cï¿½ tï¿½n vi?t t?t khï¿½ng
             if (shortenedNames.TryGetValue(businessTypeName, out string shortName))
             {
                 return shortName;
             }
 
-            // N?u không có trong dictionary, t? d?ng rút g?n
+            // N?u khï¿½ng cï¿½ trong dictionary, t? d?ng rï¿½t g?n
             if (businessTypeName.Length > 20)
             {
-                // Lo?i b? các t? thu?ng g?p d? rút g?n
+                // Lo?i b? cï¿½c t? thu?ng g?p d? rï¿½t g?n
                 var shortened = businessTypeName
-                    .Replace("Công ty ", "")
+                    .Replace("Cï¿½ng ty ", "")
                     .Replace("Doanh nghi?p ", "DN ")
-                    .Replace("trách nhi?m h?u h?n", "TNHH")
+                    .Replace("trï¿½ch nhi?m h?u h?n", "TNHH")
                     .Replace("c? ph?n", "CP")
-                    .Replace("m?t thành viên", "1TV")
-                    .Replace("hai thành viên tr? lên", "2TV+")
-                    .Replace("có v?n", "v?n")
-                    .Replace("Nhà nu?c", "NN")
-                    .Replace("d?u tu nu?c ngoài", "ngo?i")
-                    .Replace("tu nhân", "TN");
+                    .Replace("m?t thï¿½nh viï¿½n", "1TV")
+                    .Replace("hai thï¿½nh viï¿½n tr? lï¿½n", "2TV+")
+                    .Replace("cï¿½ v?n", "v?n")
+                    .Replace("Nhï¿½ nu?c", "NN")
+                    .Replace("d?u tu nu?c ngoï¿½i", "ngo?i")
+                    .Replace("tu nhï¿½n", "TN");
 
-                // N?u v?n dài, c?t b?t
+                // N?u v?n dï¿½i, c?t b?t
                 if (shortened.Length > 20)
                 {
                     shortened = shortened.Substring(0, 17) + "...";
@@ -2609,7 +2609,7 @@ namespace CIResearch.Controllers
                     DatabaseConnection = _connectionString,
                     TotalRecordsFromDatabase = allData.Count,
 
-                    // Vùng Kinh T? t? c?t Vungkinhte
+                    // Vï¿½ng Kinh T? t? c?t Vungkinhte
                     VungKinhTeStats = new
                     {
                         RecordsWithVungkinhte = allData.Count(x => !string.IsNullOrEmpty(x.Vungkinhte)),
@@ -2654,7 +2654,7 @@ namespace CIResearch.Controllers
                             .Where(x => x.SR_Doanhthu_Thuan_BH_CCDV.HasValue && x.SR_Doanhthu_Thuan_BH_CCDV.Value > 0)
                             .Select(x => x.SR_Doanhthu_Thuan_BH_CCDV.Value / 1000m) // Convert tri?u to t? VND
                             .GroupBy(x =>
-                                x <= 3 ? "Siêu nh? (= 3 t?)" :
+                                x <= 3 ? "Siï¿½u nh? (= 3 t?)" :
                                 x <= 50 ? "Nh? (3-50 t?)" :
                                 x <= 300 ? "V?a (50-300 t?)" : "L?n (> 300 t?)")
                             .Select(g => new { Category = g.Key, Count = g.Count() })
@@ -2665,7 +2665,7 @@ namespace CIResearch.Controllers
                     {
                         Message = "? ALL DATA IS REAL FROM DATABASE - NO DEMO DATA",
                         DatabaseStatus = "CONNECTED",
-                        DataSource = "sakila.dn_all",
+                        DataSource = "admin_ciresearch.dn_all",
                         LastChecked = DateTime.Now
                     }
                 };
@@ -2759,7 +2759,7 @@ namespace CIResearch.Controllers
                         .OrderByDescending(x => x.Count)
                         .ToList(),
                     BusinessTypes = stats.BusinessTypeData,
-                    ConnectionString = "Server=localhost;Database=sakila;User=root;Password=1234;",
+                    ConnectionString = "Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;",
                     DatabaseTable = "dn_all2"
                 };
 
@@ -2795,7 +2795,7 @@ namespace CIResearch.Controllers
 
                 var result = new
                 {
-                    DatabaseConnection = "? Connected to Server=localhost;Database=sakila;User=root;Password=1234;",
+                    DatabaseConnection = "? Connected to Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;",
                     TableUsed = "dn_all2",
                     ColumnUsed = "Vungkinhte",
                     TotalRecords = allData.Count,
@@ -2812,7 +2812,7 @@ namespace CIResearch.Controllers
                 {
                     Error = ex.Message,
                     StackTrace = ex.StackTrace,
-                    DatabaseConnection = "? Failed to connect to Server=localhost;Database=sakila;User=root;Password=1234;"
+                    DatabaseConnection = "? Failed to connect to Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;"
                 });
             }
         }
@@ -2827,7 +2827,7 @@ namespace CIResearch.Controllers
                 Console.WriteLine("? Database connected for industry test");
 
                 // Test TEN_NGANH column existence and data  
-                var columnExistsQuery = "SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = 'sakila' AND table_name = 'dn_all' AND column_name = 'TEN_NGANH'";
+                var columnExistsQuery = "SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = 'admin_ciresearch' AND table_name = 'dn_all' AND column_name = 'TEN_NGANH'";
                 using var cmd1 = new MySqlCommand(columnExistsQuery, conn);
                 var columnExists = Convert.ToInt32(await cmd1.ExecuteScalarAsync()) > 0;
 
@@ -2839,7 +2839,7 @@ namespace CIResearch.Controllers
                     {
                         success = false,
                         message = "? Column TEN_NGANH does not exist in dn_all2 table",
-                        connectionString = "Server=localhost;Database=sakila;User=root;Password=***",
+                        connectionString = "Server=localhost;Database=admin_ciresearch;User=root;Password=***",
                         timestamp = DateTime.Now
                     });
                 }
@@ -2878,8 +2878,8 @@ namespace CIResearch.Controllers
                     success = true,
                     message = $"? Industry data test successful. Found {industries.Count} industries from TEN_NGANH column",
                     data = industries,
-                    connectionString = "Server=localhost;Database=sakila;User=root;Password=***",
-                    database = "sakila",
+                    connectionString = "Server=localhost;Database=admin_ciresearch;User=root;Password=***",
+                    database = "admin_ciresearch",
                     table = "dn_all2",
                     column = "TEN_NGANH",
                     totalIndustries = industries.Count,
@@ -2893,7 +2893,7 @@ namespace CIResearch.Controllers
                 {
                     success = false,
                     message = $"? Industry data test failed: {ex.Message}",
-                    connectionString = "Server=localhost;Database=sakila;User=root;Password=***",
+                    connectionString = "Server=localhost;Database=admin_ciresearch;User=root;Password=***",
                     timestamp = DateTime.Now
                 });
             }
@@ -2921,7 +2921,7 @@ namespace CIResearch.Controllers
                         TenDN = x.TenDN,
                         RevenueTrieuVND = x.SR_Doanhthu_Thuan_BH_CCDV.Value,
                         RevenueTyVND = x.SR_Doanhthu_Thuan_BH_CCDV.Value / 1000m,
-                        Category = x.SR_Doanhthu_Thuan_BH_CCDV.Value / 1000m <= 3 ? "Siêu nh?" :
+                        Category = x.SR_Doanhthu_Thuan_BH_CCDV.Value / 1000m <= 3 ? "Siï¿½u nh?" :
                                   x.SR_Doanhthu_Thuan_BH_CCDV.Value / 1000m <= 50 ? "Nh?" :
                                   x.SR_Doanhthu_Thuan_BH_CCDV.Value / 1000m <= 300 ? "V?a" : "L?n"
                     })
@@ -2942,7 +2942,7 @@ namespace CIResearch.Controllers
                     companySizeDistribution = companySizeData,
                     databaseInfo = new
                     {
-                        connectionString = "Server=localhost;Database=sakila;User=root;Password=1234;",
+                        connectionString = "Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;",
                         table = "dn_all2",
                         revenueColumn = "SR_Doanhthu_Thuan_BH_CCDV",
                         unit = "tri?u VND"
@@ -2952,7 +2952,7 @@ namespace CIResearch.Controllers
                         sieuNho = "Doanh thu = 3 t? VND",
                         nho = "3 t? < Doanh thu = 50 t? VND",
                         vua = "50 t? < Doanh thu = 300 t? VND",
-                        lon = "Doanh thu > 300 t? VND & Tài s?n > 100 t? VND"
+                        lon = "Doanh thu > 300 t? VND & Tï¿½i s?n > 100 t? VND"
                     },
                     lastChecked = DateTime.Now
                 });
@@ -3107,9 +3107,9 @@ namespace CIResearch.Controllers
                     success = true,
                     message = "? Raw Data Debug Complete",
 
-                    database = "sakila",
+                    database = "admin_ciresearch",
                     table = "dn_all2",
-                    connectionString = "Server=localhost;Database=sakila;User=root;Password=1234;",
+                    connectionString = "Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;",
 
                     rawDataSample = rawData,
                     databaseStatistics = dbStats,
@@ -3199,7 +3199,7 @@ namespace CIResearch.Controllers
                 {
                     success = true,
                     message = "? Trend Data Test SUCCESSFUL",
-                    database = "sakila",
+                    database = "admin_ciresearch",
                     table = "dn_all2",
                     columns = new { year = "Nam", revenue = "SR_Doanhthu_Thuan_BH_CCDV", profit = "SR_Loinhuan_TruocThue" },
 
@@ -3223,7 +3223,7 @@ namespace CIResearch.Controllers
                         totalRecords = allData.Count,
                         recordsWithTrendData = allData.Count(x => x.Nam.HasValue && x.SR_Doanhthu_Thuan_BH_CCDV.HasValue && x.SR_Loinhuan_TruocThue.HasValue),
                         yearsAvailable = stats.Years.Count,
-                        dataSource = "REAL database data from sakila.dn_all",
+                        dataSource = "REAL database data from admin_ciresearch.dn_all",
                         confirmRealData = "? Chart uses actual data from Nam, SR_Doanhthu_Thuan_BH_CCDV, SR_Loinhuan_TruocThue columns"
                     },
 
@@ -3237,7 +3237,7 @@ namespace CIResearch.Controllers
                 {
                     success = false,
                     message = $"? Trend Data Test FAILED: {ex.Message}",
-                    connectionString = "Server=localhost;Database=sakila;User=root;Password=1234;",
+                    connectionString = "Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;",
                     timestamp = DateTime.Now
                 });
             }
@@ -3257,7 +3257,7 @@ namespace CIResearch.Controllers
                     DatabaseConnected = connectionTest.IsConnected,
                     message = connectionTest.Message,
                     details = connectionTest.Details,
-                    connectionString = "Server=127.0.0.1;Database=sakila;User=admin_dbciresearch",
+                    connectionString = "Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch",
                     timestamp = DateTime.Now
                 });
             }
@@ -3271,7 +3271,7 @@ namespace CIResearch.Controllers
                     message = "? L?i ki?m tra k?t n?i database!",
                     error = ex.Message,
                     details = $"L?i chi ti?t: {ex.Message}",
-                    connectionString = "Server=127.0.0.1;Database=sakila;User=admin_dbciresearch",
+                    connectionString = "Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch",
                     timestamp = DateTime.Now
                 });
             }
@@ -3437,7 +3437,7 @@ namespace CIResearch.Controllers
                     // Regional distribution for unique companies in this year
                     var regionalDistribution = uniqueCompaniesInYear
                         .Where(x => !string.IsNullOrEmpty(x.Vungkinhte) || !string.IsNullOrEmpty(x.Region))
-                        .GroupBy(x => x.Vungkinhte ?? x.Region ?? "Khác")
+                        .GroupBy(x => x.Vungkinhte ?? x.Region ?? "Khï¿½c")
                         .Select(g => new
                         {
                             Region = g.Key,
@@ -3529,7 +3529,7 @@ namespace CIResearch.Controllers
                 {
                     success = true,
                     message = "? ViewBag.TrendData Test Successful",
-                    database = "sakila",
+                    database = "admin_ciresearch",
                     table = "dn_all2",
                     columns = new { year = "Nam", revenue = "SR_Doanhthu_Thuan_BH_CCDV", profit = "SR_Loinhuan_TruocThue" },
                     rawStatsData = new
@@ -3635,13 +3635,13 @@ namespace CIResearch.Controllers
                     },
                     metadata = new
                     {
-                        database = "sakila",
+                        database = "admin_ciresearch",
                         table = "dn_all2",
                         totalRecords = allData.Count,
                         years = stats.Years.Count,
                         message = "? Real data from database in Chart.js format",
                         timestamp = DateTime.Now,
-                        dataSource = "Real database: Server=localhost;Database=sakila;User=root;Password=1234;"
+                        dataSource = "Real database: Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;"
                     }
                 };
 
@@ -3672,7 +3672,7 @@ namespace CIResearch.Controllers
                 var columnCheckQuery = @"
                     SELECT COUNT(*) 
                     FROM information_schema.columns 
-                    WHERE table_schema = 'sakila' 
+                    WHERE table_schema = 'admin_ciresearch' 
                     AND table_name = 'dn_all' 
                     AND column_name = 'TEN_NGANH'";
                 using var cmd1 = new MySqlCommand(columnCheckQuery, conn);
@@ -3684,7 +3684,7 @@ namespace CIResearch.Controllers
                     {
                         success = false,
                         message = "Column TEN_NGANH does not exist in dn_all2 table",
-                        database = "sakila",
+                        database = "admin_ciresearch",
                         table = "dn_all2"
                     });
                 }
@@ -3761,7 +3761,7 @@ namespace CIResearch.Controllers
                 {
                     success = true,
                     message = "Industry data verification completed",
-                    database = "sakila",
+                    database = "admin_ciresearch",
                     table = "dn_all2",
                     column = "TEN_NGANH",
                     dataQuality = qualityStats,
@@ -3777,7 +3777,7 @@ namespace CIResearch.Controllers
                     success = false,
                     message = $"Error verifying industry data: {ex.Message}",
                     error = ex.StackTrace,
-                    database = "sakila",
+                    database = "admin_ciresearch",
                     table = "dn_all2",
                     timestamp = DateTime.Now
                 });
@@ -4082,7 +4082,7 @@ namespace CIResearch.Controllers
                 // Combined distribution using fallback logic
                 var combinedDistribution = uniqueCompaniesInYear
                     .Where(x => !string.IsNullOrEmpty(x.Vungkinhte) || !string.IsNullOrEmpty(x.Region))
-                    .GroupBy(x => x.Vungkinhte ?? x.Region ?? "Khác")
+                    .GroupBy(x => x.Vungkinhte ?? x.Region ?? "Khï¿½c")
                     .Select(g => new { Field = g.Key, Count = g.Count() })
                     .OrderByDescending(x => x.Count)
                     .ToList();
@@ -4387,7 +4387,7 @@ namespace CIResearch.Controllers
                     sampleCompanies = sampleCompanies,
                     databaseInfo = new
                     {
-                        database = "sakila",
+                        database = "admin_ciresearch",
                         table = "dn_all2",
                         revenueColumn = "SR_Doanhthu_Thuan_BH_CCDV",
                         profitColumn = "SR_Loinhuan_TruocThue",
@@ -4469,7 +4469,7 @@ namespace CIResearch.Controllers
                 Console.WriteLine($"?? Regions found: {regions.Count}");
 
                 // Get company size categories based on revenue data
-                var companySizeCategories = new List<string> { "Siêu nh?", "Nh?", "V?a", "L?n" };
+                var companySizeCategories = new List<string> { "Siï¿½u nh?", "Nh?", "V?a", "L?n" };
 
                 var filterOptions = new
                 {
@@ -4477,7 +4477,7 @@ namespace CIResearch.Controllers
                     message = "? Filter options loaded from database",
                     dataSource = new
                     {
-                        database = "sakila",
+                        database = "admin_ciresearch",
                         table = "dn_all2",
                         totalRecords = allData.Count
                     },
@@ -4550,7 +4550,7 @@ namespace CIResearch.Controllers
                     return Json(new
                     {
                         success = false,
-                        message = "? Không tìm th?y d? li?u doanh thu t? c?t SR_Doanhthu_Thuan_BH_CCDV",
+                        message = "? Khï¿½ng tï¿½m th?y d? li?u doanh thu t? c?t SR_Doanhthu_Thuan_BH_CCDV",
                         debug = new
                         {
                             totalRecords = allData.Count,
@@ -4597,7 +4597,7 @@ namespace CIResearch.Controllers
                     return Json(new
                     {
                         success = false,
-                        message = "? Không tìm th?y doanh nghi?p nào có d? d? li?u doanh thu",
+                        message = "? Khï¿½ng tï¿½m th?y doanh nghi?p nï¿½o cï¿½ d? d? li?u doanh thu",
                         debug = new
                         {
                             filteredRecords = companiesWithRevenue.Count,
@@ -4744,7 +4744,7 @@ namespace CIResearch.Controllers
                     return Json(new
                     {
                         success = false,
-                        message = "? Không tìm th?y doanh nghi?p nào có d? d? li?u l?i nhu?n",
+                        message = "? Khï¿½ng tï¿½m th?y doanh nghi?p nï¿½o cï¿½ d? d? li?u l?i nhu?n",
                         debug = new
                         {
                             filteredRecords = companiesWithProfit.Count,
@@ -4832,7 +4832,7 @@ namespace CIResearch.Controllers
                     return Json(new
                     {
                         success = false,
-                        message = "? Mã s? thu? không du?c d? tr?ng",
+                        message = "? Mï¿½ s? thu? khï¿½ng du?c d? tr?ng",
                         timestamp = DateTime.Now
                     });
                 }
@@ -4854,7 +4854,7 @@ namespace CIResearch.Controllers
                     return Json(new
                     {
                         success = false,
-                        message = $"? Không tìm th?y doanh nghi?p v?i mã s? thu?: {masothue}",
+                        message = $"? Khï¿½ng tï¿½m th?y doanh nghi?p v?i mï¿½ s? thu?: {masothue}",
                         timestamp = DateTime.Now
                     });
                 }
@@ -4888,7 +4888,7 @@ namespace CIResearch.Controllers
                 var result = new
                 {
                     success = true,
-                    message = $"? Tìm th?y d? li?u cho doanh nghi?p: {companyName}",
+                    message = $"? Tï¿½m th?y d? li?u cho doanh nghi?p: {companyName}",
                     company = new
                     {
                         masothue = masothue,
@@ -4964,7 +4964,7 @@ namespace CIResearch.Controllers
                 {
                     success = false,
                     error = ex.Message,
-                    message = $"? L?i khi tìm ki?m mã s? thu?: {masothue}",
+                    message = $"? L?i khi tï¿½m ki?m mï¿½ s? thu?: {masothue}",
                     timestamp = DateTime.Now
                 });
             }
@@ -5142,7 +5142,7 @@ namespace CIResearch.Controllers
                     return Json(new
                     {
                         success = false,
-                        message = $"? Không tìm th?y d? li?u market share cho nam {targetYear}",
+                        message = $"? Khï¿½ng tï¿½m th?y d? li?u market share cho nam {targetYear}",
                         debug = new
                         {
                             targetYear = targetYear,
@@ -5282,7 +5282,7 @@ namespace CIResearch.Controllers
                 var totalMarketShareCheck = marketShareValues.Sum();
                 Console.WriteLine($"?? MARKET SHARE VALIDATION:");
                 Console.WriteLine($"   - Total Market Share: {totalMarketShareCheck:N4}%");
-                Console.WriteLine($"   - Should be ˜ 100%: {Math.Abs(totalMarketShareCheck - 100m) < 0.01m}");
+                Console.WriteLine($"   - Should be ï¿½ 100%: {Math.Abs(totalMarketShareCheck - 100m) < 0.01m}");
 
                 // Generate colors for the chart
                 var colors = new[]
@@ -5334,7 +5334,7 @@ namespace CIResearch.Controllers
                         totalMarketRevenue = Math.Round(totalMarketRevenue / 1000, 2),
                         top10SharePercentage = top10TotalMarketShare,
                         othersSharePercentage = othersMarketShare,
-                        marketShareFormula = "Market Share = (Doanh thu DN / T?ng doanh thu th? tru?ng) × 100%",
+                        marketShareFormula = "Market Share = (Doanh thu DN / T?ng doanh thu th? tru?ng) ï¿½ 100%",
                         dataSource = $"Optimized SQL queries for year {targetYear}",
                         executionTime = executionTime,
                         optimization = new
@@ -5385,8 +5385,8 @@ namespace CIResearch.Controllers
                             totalMarketShareValidation = Math.Round(totalMarketShareCheck, 2),
                             shouldBe100Percent = Math.Abs(totalMarketShareCheck - 100m) < 0.01m,
                             calculationAccuracy = Math.Abs(totalMarketShareCheck - 100m) < 0.01m
-                                ? "Chính xác 100%"
-                                : $"{Math.Abs(100 - totalMarketShareCheck):0.0000}% khác bi?t",
+                                ? "Chï¿½nh xï¿½c 100%"
+                                : $"{Math.Abs(100 - totalMarketShareCheck):0.0000}% khï¿½c bi?t",
                             top10SharePercentage = top10TotalMarketShare,
                             othersSharePercentage = othersMarketShare,
                             companiesWithPositiveRevenue = companiesWithPositiveRevenue,
@@ -5966,7 +5966,7 @@ namespace CIResearch.Controllers
                 return Json(new
                 {
                     success = true,
-                    database = "sakila",
+                    database = "admin_ciresearch",
                     table = "dn_all2",
                     column = "QUY_MO",
                     totalCompanies = allData.Count,
@@ -6014,7 +6014,7 @@ namespace CIResearch.Controllers
                 var chartData = new
                 {
                     success = true,
-                    message = "? Fixed Quy mô chart test successful",
+                    message = "? Fixed Quy mï¿½ chart test successful",
                     data = new
                     {
                         categories = companySizeData.Select(x =>
@@ -6033,7 +6033,7 @@ namespace CIResearch.Controllers
                     },
                     expectedCategories = new[]
                     {
-                        "Doanh nghi?p siêu nh?",
+                        "Doanh nghi?p siï¿½u nh?",
                         "Doanh nghi?p nh?",
                         "Doanh nghi?p v?a",
                         "Doanh nghi?p l?n"
@@ -6047,12 +6047,12 @@ namespace CIResearch.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"? Error testing fixed Quy mô chart: {ex.Message}");
+                Console.WriteLine($"? Error testing fixed Quy mï¿½ chart: {ex.Message}");
                 return Json(new
                 {
                     success = false,
                     error = ex.Message,
-                    message = "? Failed to test fixed Quy mô chart",
+                    message = "? Failed to test fixed Quy mï¿½ chart",
                     timestamp = DateTime.Now
                 });
             }
@@ -6087,7 +6087,7 @@ namespace CIResearch.Controllers
                 return Json(new
                 {
                     success = true,
-                    message = "? Simple Quy mô chart test successful",
+                    message = "? Simple Quy mï¿½ chart test successful",
                     simpleLabels = chartLabels,
                     simpleValues = chartValues,
                     totalCompanies = chartValues.Sum(),
@@ -6104,7 +6104,7 @@ namespace CIResearch.Controllers
                     chartReady = companySizeData.Count > 0,
                     dataMapping = new
                     {
-                        note = "Labels are now simple: Siêu nh?, Nh?, V?a, L?n instead of Doanh nghi?p xxx",
+                        note = "Labels are now simple: Siï¿½u nh?, Nh?, V?a, L?n instead of Doanh nghi?p xxx",
                         source = "Direct from QUY_MO column, mapped to simple labels",
                         fallback = "If no QUY_MO data, creates minimal fallback"
                     },
@@ -6113,12 +6113,12 @@ namespace CIResearch.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"? Error testing simple Quy mô chart: {ex.Message}");
+                Console.WriteLine($"? Error testing simple Quy mï¿½ chart: {ex.Message}");
                 return Json(new
                 {
                     success = false,
                     error = ex.Message,
-                    message = "? Failed to test simple Quy mô chart",
+                    message = "? Failed to test simple Quy mï¿½ chart",
                     timestamp = DateTime.Now
                 });
             }
@@ -6152,7 +6152,7 @@ namespace CIResearch.Controllers
                 return Json(new
                 {
                     success = true,
-                    message = "? Full Quy mô chart pipeline debug completed",
+                    message = "? Full Quy mï¿½ chart pipeline debug completed",
 
                     step1_CalculateCompanySizeData = new
                     {
@@ -6229,7 +6229,7 @@ namespace CIResearch.Controllers
                     success = false,
                     error = ex.Message,
                     stackTrace = ex.StackTrace,
-                    message = "? Failed to debug full Quy mô chart pipeline",
+                    message = "? Failed to debug full Quy mï¿½ chart pipeline",
                     timestamp = DateTime.Now
                 });
             }
@@ -6293,7 +6293,7 @@ namespace CIResearch.Controllers
                         noMapping = "No complex mapping logic - direct from QUY_MO column",
                         categories = new[]
                         {
-                            "Doanh nghi?p siêu nh?",
+                            "Doanh nghi?p siï¿½u nh?",
                             "Doanh nghi?p nh?",
                             "Doanh nghi?p v?a",
                             "Doanh nghi?p l?n"
@@ -6495,7 +6495,7 @@ namespace CIResearch.Controllers
                     success = true,
                     message = "? Vung Kinh Te chart debug completed",
 
-                    issue = "Chart ch? hi?n th? 'Ð?ng b?ng Sông H?ng' - debugging t?t c? steps",
+                    issue = "Chart ch? hi?n th? 'ï¿½?ng b?ng Sï¿½ng H?ng' - debugging t?t c? steps",
 
                     step1_AllYearsRawData = new
                     {
@@ -6549,17 +6549,17 @@ namespace CIResearch.Controllers
                     {
                         possibleIssues = new[]
                         {
-                            "1. D? li?u trong year hi?n t?i ch? có 1 vùng",
-                            "2. Logic unique companies filter out các vùng khác",
-                            "3. Database th?c s? ch? có 1 vùng cho year này",
-                            "4. Có bug trong grouping logic"
+                            "1. D? li?u trong year hi?n t?i ch? cï¿½ 1 vï¿½ng",
+                            "2. Logic unique companies filter out cï¿½c vï¿½ng khï¿½c",
+                            "3. Database th?c s? ch? cï¿½ 1 vï¿½ng cho year nï¿½y",
+                            "4. Cï¿½ bug trong grouping logic"
                         },
 
                         checkThese = new[]
                         {
-                            "So sánh step2 vs step5 - raw data should match",
-                            "So sánh step3 vs step2 - unique logic shouldn't change distribution",
-                            "Check step6 - xem year khác có nhi?u vùng không"
+                            "So sï¿½nh step2 vs step5 - raw data should match",
+                            "So sï¿½nh step3 vs step2 - unique logic shouldn't change distribution",
+                            "Check step6 - xem year khï¿½c cï¿½ nhi?u vï¿½ng khï¿½ng"
                         }
                     },
 
@@ -6653,7 +6653,7 @@ namespace CIResearch.Controllers
                         loadTime = DateTime.Now,
                         dataSource = "Real data FROM dn_all2 table",
                         limitRemoved = "LIMIT 50000 has been removed - loading ALL data",
-                        connectionString = "Server=localhost;Database=sakila;User=root;Password=***"
+                        connectionString = "Server=localhost;Database=admin_ciresearch;User=root;Password=***"
                     }
                 };
 
@@ -6843,7 +6843,7 @@ namespace CIResearch.Controllers
                     return Json(new
                     {
                         success = false,
-                        message = $"? Không tìm th?y d? li?u market share cho nam {targetYear}",
+                        message = $"? Khï¿½ng tï¿½m th?y d? li?u market share cho nam {targetYear}",
                         debug = new
                         {
                             targetYear = targetYear,
@@ -6956,7 +6956,7 @@ namespace CIResearch.Controllers
                             totalMarketShareValidation = Math.Round(totalMarketShare, 2),
                             shouldBe100Percent = Math.Abs(totalMarketShare - 100m) < 0.1m,
                             calculationAccuracy = Math.Abs(totalMarketShare - 100m) < 0.1m ?
-                                "Chính xác 100%" : $"{Math.Abs(100 - totalMarketShare):0.00}% khác bi?t"
+                                "Chï¿½nh xï¿½c 100%" : $"{Math.Abs(100 - totalMarketShare):0.00}% khï¿½c bi?t"
                         }
                     },
                     performance = new
