@@ -3,8 +3,12 @@
   "WorkspaceRootPath": "D:\\Projects\\Webdatabase-CI\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\Projects\\Webdatabase-CI\\Program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\Projects\\Webdatabase-CI\\CIResearch.csproj.user||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:CIResearch.csproj.user||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{918A7ECC-263A-E4DE-961D-4D46CBAED516}|CIResearch.csproj|d:\\projects\\webdatabase-ci\\ciresearch.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{918A7ECC-263A-E4DE-961D-4D46CBAED516}|CIResearch.csproj|solutionrelative:ciresearch.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
     }
   ],
   "DocumentGroupContainers": [
@@ -19,14 +23,27 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "Program.cs",
-              "DocumentMoniker": "D:\\Projects\\Webdatabase-CI\\Program.cs",
-              "RelativeDocumentMoniker": "Program.cs",
-              "ToolTip": "D:\\Projects\\Webdatabase-CI\\Program.cs",
-              "RelativeToolTip": "Program.cs",
-              "ViewState": "AgIAAAMAAAAAAAAAAAAAAAQAAAAqAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-12T10:15:14.046Z",
+              "Title": "CIResearch.csproj.user",
+              "DocumentMoniker": "D:\\Projects\\Webdatabase-CI\\CIResearch.csproj.user",
+              "RelativeDocumentMoniker": "CIResearch.csproj.user",
+              "ToolTip": "D:\\Projects\\Webdatabase-CI\\CIResearch.csproj.user",
+              "RelativeToolTip": "CIResearch.csproj.user",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAAAKAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003464|",
+              "WhenOpened": "2025-07-15T08:44:55.113Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "CIResearch",
+              "DocumentMoniker": "D:\\Projects\\Webdatabase-CI\\CIResearch.csproj",
+              "RelativeDocumentMoniker": "CIResearch.csproj",
+              "ToolTip": "D:\\Projects\\Webdatabase-CI\\CIResearch.csproj",
+              "RelativeToolTip": "CIResearch.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-07-15T08:43:36.138Z",
               "EditorCaption": ""
             }
           ]
