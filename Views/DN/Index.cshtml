@@ -1149,10 +1149,10 @@
                                     <i class="fas fa-chart-bar me-1"></i>
                                                 Cập nhật Charts
                                 </button>
-                                            <a href="@Url.Action("ViewRawData", "DN")" class="btn btn-info btn-sm">
+                                            <button type="button" class="btn btn-info btn-sm" onclick="goToDetailData()">
                         <i class="fas fa-table me-1"></i>
                                                 Dữ liệu chi tiết
-                                            </a>
+                                            </button>
                                             <button type="button" class="btn btn-warning btn-sm" onclick="showFilterGuide()">
                                                 <i class="fas fa-question-circle me-1"></i>
                                                 Hướng dẫn
@@ -6045,6 +6045,30 @@ window.addEventListener('load', function() {
         createNewQuyMoChart();
     }
 });
+</script>
+<script>
+function goToDetailData() {
+    // Lấy form chứa các filter (giả sử form có id là 'filterForm', nếu không hãy sửa lại cho đúng)
+    var form = document.querySelector('form');
+    var params = new URLSearchParams();
+    if (!form) { window.location = '/DN/ViewRawData'; return; }
+    // Lấy tất cả input, select, radio, checkbox trong form
+    var elements = form.querySelectorAll('input, select');
+    elements.forEach(function(el) {
+        if (!el.name) return;
+        if ((el.type === 'checkbox' || el.type === 'radio') && !el.checked) return;
+        if (el.type === 'select-multiple') {
+            Array.from(el.selectedOptions).forEach(opt => {
+                params.append(el.name, opt.value);
+            });
+        } else {
+            if (el.value) params.append(el.name, el.value);
+        }
+    });
+    // Chuyển hướng sang ViewRawData với query string
+    var url = '/DN/ViewRawData' + (params.toString() ? ('?' + params.toString()) : '');
+    window.location.href = url;
+}
 </script>
 </body>
 </html>

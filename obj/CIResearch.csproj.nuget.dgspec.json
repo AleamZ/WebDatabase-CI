@@ -13,7 +13,6 @@
         "packagesPath": "C:\\Users\\datan\\.nuget\\packages\\",
         "outputPath": "D:\\Projects\\Webdatabase-CI\\obj\\",
         "projectStyle": "PackageReference",
-        "crossTargeting": true,
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],

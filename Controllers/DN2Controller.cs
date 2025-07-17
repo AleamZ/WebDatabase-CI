@@ -29,15 +29,15 @@ namespace CIResearch.Controllers
     public class DN2Controller : Controller
     {
         private readonly IMemoryCache _cache;
-        private string _connectionString = "Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;";
+        private string _connectionString = "Server=127.0.0.1;Database=sakila;User=admin_dbciresearch;Password=9t52$7sBx;";
 
         // Multi-level cache keys for comprehensive caching
         private const string DATA_CACHE_KEY = "dn_all2";
-        private const string SUMMARY_CACHE_KEY = "dn2_summary";
-        private const string FILTER_OPTIONS_CACHE_KEY = "dn2_filter_options";
-        private const string STATISTICS_CACHE_KEY = "dn2_statistics_cache";
-        private const string FILTERED_DATA_CACHE_PREFIX = "dn2_filtered_data_";
-        private const string METHOD_CACHE_PREFIX = "dn2_method_cache_";
+        private const string SUMMARY_CACHE_KEY = "dn_summary";
+        private const string FILTER_OPTIONS_CACHE_KEY = "filter_options";
+        private const string STATISTICS_CACHE_KEY = "statistics_cache";
+        private const string FILTERED_DATA_CACHE_PREFIX = "filtered_data_";
+        private const string METHOD_CACHE_PREFIX = "method_cache_";
 
         // Cache duration policies - OPTIMIZED FOR PERFORMANCE
         private const int CACHE_DURATION_MINUTES = 120; // Increased from 30 to 120 minutes (2 hours)
@@ -48,9 +48,9 @@ namespace CIResearch.Controllers
         private const int METHOD_CACHE_MINUTES = 30; // Increased from 10 to 30 minutes
 
         // Static method-level memoization dictionary (thread-safe)
-        private static readonly ConcurrentDictionary<string, object> _dn2MethodCache = new();
-        private static readonly ConcurrentDictionary<string, DateTime> _dn2MethodCacheTimestamps = new();
-        private static readonly TimeSpan _dn2MethodCacheTimeout = TimeSpan.FromMinutes(METHOD_CACHE_MINUTES);
+        private static readonly ConcurrentDictionary<string, object> _methodCache = new();
+        private static readonly ConcurrentDictionary<string, DateTime> _methodCacheTimestamps = new();
+        private static readonly TimeSpan _methodCacheTimeout = TimeSpan.FromMinutes(METHOD_CACHE_MINUTES);
 
         public DN2Controller(IMemoryCache cache)
         {
@@ -64,7 +64,7 @@ namespace CIResearch.Controllers
         {
             try
             {
-                Console.WriteLine("?? Testing database connection...");
+                Console.WriteLine("🔍 Testing database connection...");
 
                 using var conn = new MySqlConnection(_connectionString);
                 await conn.OpenAsync();
@@ -74,22 +74,22 @@ namespace CIResearch.Controllers
                 var result = await cmd.ExecuteScalarAsync();
                 var recordCount = Convert.ToInt64(result);
 
-                Console.WriteLine($"? Database connection successful! Found {recordCount:N0} records");
+                Console.WriteLine($"✅ Database connection successful! Found {recordCount:N0} records");
 
-                return (true, "? K?t n?i co s? d? li?u th�nh c�ng!",
-                       $"Server: 127.0.0.1 | Database: admin_ciresearch | Records: {recordCount:N0}");
+                return (true, "✅ Kết nối cơ sở dữ liệu thành công!",
+                       $"Server: 127.0.0.1 | Database: sakila | Records: {recordCount:N0}");
             }
             catch (MySqlException mysqlEx)
             {
-                Console.WriteLine($"? MySQL Error: {mysqlEx.Message}");
-                return (false, "? L?i k?t n?i MySQL!",
-                       $"M� l?i: {mysqlEx.Number} | Chi ti?t: {mysqlEx.Message}");
+                Console.WriteLine($"❌ MySQL Error: {mysqlEx.Message}");
+                return (false, "❌ Lỗi kết nối MySQL!",
+                       $"Mã lỗi: {mysqlEx.Number} | Chi tiết: {mysqlEx.Message}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"? Database connection failed: {ex.Message}");
-                return (false, "? K?t n?i co s? d? li?u th?t b?i!",
-                       $"L?i: {ex.Message}");
+                Console.WriteLine($"❌ Database connection failed: {ex.Message}");
+                return (false, "❌ Kết nối cơ sở dữ liệu thất bại!",
+                       $"Lỗi: {ex.Message}");
             }
         }
 
@@ -108,14 +108,14 @@ namespace CIResearch.Controllers
 
             try
             {
-                // ?? PERFORMANCE OPTIMIZED: Use cached data instead of force clear
-                Console.WriteLine("?? Loading data from cache (performance optimized)...");
+                // 🚀 PERFORMANCE OPTIMIZED: Use cached data instead of force clear
+                Console.WriteLine("🚀 Loading data from cache (performance optimized)...");
 
                 var allData = await GetCachedDataAsync();
-                Console.WriteLine($"?? Loaded {allData.Count:N0} records from cache/database");
+                Console.WriteLine($"📊 Loaded {allData.Count:N0} records from cache/database");
 
                 var filteredData = ApplyFiltersOptimized(allData, stt, Nam, MaTinh_Dieutra, Masothue, Loaihinhkte, Vungkinhte);
-                Console.WriteLine($"?? Filtered to {filteredData.Count} records");
+                Console.WriteLine($"🔍 Filtered to {filteredData.Count} records");
 
                 var stats = CalculateAllStatistics(allData, Nam);
                 ViewBag.Data = filteredData;
@@ -127,20 +127,20 @@ namespace CIResearch.Controllers
                 ViewBag.CurrentLoaihinhkte = Loaihinhkte;
                 ViewBag.CurrentVungkinhte = Vungkinhte;
 
-                Console.WriteLine("? Data processing completed successfully");
+                Console.WriteLine("✅ Data processing completed successfully");
                 return View();
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"? ERROR: {ex.Message}");
-                Console.WriteLine($"? Stack Trace: {ex.StackTrace}");
+                Console.WriteLine($"❌ ERROR: {ex.Message}");
+                Console.WriteLine($"❌ Stack Trace: {ex.StackTrace}");
 
                 // Update connection status to show specific error
                 ViewBag.DatabaseConnected = false;
-                ViewBag.DatabaseMessage = "? L?i x? l� d? li?u!";
-                ViewBag.DatabaseDetails = $"Chi ti?t l?i: {ex.Message}";
+                ViewBag.DatabaseMessage = "❌ Lỗi xử lý dữ liệu!";
+                ViewBag.DatabaseDetails = $"Chi tiết lỗi: {ex.Message}";
 
-                ViewBag.Error = "Kh�ng th? k?t n?i ho?c l?y d? li?u t? database. Vui l�ng ki?m tra l?i k?t n?i ho?c d? li?u.";
+                ViewBag.Error = "Không thể kết nối hoặc lấy dữ liệu từ database. Vui lòng kiểm tra lại kết nối hoặc dữ liệu.";
                 ViewBag.Data = new List<QLKH>();
 
                 // Initialize ALL ViewBag properties with safe defaults when database fails
@@ -167,7 +167,7 @@ namespace CIResearch.Controllers
         {
             try
             {
-                Console.WriteLine($"?? ViewRawData called with filters:");
+                Console.WriteLine($"🔍 ViewRawData called with filters:");
                 Console.WriteLine($"   - STT: {stt}");
                 Console.WriteLine($"   - Nam: [{string.Join(", ", Nam ?? new List<string>())}]");
                 Console.WriteLine($"   - MaTinh_Dieutra: [{string.Join(", ", MaTinh_Dieutra ?? new List<string>())}]");
@@ -184,20 +184,20 @@ namespace CIResearch.Controllers
                 if (!string.IsNullOrEmpty(validationError))
                 {
                     ViewBag.Error = validationError;
-                    Console.WriteLine($"? Validation error: {validationError}");
+                    Console.WriteLine($"❌ Validation error: {validationError}");
                     return View(new List<QLKH>());
                 }
 
-                // ?? PERFORMANCE OPTIMIZED: Use cached filtering
+                // 🚀 PERFORMANCE OPTIMIZED: Use cached filtering
                 var allData = await GetCachedDataAsync();
                 var filteredData = GetCachedFilteredData(allData, stt, Nam, MaTinh_Dieutra, Masothue, Loaihinhkte, Vungkinhte);
 
-                Console.WriteLine($"?? Data after filtering: {filteredData.Count} records");
+                Console.WriteLine($"📊 Data after filtering: {filteredData.Count} records");
 
                 // Apply data limiting based on limitType
                 var limitedData = ApplyDataLimiting(filteredData, limitType, customStart, customEnd, customFilter, evenStart, evenEnd, oddStart, oddEnd);
 
-                Console.WriteLine($"?? Data after limiting ({limitType}): {limitedData.Count} records");
+                Console.WriteLine($"📊 Data after limiting ({limitType}): {limitedData.Count} records");
 
                 // Prepare ViewBag data for filters
                 ViewBag.CurrentStt = stt;
@@ -220,15 +220,15 @@ namespace CIResearch.Controllers
                 ViewBag.FilteredRecords = filteredData.Count;
                 ViewBag.DisplayedRecords = limitedData.Count;
 
-                // ?? PERFORMANCE OPTIMIZED: Use cached filter options
+                // 🚀 PERFORMANCE OPTIMIZED: Use cached filter options
                 await PrepareFilterOptionsOptimized();
 
                 return View(limitedData);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"? ViewRawData error: {ex.Message}");
-                ViewBag.Error = $"L?i khi t?i d? li?u: {ex.Message}";
+                Console.WriteLine($"❌ ViewRawData error: {ex.Message}");
+                ViewBag.Error = $"Lỗi khi tải dữ liệu: {ex.Message}";
                 return View(new List<QLKH>());
             }
         }
@@ -251,7 +251,7 @@ namespace CIResearch.Controllers
         {
             try
             {
-                Console.WriteLine($"?? DEBUG FILTERS called with:");
+                Console.WriteLine($"🔍 DEBUG FILTERS called with:");
                 Console.WriteLine($"   - STT: '{stt}'");
                 Console.WriteLine($"   - Nam: [{string.Join(", ", Nam ?? new List<string>())}] (Count: {Nam?.Count ?? 0})");
                 Console.WriteLine($"   - MaTinh_Dieutra: [{string.Join(", ", MaTinh_Dieutra ?? new List<string>())}] (Count: {MaTinh_Dieutra?.Count ?? 0})");
@@ -263,7 +263,7 @@ namespace CIResearch.Controllers
                 var result = new
                 {
                     success = true,
-                    message = "? Filter parameters received and parsed successfully",
+                    message = "✅ Filter parameters received and parsed successfully",
                     receivedParameters = new
                     {
                         stt = new { value = stt, isEmpty = string.IsNullOrEmpty(stt) },
@@ -305,7 +305,7 @@ namespace CIResearch.Controllers
                     },
                     instructions = new
                     {
-                        testUrl = "/DN/DebugFilters?Nam=2020&Nam=2023&MaTinh_Dieutra=01&Loaihinhkte=C?%20ph?n&limitType=custom&customStart=1&customEnd=100",
+                        testUrl = "/DN/DebugFilters?Nam=2020&Nam=2023&MaTinh_Dieutra=01&Loaihinhkte=Cổ%20phần&limitType=custom&customStart=1&customEnd=100",
                         usage = "This endpoint helps debug why filters might not be working. Check the 'filteringWillWork' section.",
                         expectedBehavior = "If parameters are received correctly, the issue is in ViewRawData processing. If not, check form submission."
                     },
@@ -316,7 +316,7 @@ namespace CIResearch.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"? DebugFilters error: {ex.Message}");
+                Console.WriteLine($"❌ DebugFilters error: {ex.Message}");
                 return Json(new
                 {
                     success = false,
@@ -344,12 +344,12 @@ namespace CIResearch.Controllers
                     var evenData = data.Where(x => x.STT % 2 == 0);
                     if (evenStart.HasValue && evenEnd.HasValue)
                     {
-                        Console.WriteLine($"?? Even range: {evenStart.Value} to {evenEnd.Value}");
+                        Console.WriteLine($"🔍 Even range: {evenStart.Value} to {evenEnd.Value}");
                         evenData = evenData.Where(x => x.STT >= evenStart.Value && x.STT <= evenEnd.Value);
 
                         var expectedEvenCount = (evenEnd.Value - evenStart.Value) / 2 + 1;
                         var dynamicEvenLimit = Math.Min(5000, Math.Max(1000, expectedEvenCount));
-                        Console.WriteLine($"?? Even expected: ~{expectedEvenCount}, using limit: {dynamicEvenLimit}");
+                        Console.WriteLine($"🔍 Even expected: ~{expectedEvenCount}, using limit: {dynamicEvenLimit}");
 
                         return evenData.Take(dynamicEvenLimit).ToList();
                     }
@@ -359,12 +359,12 @@ namespace CIResearch.Controllers
                     var oddData = data.Where(x => x.STT % 2 != 0);
                     if (oddStart.HasValue && oddEnd.HasValue)
                     {
-                        Console.WriteLine($"?? Odd range: {oddStart.Value} to {oddEnd.Value}");
+                        Console.WriteLine($"🔍 Odd range: {oddStart.Value} to {oddEnd.Value}");
                         oddData = oddData.Where(x => x.STT >= oddStart.Value && x.STT <= oddEnd.Value);
 
                         var expectedOddCount = (oddEnd.Value - oddStart.Value) / 2 + 1;
                         var dynamicOddLimit = Math.Min(5000, Math.Max(1000, expectedOddCount));
-                        Console.WriteLine($"?? Odd expected: ~{expectedOddCount}, using limit: {dynamicOddLimit}");
+                        Console.WriteLine($"🔍 Odd expected: ~{expectedOddCount}, using limit: {dynamicOddLimit}");
 
                         return oddData.Take(dynamicOddLimit).ToList();
                     }
@@ -377,24 +377,24 @@ namespace CIResearch.Controllers
                 case "custom":
                     if (customStart.HasValue && customEnd.HasValue)
                     {
-                        Console.WriteLine($"?? Custom range: {customStart.Value} to {customEnd.Value}, filter: {customFilter}");
+                        Console.WriteLine($"🔍 Custom range: {customStart.Value} to {customEnd.Value}, filter: {customFilter}");
 
                         var customData = data.Where(x => x.STT >= customStart.Value && x.STT <= customEnd.Value);
-                        Console.WriteLine($"?? Records in range {customStart.Value}-{customEnd.Value}: {customData.Count()}");
+                        Console.WriteLine($"🔍 Records in range {customStart.Value}-{customEnd.Value}: {customData.Count()}");
 
                         // Apply even/odd filter if specified
                         switch (customFilter?.ToLower())
                         {
                             case "even":
                                 customData = customData.Where(x => x.STT % 2 == 0);
-                                Console.WriteLine($"?? After even filter: {customData.Count()}");
+                                Console.WriteLine($"🔍 After even filter: {customData.Count()}");
                                 break;
                             case "odd":
                                 customData = customData.Where(x => x.STT % 2 != 0);
-                                Console.WriteLine($"?? After odd filter: {customData.Count()}");
+                                Console.WriteLine($"🔍 After odd filter: {customData.Count()}");
                                 break;
                             default: // "all"
-                                Console.WriteLine($"?? No additional filter applied");
+                                Console.WriteLine($"🔍 No additional filter applied");
                                 break;
                         }
 
@@ -402,13 +402,13 @@ namespace CIResearch.Controllers
                         var expectedCount = customEnd.Value - customStart.Value + 1;
                         var actualResults = customData.ToList();
 
-                        Console.WriteLine($"?? Expected records: {expectedCount}, Actual found: {actualResults.Count}");
+                        Console.WriteLine($"🔍 Expected records: {expectedCount}, Actual found: {actualResults.Count}");
 
                         // Dynamic limit based on range size, max 5000 for performance
                         var dynamicLimit = Math.Min(5000, Math.Max(1000, expectedCount));
                         var finalResults = actualResults.Take(dynamicLimit).ToList();
 
-                        Console.WriteLine($"?? Final results after limit {dynamicLimit}: {finalResults.Count}");
+                        Console.WriteLine($"🔍 Final results after limit {dynamicLimit}: {finalResults.Count}");
                         return finalResults;
                     }
                     return data.Take(1000).ToList(); // Fallback to first 1000
@@ -428,16 +428,16 @@ namespace CIResearch.Controllers
             {
                 case "custom":
                     if (!customStart.HasValue || !customEnd.HasValue)
-                        return "Vui l�ng nh?p d?y d? gi� tr? T? v� �?n cho T? ch?n kho?ng";
+                        return "Vui lòng nhập đầy đủ giá trị Từ và Đến cho Tự chọn khoảng";
 
                     if (customStart.Value <= 0 || customEnd.Value <= 0)
-                        return "Gi� tr? STT ph?i l?n hon 0";
+                        return "Giá trị STT phải lớn hơn 0";
 
                     if (customStart.Value > customEnd.Value)
-                        return "Gi� tr? 'T?' ph?i nh? hon ho?c b?ng '�?n'";
+                        return "Giá trị 'Từ' phải nhỏ hơn hoặc bằng 'Đến'";
 
                     if (customEnd.Value - customStart.Value > 10000)
-                        return "Kho?ng kh�ng du?c vu?t qu� 10,000 records d? d?m b?o hi?u su?t";
+                        return "Khoảng không được vượt quá 10,000 records để đảm bảo hiệu suất";
 
                     break;
 
@@ -445,19 +445,19 @@ namespace CIResearch.Controllers
                     if (evenStart.HasValue || evenEnd.HasValue)
                     {
                         if (!evenStart.HasValue || !evenEnd.HasValue)
-                            return "Vui l�ng nh?p d?y d? kho?ng STT ch?n";
+                            return "Vui lòng nhập đầy đủ khoảng STT chẵn";
 
                         if (evenStart.Value <= 0 || evenEnd.Value <= 0)
-                            return "Gi� tr? STT ch?n ph?i l?n hon 0";
+                            return "Giá trị STT chẵn phải lớn hơn 0";
 
                         if (evenStart.Value % 2 != 0 || evenEnd.Value % 2 != 0)
-                            return "Vui l�ng ch? nh?p s? ch?n cho kho?ng STT ch?n";
+                            return "Vui lòng chỉ nhập số chẵn cho khoảng STT chẵn";
 
                         if (evenStart.Value > evenEnd.Value)
-                            return "STT ch?n 'T?' ph?i nh? hon ho?c b?ng '�?n'";
+                            return "STT chẵn 'Từ' phải nhỏ hơn hoặc bằng 'Đến'";
 
                         if (evenEnd.Value - evenStart.Value > 10000)
-                            return "Kho?ng STT ch?n kh�ng du?c vu?t qu� 10,000 d? d?m b?o hi?u su?t";
+                            return "Khoảng STT chẵn không được vượt quá 10,000 để đảm bảo hiệu suất";
                     }
                     break;
 
@@ -465,19 +465,19 @@ namespace CIResearch.Controllers
                     if (oddStart.HasValue || oddEnd.HasValue)
                     {
                         if (!oddStart.HasValue || !oddEnd.HasValue)
-                            return "Vui l�ng nh?p d?y d? kho?ng STT l?";
+                            return "Vui lòng nhập đầy đủ khoảng STT lẻ";
 
                         if (oddStart.Value <= 0 || oddEnd.Value <= 0)
-                            return "Gi� tr? STT l? ph?i l?n hon 0";
+                            return "Giá trị STT lẻ phải lớn hơn 0";
 
                         if (oddStart.Value % 2 == 0 || oddEnd.Value % 2 == 0)
-                            return "Vui l�ng ch? nh?p s? l? cho kho?ng STT l?";
+                            return "Vui lòng chỉ nhập số lẻ cho khoảng STT lẻ";
 
                         if (oddStart.Value > oddEnd.Value)
-                            return "STT l? 'T?' ph?i nh? hon ho?c b?ng '�?n'";
+                            return "STT lẻ 'Từ' phải nhỏ hơn hoặc bằng 'Đến'";
 
                         if (oddEnd.Value - oddStart.Value > 10000)
-                            return "Kho?ng STT l? kh�ng du?c vu?t qu� 10,000 d? d?m b?o hi?u su?t";
+                            return "Khoảng STT lẻ không được vượt quá 10,000 để đảm bảo hiệu suất";
                     }
                     break;
             }
@@ -519,7 +519,7 @@ namespace CIResearch.Controllers
                 .OrderBy(x => x)
                 .ToList();
 
-            Console.WriteLine($"?? Filter options prepared:");
+            Console.WriteLine($"📊 Filter options prepared:");
             Console.WriteLine($"   - Years: {ViewBag.AvailableYears.Count}");
             Console.WriteLine($"   - Provinces: {ViewBag.AvailableProvinces.Count}");
             Console.WriteLine($"   - Business Types: {ViewBag.AvailableBusinessTypes.Count}");
@@ -538,36 +538,36 @@ namespace CIResearch.Controllers
                 var cacheKey = $"{METHOD_CACHE_PREFIX}{methodKey}";
 
                 // Check if cached result exists and is still valid
-                if (_dn2MethodCache.TryGetValue(cacheKey, out var cachedResult) &&
-                    _dn2MethodCacheTimestamps.TryGetValue(cacheKey, out var timestamp))
+                if (_methodCache.TryGetValue(cacheKey, out var cachedResult) &&
+                    _methodCacheTimestamps.TryGetValue(cacheKey, out var timestamp))
                 {
-                    if (DateTime.Now - timestamp < _dn2MethodCacheTimeout)
+                    if (DateTime.Now - timestamp < _methodCacheTimeout)
                     {
-                        Console.WriteLine($"?? MEMOIZATION HIT: {methodKey}");
+                        Console.WriteLine($"🚀 MEMOIZATION HIT: {methodKey}");
                         return (T)cachedResult;
                     }
                     else
                     {
                         // Cache expired, remove it
-                        _dn2MethodCache.TryRemove(cacheKey, out _);
-                        _dn2MethodCacheTimestamps.TryRemove(cacheKey, out _);
-                        Console.WriteLine($"?? MEMOIZATION EXPIRED: {methodKey}");
+                        _methodCache.TryRemove(cacheKey, out _);
+                        _methodCacheTimestamps.TryRemove(cacheKey, out _);
+                        Console.WriteLine($"🕒 MEMOIZATION EXPIRED: {methodKey}");
                     }
                 }
 
                 // Calculate new result and cache it
-                Console.WriteLine($"?? MEMOIZATION MISS: {methodKey} - calculating...");
+                Console.WriteLine($"💻 MEMOIZATION MISS: {methodKey} - calculating...");
                 var result = calculation();
 
-                _dn2MethodCache.TryAdd(cacheKey, result);
-                _dn2MethodCacheTimestamps.TryAdd(cacheKey, DateTime.Now);
+                _methodCache.TryAdd(cacheKey, result);
+                _methodCacheTimestamps.TryAdd(cacheKey, DateTime.Now);
 
-                Console.WriteLine($"? MEMOIZATION STORED: {methodKey}");
+                Console.WriteLine($"✅ MEMOIZATION STORED: {methodKey}");
                 return result;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"? MEMOIZATION ERROR for {methodKey}: {ex.Message}");
+                Console.WriteLine($"❌ MEMOIZATION ERROR for {methodKey}: {ex.Message}");
                 // Fallback to direct calculation
                 return calculation();
             }
@@ -580,7 +580,7 @@ namespace CIResearch.Controllers
         {
             return await GetMemoizedResultAsync(FILTER_OPTIONS_CACHE_KEY, async () =>
             {
-                Console.WriteLine("?? Calculating fresh filter options...");
+                Console.WriteLine("🔄 Calculating fresh filter options...");
                 var allData = await GetCachedDataAsync();
 
                 return new FilterOptionsCache
@@ -623,15 +623,15 @@ namespace CIResearch.Controllers
         /// </summary>
         private async Task<T> GetMemoizedResultAsync<T>(string cacheKey, Func<Task<T>> calculation, TimeSpan? customTimeout = null)
         {
-            var timeout = customTimeout ?? _dn2MethodCacheTimeout;
+            var timeout = customTimeout ?? _methodCacheTimeout;
 
             if (_cache.TryGetValue(cacheKey, out T cachedResult))
             {
-                Console.WriteLine($"?? ASYNC CACHE HIT: {cacheKey}");
+                Console.WriteLine($"🚀 ASYNC CACHE HIT: {cacheKey}");
                 return cachedResult;
             }
 
-            Console.WriteLine($"?? ASYNC CACHE MISS: {cacheKey} - calculating...");
+            Console.WriteLine($"💻 ASYNC CACHE MISS: {cacheKey} - calculating...");
             var result = await calculation();
 
             var cacheOptions = new MemoryCacheEntryOptions()
@@ -639,7 +639,7 @@ namespace CIResearch.Controllers
                 .SetSize(1);
 
             _cache.Set(cacheKey, result, cacheOptions);
-            Console.WriteLine($"? ASYNC CACHE STORED: {cacheKey}");
+            Console.WriteLine($"✅ ASYNC CACHE STORED: {cacheKey}");
 
             return result;
         }
@@ -657,7 +657,7 @@ namespace CIResearch.Controllers
 
             return GetMemoizedResult(cacheKey, () =>
             {
-                Console.WriteLine($"?? Applying filters for cache key: {filterKey}");
+                Console.WriteLine($"🔍 Applying filters for cache key: {filterKey}");
                 return ApplyFiltersOptimized(allData, stt, Nam, MaTinh_Dieutra, Masothue, Loaihinhkte, Vungkinhte);
             });
         }
@@ -689,7 +689,7 @@ namespace CIResearch.Controllers
         /// </summary>
         private async Task StartBackgroundCacheRefresh()
         {
-            Console.WriteLine("?? Starting background cache refresh...");
+            Console.WriteLine("🔄 Starting background cache refresh...");
 
             _ = Task.Run(async () =>
             {
@@ -714,11 +714,11 @@ namespace CIResearch.Controllers
                         GetCachedFilteredData(allData, "", yearFilter, null, null, null, null);
                     }
 
-                    Console.WriteLine("? Background cache refresh completed");
+                    Console.WriteLine("✅ Background cache refresh completed");
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"? Background cache refresh error: {ex.Message}");
+                    Console.WriteLine($"❌ Background cache refresh error: {ex.Message}");
                 }
             });
         }
@@ -728,7 +728,7 @@ namespace CIResearch.Controllers
         /// </summary>
         private void ClearAllPerformanceCaches()
         {
-            Console.WriteLine("?? Clearing all performance caches...");
+            Console.WriteLine("🧹 Clearing all performance caches...");
 
             // Clear main data caches
             _cache.Remove(DATA_CACHE_KEY);
@@ -737,8 +737,8 @@ namespace CIResearch.Controllers
             _cache.Remove(STATISTICS_CACHE_KEY);
 
             // Clear method-level caches
-            _dn2MethodCache.Clear();
-            _dn2MethodCacheTimestamps.Clear();
+            _methodCache.Clear();
+            _methodCacheTimestamps.Clear();
 
             // Clear filtered data caches (pattern-based removal)
             var cacheField = typeof(MemoryCache).GetField("_coherentState",
@@ -764,11 +764,11 @@ namespace CIResearch.Controllers
                         _cache.Remove(key);
                     }
 
-                    Console.WriteLine($"?? Cleared {keysToRemove.Count} pattern-based cache entries");
+                    Console.WriteLine($"🧹 Cleared {keysToRemove.Count} pattern-based cache entries");
                 }
             }
 
-            Console.WriteLine("? All performance caches cleared");
+            Console.WriteLine("✅ All performance caches cleared");
         }
 
         /// <summary>
@@ -783,7 +783,7 @@ namespace CIResearch.Controllers
             ViewBag.AvailableBusinessTypes = options.BusinessTypes;
             ViewBag.AvailableEconomicZones = options.EconomicZones;
 
-            Console.WriteLine($"?? Cached filter options assigned:");
+            Console.WriteLine($"📊 Cached filter options assigned:");
             Console.WriteLine($"   - Years: {ViewBag.AvailableYears.Count} (cached at {options.GeneratedAt})");
             Console.WriteLine($"   - Provinces: {ViewBag.AvailableProvinces.Count}");
             Console.WriteLine($"   - Business Types: {ViewBag.AvailableBusinessTypes.Count}");
@@ -826,7 +826,7 @@ namespace CIResearch.Controllers
             {
                 await conn.OpenAsync();
 
-                // ?? OPTIMIZED: Remove unnecessary logging and load ALL data efficiently
+                // 🚀 OPTIMIZED: Remove unnecessary logging and load ALL data efficiently
                 string query = @"
                     SELECT STT, TenDN, Diachi, MaTinh_Dieutra, MaHuyen_Dieutra, MaXa_Dieutra,
                            DNTB_MaTinh, DNTB_MaHuyen, DNTB_MaXa, Region, Loaihinhkte, 
@@ -837,16 +837,16 @@ namespace CIResearch.Controllers
                     FROM dn_all2 
                     ORDER BY STT";
 
-                Console.WriteLine($"?? Loading data from database (optimized)...");
+                Console.WriteLine($"🔍 Loading data from database (optimized)...");
 
                 using (var cmd = new MySqlCommand(query, conn))
                 {
-                    // ?? PERFORMANCE: Set command timeout to handle large datasets
+                    // 🚀 PERFORMANCE: Set command timeout to handle large datasets
                     cmd.CommandTimeout = 300; // 5 minutes timeout for large datasets
 
                     using (var reader = await cmd.ExecuteReaderAsync())
                     {
-                        // ?? PERFORMANCE: Pre-allocate list capacity for better performance
+                        // 🚀 PERFORMANCE: Pre-allocate list capacity for better performance
                         if (data.Capacity < 1000000) data.Capacity = 1000000;
 
                         while (await reader.ReadAsync())
@@ -854,17 +854,17 @@ namespace CIResearch.Controllers
                             var record = CreateQLKHFromReader(reader);
                             data.Add(record);
 
-                            // ?? PERFORMANCE: Reduced logging frequency (every 500k instead of 100k)
+                            // 🚀 PERFORMANCE: Reduced logging frequency (every 500k instead of 100k)
                             if (data.Count % 500000 == 0)
                             {
-                                Console.WriteLine($"?? Loaded {data.Count:N0} records...");
+                                Console.WriteLine($"📊 Loaded {data.Count:N0} records...");
                             }
                         }
                     }
                 }
             }
 
-            Console.WriteLine($"? Loaded {data.Count:N0} records from database (performance optimized)");
+            Console.WriteLine($"✅ Loaded {data.Count:N0} records from database (performance optimized)");
             return data;
         }
 
@@ -1044,7 +1044,7 @@ namespace CIResearch.Controllers
 
             // Get current analysis year (latest year or user-selected year)
             int currentYear = GetCurrentAnalysisYear(data, namFilter);
-            Console.WriteLine($"?? Analysis year: {currentYear} ({data.Count:N0} total records)");
+            Console.WriteLine($"🔍 Analysis year: {currentYear} ({data.Count:N0} total records)");
 
             // Filter data for the current analysis year
             var currentYearData = FilterDataByYear(data, currentYear);
@@ -1064,7 +1064,7 @@ namespace CIResearch.Controllers
             // Count unique companies based on unique tax codes in current year
             stats.TotalCompanies = uniqueCompaniesInYear.Count;
 
-            Console.WriteLine($"?? UNIQUE COMPANIES COUNT FOR YEAR {currentYear}:");
+            Console.WriteLine($"🔍 UNIQUE COMPANIES COUNT FOR YEAR {currentYear}:");
             Console.WriteLine($"   - Total records in year {currentYear}: {currentYearData.Count}");
             Console.WriteLine($"   - Records with Masothue: {currentYearData.Count(x => !string.IsNullOrEmpty(x.Masothue))}");
             Console.WriteLine($"   - Unique companies (by Masothue): {stats.TotalCompanies}");
@@ -1077,7 +1077,7 @@ namespace CIResearch.Controllers
 
             if (duplicateExamples.Any())
             {
-                Console.WriteLine($"\n?? SAMPLE DUPLICATE COMPANIES IN YEAR {currentYear} (same Masothue):");
+                Console.WriteLine($"\n🔍 SAMPLE DUPLICATE COMPANIES IN YEAR {currentYear} (same Masothue):");
                 foreach (var example in duplicateExamples)
                 {
                     Console.WriteLine($"   - Masothue: {example.Masothue}");
@@ -1093,11 +1093,11 @@ namespace CIResearch.Controllers
             ViewBag.CurrentAnalysisYear = currentYear;
             ViewBag.AvailableYears = data.Where(x => x.Nam.HasValue).Select(x => x.Nam.Value).Distinct().OrderByDescending(x => x).ToList();
 
-            Console.WriteLine($"?? VIEWBAG YEAR ASSIGNMENT:");
+            Console.WriteLine($"🔍 VIEWBAG YEAR ASSIGNMENT:");
             Console.WriteLine($"   - ViewBag.CurrentAnalysisYear: {ViewBag.CurrentAnalysisYear}");
             Console.WriteLine($"   - ViewBag.AvailableYears: [{string.Join(", ", ViewBag.AvailableYears)}]");
 
-            Console.WriteLine($"?? UNIQUE COMPANIES COUNT:");
+            Console.WriteLine($"🔍 UNIQUE COMPANIES COUNT:");
             Console.WriteLine($"   - Total records: {data.Count}");
             Console.WriteLine($"   - Unique companies: {stats.TotalCompanies}");
             Console.WriteLine($"   - Duplicates removed: {data.Count - stats.TotalCompanies}");
@@ -1109,7 +1109,7 @@ namespace CIResearch.Controllers
                 var laborSum = uniqueCompanies.Sum(x => (long)(x.SoLaodong_CuoiNam ?? 0));
                 stats.TotalLabor = laborSum > int.MaxValue ? int.MaxValue : (int)laborSum;
 
-                Console.WriteLine($"?? LABOR COUNT FOR YEAR {currentYear} (using unique companies only):");
+                Console.WriteLine($"🔍 LABOR COUNT FOR YEAR {currentYear} (using unique companies only):");
                 Console.WriteLine($"   - Unique companies in year: {uniqueCompanies.Count}");
                 Console.WriteLine($"   - Companies with labor data: {uniqueCompanies.Count(x => x.SoLaodong_CuoiNam.HasValue)}");
                 Console.WriteLine($"   - Total labor count: {stats.TotalLabor:N0}");
@@ -1122,23 +1122,23 @@ namespace CIResearch.Controllers
 
                 if (sampleWithLabor.Any())
                 {
-                    Console.WriteLine($"?? SAMPLE COMPANIES WITH LABOR DATA IN YEAR {currentYear}:");
+                    Console.WriteLine($"🔍 SAMPLE COMPANIES WITH LABOR DATA IN YEAR {currentYear}:");
                     foreach (var company in sampleWithLabor)
                     {
-                        Console.WriteLine($"   - {company.TenDN}: {company.SoLaodong_CuoiNam:N0} lao d?ng");
-                        Console.WriteLine($"     M� s? thu?: {company.Masothue}");
+                        Console.WriteLine($"   - {company.TenDN}: {company.SoLaodong_CuoiNam:N0} lao động");
+                        Console.WriteLine($"     Mã số thuế: {company.Masothue}");
                     }
                 }
             }
             catch (OverflowException)
             {
-                Console.WriteLine($"?? Labor sum overflow for year {currentYear}, using count of companies with labor data");
+                Console.WriteLine($"⚠️ Labor sum overflow for year {currentYear}, using count of companies with labor data");
                 stats.TotalLabor = uniqueCompanies.Count(x => x.SoLaodong_CuoiNam.HasValue);
             }
 
             // Debug: Log data details
-            Console.WriteLine($"?? DEBUGGING - Total unique companies: {stats.TotalCompanies}");
-            Console.WriteLine($"?? Sample unique companies:");
+            Console.WriteLine($"🔍 DEBUGGING - Total unique companies: {stats.TotalCompanies}");
+            Console.WriteLine($"🔍 Sample unique companies:");
             var sampleCompanies = uniqueCompanies.Take(3);
             foreach (var company in sampleCompanies)
             {
@@ -1150,15 +1150,15 @@ namespace CIResearch.Controllers
             // DIRECT REGION MAPPING - No complex economic zones needed
 
             // ===== DEBUG REGIONAL DATA START =====
-            Console.WriteLine($"\n?????? REGIONAL DEBUG START - YEAR {currentYear} ??????");
-            Console.WriteLine($"\n?? REGIONAL DATA SOURCE DEBUG FOR YEAR {currentYear}:");
+            Console.WriteLine($"\n🚨🚨🚨 REGIONAL DEBUG START - YEAR {currentYear} 🚨🚨🚨");
+            Console.WriteLine($"\n🔍 REGIONAL DATA SOURCE DEBUG FOR YEAR {currentYear}:");
             Console.WriteLine($"   - Total unique companies in year: {uniqueCompaniesInYear.Count}");
             Console.WriteLine($"   - Companies with Vungkinhte: {uniqueCompaniesInYear.Count(x => !string.IsNullOrEmpty(x.Record.Vungkinhte))}");
             Console.WriteLine($"   - Companies with Region: {uniqueCompaniesInYear.Count(x => !string.IsNullOrEmpty(x.Record.Region))}");
             Console.WriteLine($"   - Companies with either: {uniqueCompaniesInYear.Count(x => !string.IsNullOrEmpty(x.Record.Vungkinhte) || !string.IsNullOrEmpty(x.Record.Region))}");
 
             // Sample raw data from Region field only
-            Console.WriteLine($"\n?? SAMPLE RAW REGIONAL DATA FROM DATABASE:");
+            Console.WriteLine($"\n🔍 SAMPLE RAW REGIONAL DATA FROM DATABASE:");
             var sampleRawData = uniqueCompaniesInYear.Take(10).ToList();
             foreach (var sample in sampleRawData)
             {
@@ -1173,7 +1173,7 @@ namespace CIResearch.Controllers
                 .Where(x => !string.IsNullOrEmpty(x.Record.Vungkinhte))
                 .ToList();
 
-            Console.WriteLine($"\n?? VUNG KINH TE COUNT FROM DATABASE:");
+            Console.WriteLine($"\n🔍 VUNG KINH TE COUNT FROM DATABASE:");
             Console.WriteLine($"   - Total companies with Vungkinhte data: {companiesWithVungKinhTe.Count}");
 
             // Group by Vungkinhte values (7 detailed economic zones)
@@ -1181,14 +1181,14 @@ namespace CIResearch.Controllers
                 .GroupBy(x => x.Record.Vungkinhte)
                 .ToDictionary(g => g.Key, g => g.Count());
 
-            Console.WriteLine($"\n?? VUNG KINH TE DISTRIBUTION:");
+            Console.WriteLine($"\n🔍 VUNG KINH TE DISTRIBUTION:");
             foreach (var vungKinhTe in regionGrouping.OrderByDescending(x => x.Value))
             {
                 Console.WriteLine($"   - {vungKinhTe.Key}: {vungKinhTe.Value} companies");
             }
 
             // Sample companies by vung kinh te
-            Console.WriteLine($"\n?? SAMPLE COMPANIES BY VUNG KINH TE:");
+            Console.WriteLine($"\n🔍 SAMPLE COMPANIES BY VUNG KINH TE:");
             foreach (var vungKinhTeGroup in regionGrouping.Take(3))
             {
                 var vungKinhTeName = vungKinhTeGroup.Key;
@@ -1209,24 +1209,24 @@ namespace CIResearch.Controllers
             stats.RegionCounts = regionGrouping;
 
             // Map Vungkinhte to 3 main regions for ViewBag compatibility
-            var dongBangSongHong = regionGrouping.GetValueOrDefault("�?ng b?ng S�ng H?ng", 0);
-            var trungDuMienNui = regionGrouping.GetValueOrDefault("Trung du v� Mi?n n�i B?c B?", 0);
-            var bacTrungBo = regionGrouping.GetValueOrDefault("B?c Trung B?", 0);
-            var duyenHaiNamTrungBo = regionGrouping.GetValueOrDefault("Duy�n h?i Nam Trung B?", 0);
-            var tayNguyen = regionGrouping.GetValueOrDefault("T�y Nguy�n", 0);
-            var dongNamBo = regionGrouping.GetValueOrDefault("��ng Nam B?", 0);
-            var dongBangSongCuuLong = regionGrouping.GetValueOrDefault("�?ng b?ng S�ng C?u Long", 0);
+            var dongBangSongHong = regionGrouping.GetValueOrDefault("Đồng bằng Sông Hồng", 0);
+            var trungDuMienNui = regionGrouping.GetValueOrDefault("Trung du và Miền núi Bắc Bộ", 0);
+            var bacTrungBo = regionGrouping.GetValueOrDefault("Bắc Trung Bộ", 0);
+            var duyenHaiNamTrungBo = regionGrouping.GetValueOrDefault("Duyên hải Nam Trung Bộ", 0);
+            var tayNguyen = regionGrouping.GetValueOrDefault("Tây Nguyên", 0);
+            var dongNamBo = regionGrouping.GetValueOrDefault("Đông Nam Bộ", 0);
+            var dongBangSongCuuLong = regionGrouping.GetValueOrDefault("Đồng bằng Sông Cửu Long", 0);
 
             ViewBag.MienBacCount = dongBangSongHong + trungDuMienNui;
             ViewBag.MienTrungCount = bacTrungBo + duyenHaiNamTrungBo + tayNguyen;
             ViewBag.MienNamCount = dongNamBo + dongBangSongCuuLong;
 
-            Console.WriteLine($"\n? VUNG KINH TE VIEWBAG ASSIGNMENT FOR YEAR {currentYear}:");
-            Console.WriteLine($"   - 7 V�ng Kinh T? found: {regionGrouping.Count}");
-            Console.WriteLine($"   - Mapping to 3 mi?n for ViewBag compatibility:");
-            Console.WriteLine($"     * Mi?n B?c: {ViewBag.MienBacCount} companies (�?ng b?ng SH + Trung du mi?n n�i)");
-            Console.WriteLine($"     * Mi?n Trung: {ViewBag.MienTrungCount} companies (B?c TB + Duy�n h?i NTB + T�y Nguy�n)");
-            Console.WriteLine($"     * Mi?n Nam: {ViewBag.MienNamCount} companies (��ng Nam B? + �BSCL)");
+            Console.WriteLine($"\n✅ VUNG KINH TE VIEWBAG ASSIGNMENT FOR YEAR {currentYear}:");
+            Console.WriteLine($"   - 7 Vùng Kinh Tế found: {regionGrouping.Count}");
+            Console.WriteLine($"   - Mapping to 3 miền for ViewBag compatibility:");
+            Console.WriteLine($"     * Miền Bắc: {ViewBag.MienBacCount} companies (Đồng bằng SH + Trung du miền núi)");
+            Console.WriteLine($"     * Miền Trung: {ViewBag.MienTrungCount} companies (Bắc TB + Duyên hải NTB + Tây Nguyên)");
+            Console.WriteLine($"     * Miền Nam: {ViewBag.MienNamCount} companies (Đông Nam Bộ + ĐBSCL)");
             Console.WriteLine($"   - Total regional: {ViewBag.MienBacCount + ViewBag.MienTrungCount + ViewBag.MienNamCount} companies");
 
             // Business type distribution - FIXED: Use unique companies from current year
@@ -1234,8 +1234,8 @@ namespace CIResearch.Controllers
                 .Where(x => !string.IsNullOrEmpty(x.Record.Loaihinhkte))
                 .ToList();
 
-            Console.WriteLine($"\n?????? BUSINESS TYPE DEBUG START - YEAR {currentYear} ??????");
-            Console.WriteLine($"?? BUSINESS TYPE DATA SOURCE DEBUG FOR YEAR {currentYear}:");
+            Console.WriteLine($"\n🚨🚨🚨 BUSINESS TYPE DEBUG START - YEAR {currentYear} 🚨🚨🚨");
+            Console.WriteLine($"🔍 BUSINESS TYPE DATA SOURCE DEBUG FOR YEAR {currentYear}:");
             Console.WriteLine($"   - Total unique companies in year: {uniqueCompaniesInYear.Count}");
             Console.WriteLine($"   - Companies with Loaihinhkte: {companiesWithBusinessType.Count}");
 
@@ -1243,14 +1243,14 @@ namespace CIResearch.Controllers
                 .GroupBy(x => x.Record.Loaihinhkte)
                 .ToDictionary(g => g.Key ?? "Unknown", g => g.Count());
 
-            Console.WriteLine($"\n?? DIRECT BUSINESS TYPE DISTRIBUTION:");
+            Console.WriteLine($"\n🔍 DIRECT BUSINESS TYPE DISTRIBUTION:");
             foreach (var businessType in stats.BusinessTypeCounts.OrderByDescending(x => x.Value))
             {
                 Console.WriteLine($"   - {businessType.Key}: {businessType.Value} companies");
             }
 
             // Sample companies by business type
-            Console.WriteLine($"\n?? SAMPLE COMPANIES BY BUSINESS TYPE:");
+            Console.WriteLine($"\n🔍 SAMPLE COMPANIES BY BUSINESS TYPE:");
             foreach (var typeGroup in stats.BusinessTypeCounts.Take(3))
             {
                 var typeName = typeGroup.Key;
@@ -1267,28 +1267,28 @@ namespace CIResearch.Controllers
                 }
             }
 
-            Console.WriteLine($"\n?? Business type counts: {stats.BusinessTypeCounts.Count} types");
+            Console.WriteLine($"\n🔍 Business type counts: {stats.BusinessTypeCounts.Count} types");
 
             // If no business types, leave empty - NO DEMO DATA
             if (!stats.BusinessTypeCounts.Any())
             {
                 stats.BusinessTypeCounts = new Dictionary<string, int>();
-                Console.WriteLine($"?? No business type data available from database");
+                Console.WriteLine($"⚠️ No business type data available from database");
             }
 
             // Financial data - use current year data
             CalculateFinancialData(currentYearData, stats);
 
             // Industry data - format for chart - ENHANCED DEBUG
-            Console.WriteLine($"\n?? INDUSTRY DEBUG - Total records for current year: {currentYearData.Count}");
+            Console.WriteLine($"\n🔍 INDUSTRY DEBUG - Total records for current year: {currentYearData.Count}");
 
-            Console.WriteLine($"?? INDUSTRY DATA DEBUG - Starting analysis...");
-            Console.WriteLine($"?? Total records for year {currentYear}: {currentYearData.Count}");
+            Console.WriteLine($"🔍 INDUSTRY DATA DEBUG - Starting analysis...");
+            Console.WriteLine($"🔍 Total records for year {currentYear}: {currentYearData.Count}");
 
             // Use unique companies from current year for industry analysis
             var uniqueIndustryCompanies = uniqueCompanies;
 
-            Console.WriteLine($"\n?? INDUSTRY DISTRIBUTION VALIDATION:");
+            Console.WriteLine($"\n🔍 INDUSTRY DISTRIBUTION VALIDATION:");
             Console.WriteLine($"========================================");
             Console.WriteLine($"Total records in database: {data.Count}");
             Console.WriteLine($"Total unique companies: {uniqueCompanies.Count}");
@@ -1299,7 +1299,7 @@ namespace CIResearch.Controllers
             var whitespaceOnly = uniqueCompanies.Count(x => x.TEN_NGANH != null && x.TEN_NGANH.Trim().Length == 0);
             var validValues = uniqueCompanies.Count(x => !string.IsNullOrWhiteSpace(x.TEN_NGANH));
 
-            Console.WriteLine($"?? DETAILED INDUSTRY DATA ANALYSIS:");
+            Console.WriteLine($"🔍 DETAILED INDUSTRY DATA ANALYSIS:");
             Console.WriteLine($"   - NULL values: {nullValues}");
             Console.WriteLine($"   - Empty strings: {emptyStrings}");
             Console.WriteLine($"   - Whitespace only: {whitespaceOnly}");
@@ -1314,13 +1314,13 @@ namespace CIResearch.Controllers
                 .Where(x => string.IsNullOrWhiteSpace(x.TEN_NGANH))
                 .ToList();
 
-            Console.WriteLine($"?? Companies with valid industry data: {companiesWithIndustry.Count}");
-            Console.WriteLine($"?? Companies without valid industry data: {companiesWithoutIndustry.Count}");
+            Console.WriteLine($"🔍 Companies with valid industry data: {companiesWithIndustry.Count}");
+            Console.WriteLine($"🔍 Companies without valid industry data: {companiesWithoutIndustry.Count}");
 
             // Show sample of companies without industry data
             if (companiesWithoutIndustry.Any())
             {
-                Console.WriteLine($"\n?? SAMPLE OF COMPANIES WITHOUT INDUSTRY DATA:");
+                Console.WriteLine($"\n🔍 SAMPLE OF COMPANIES WITHOUT INDUSTRY DATA:");
                 foreach (var company in companiesWithoutIndustry.Take(5))
                 {
                     Console.WriteLine($"   - Company: {company.TenDN}");
@@ -1339,30 +1339,30 @@ namespace CIResearch.Controllers
             // Add the "No Industry Data" category
             if (companiesWithoutIndustry.Any())
             {
-                industryDistribution.Add(new { TEN_NGANH = "Chua c� d? li?u ng�nh ngh?", SoLuong = companiesWithoutIndustry.Count });
+                industryDistribution.Add(new { TEN_NGANH = "Chưa có dữ liệu ngành nghề", SoLuong = companiesWithoutIndustry.Count });
             }
 
             // Validate total companies in distribution
             var totalInDistribution = industryDistribution.Sum(x => x.SoLuong);
 
-            Console.WriteLine($"\n?? INDUSTRY DISTRIBUTION VALIDATION:");
+            Console.WriteLine($"\n🔍 INDUSTRY DISTRIBUTION VALIDATION:");
             Console.WriteLine($"----------------------------------------");
             Console.WriteLine($"Total companies in distribution: {totalInDistribution}");
             Console.WriteLine($"Should match unique companies: {uniqueCompanies.Count}");
 
             if (totalInDistribution != uniqueCompanies.Count)
             {
-                Console.WriteLine($"? ERROR: Mismatch in totals!");
+                Console.WriteLine($"❌ ERROR: Mismatch in totals!");
                 Console.WriteLine($"Missing companies: {uniqueCompanies.Count - totalInDistribution}");
             }
             else
             {
-                Console.WriteLine($"? VALIDATION PASSED: Totals match!");
+                Console.WriteLine($"✅ VALIDATION PASSED: Totals match!");
             }
 
             // Get total number of industries for logging
             var totalIndustries = industryDistribution.Count();
-            Console.WriteLine($"\n?? TOTAL UNIQUE INDUSTRIES: {totalIndustries}");
+            Console.WriteLine($"\n🔍 TOTAL UNIQUE INDUSTRIES: {totalIndustries}");
 
             // Take top 20 industries for visualization
             stats.IndustryData = industryDistribution
@@ -1371,14 +1371,14 @@ namespace CIResearch.Controllers
                 .ToList<object>();
 
             // Log all industries for reference
-            Console.WriteLine($"\n?? ALL INDUSTRIES BY COUNT ({totalIndustries} total):");
+            Console.WriteLine($"\n🔍 ALL INDUSTRIES BY COUNT ({totalIndustries} total):");
             Console.WriteLine($"----------------------------------------");
             foreach (var industry in industryDistribution)
             {
                 Console.WriteLine($"- {industry.TEN_NGANH}: {industry.SoLuong} companies");
             }
 
-            Console.WriteLine($"\n?? TOP 10 INDUSTRIES (including no-data category):");
+            Console.WriteLine($"\n🔍 TOP 10 INDUSTRIES (including no-data category):");
             Console.WriteLine($"----------------------------------------");
             foreach (var industry in stats.IndustryData.Take(10))
             {
@@ -1387,7 +1387,7 @@ namespace CIResearch.Controllers
             }
             if (stats.IndustryData.Count > 0)
             {
-                Console.WriteLine($"?? Top categories from database:");
+                Console.WriteLine($"🔍 Top categories from database:");
                 foreach (var industry in stats.IndustryData.Take(5))
                 {
                     var industryObj = (dynamic)industry;
@@ -1396,8 +1396,8 @@ namespace CIResearch.Controllers
             }
             else
             {
-                Console.WriteLine($"? CRITICAL ERROR: NO INDUSTRY DATA GENERATED!");
-                Console.WriteLine($"? This means TEN_NGANH column is empty or not being read correctly");
+                Console.WriteLine($"❌ CRITICAL ERROR: NO INDUSTRY DATA GENERATED!");
+                Console.WriteLine($"❌ This means TEN_NGANH column is empty or not being read correctly");
             }
 
             // Years - for trend analysis, use all available years but focus on current year
@@ -1408,8 +1408,8 @@ namespace CIResearch.Controllers
                 .OrderBy(x => x)
                 .ToList();
 
-            Console.WriteLine($"?? Years found: {string.Join(", ", stats.Years)}");
-            Console.WriteLine($"?? Current analysis year: {currentYear}");
+            Console.WriteLine($"🔍 Years found: {string.Join(", ", stats.Years)}");
+            Console.WriteLine($"🔍 Current analysis year: {currentYear}");
 
             // Revenue and profit data - use all years for trend
             CalculateRevenueData(data, stats);
@@ -1436,15 +1436,15 @@ namespace CIResearch.Controllers
 
             stats.CompanySizeData = CalculateCompanySizeData(uniqueCompanies);
 
-            Console.WriteLine($"? Final stats - Economic Zones: {stats.RegionData.Count}, Business Types: {stats.BusinessTypeData.Count}, Company Sizes: {stats.CompanySizeData.Count}");
+            Console.WriteLine($"✅ Final stats - Economic Zones: {stats.RegionData.Count}, Business Types: {stats.BusinessTypeData.Count}, Company Sizes: {stats.CompanySizeData.Count}");
 
             return stats;
         }
 
         private static void CalculateFinancialData(List<QLKH> data, ComprehensiveStats stats)
         {
-            Console.WriteLine($"\n?????? FINANCIAL DATA DEBUG START ??????");
-            Console.WriteLine($"?? FINANCIAL DATA CALCULATION FOR YEAR DATA:");
+            Console.WriteLine($"\n🚨🚨🚨 FINANCIAL DATA DEBUG START 🚨🚨🚨");
+            Console.WriteLine($"🔍 FINANCIAL DATA CALCULATION FOR YEAR DATA:");
             Console.WriteLine($"   - Total input records: {data.Count}");
 
             // Count unique companies with revenue
@@ -1465,12 +1465,12 @@ namespace CIResearch.Controllers
                 .GroupBy(x => !string.IsNullOrEmpty(x.Masothue) ? x.Masothue : x.TenDN)
                 .ToList();
 
-            Console.WriteLine($"\n?? DETAILED FINANCIAL DATA ANALYSIS:");
+            Console.WriteLine($"\n🔍 DETAILED FINANCIAL DATA ANALYSIS:");
             Console.WriteLine($"   - Raw records with Revenue > 0: {data.Count(x => x.SR_Doanhthu_Thuan_BH_CCDV.HasValue && x.SR_Doanhthu_Thuan_BH_CCDV.Value > 0)}");
             Console.WriteLine($"   - Raw records with Profit data: {data.Count(x => x.SR_Loinhuan_TruocThue.HasValue)}");
             Console.WriteLine($"   - Raw records with Assets > 0: {data.Count(x => x.Taisan_Tong_CK.HasValue && x.Taisan_Tong_CK.Value > 0)}");
 
-            Console.WriteLine($"\n?? UNIQUE COMPANIES WITH FINANCIAL DATA:");
+            Console.WriteLine($"\n🔍 UNIQUE COMPANIES WITH FINANCIAL DATA:");
             Console.WriteLine($"   - Companies with Revenue: {uniqueCompaniesWithRevenue.Count}");
             Console.WriteLine($"   - Companies with Profit: {uniqueCompaniesWithProfit.Count}");
             Console.WriteLine($"   - Companies with Assets: {uniqueCompaniesWithAssets.Count}");
@@ -1492,12 +1492,12 @@ namespace CIResearch.Controllers
             try
             {
                 stats.FinancialStats["TotalRevenue"] = revenueData.Any() ? revenueData.Sum() : 0;
-                Console.WriteLine($"   - Total Revenue (latest year): {stats.FinancialStats["TotalRevenue"]:N0} tri?u VND");
+                Console.WriteLine($"   - Total Revenue (latest year): {stats.FinancialStats["TotalRevenue"]:N0} triệu VND");
             }
             catch (OverflowException)
             {
                 stats.FinancialStats["TotalRevenue"] = decimal.MaxValue;
-                Console.WriteLine("?? Revenue sum overflow, using MaxValue");
+                Console.WriteLine("⚠️ Revenue sum overflow, using MaxValue");
             }
 
             stats.FinancialStats["AverageRevenue"] = revenueData.Any() ? revenueData.Average() : 0;
@@ -1506,12 +1506,12 @@ namespace CIResearch.Controllers
             try
             {
                 stats.FinancialStats["TotalAssets"] = assetData.Any() ? assetData.Sum() : 0;
-                Console.WriteLine($"   - Total Assets (latest year): {stats.FinancialStats["TotalAssets"]:N0} tri?u VND");
+                Console.WriteLine($"   - Total Assets (latest year): {stats.FinancialStats["TotalAssets"]:N0} triệu VND");
             }
             catch (OverflowException)
             {
                 stats.FinancialStats["TotalAssets"] = decimal.MaxValue;
-                Console.WriteLine("?? Assets sum overflow, using MaxValue");
+                Console.WriteLine("⚠️ Assets sum overflow, using MaxValue");
             }
 
             stats.FinancialStats["AverageAssets"] = assetData.Any() ? assetData.Average() : 0;
@@ -1520,48 +1520,48 @@ namespace CIResearch.Controllers
             try
             {
                 stats.FinancialStats["TotalProfit"] = profitData.Any() ? profitData.Sum() : 0;
-                Console.WriteLine($"   - Total Profit (latest year): {stats.FinancialStats["TotalProfit"]:N0} tri?u VND");
+                Console.WriteLine($"   - Total Profit (latest year): {stats.FinancialStats["TotalProfit"]:N0} triệu VND");
             }
             catch (OverflowException)
             {
                 stats.FinancialStats["TotalProfit"] = decimal.MaxValue;
-                Console.WriteLine("?? Profit sum overflow, using MaxValue");
+                Console.WriteLine("⚠️ Profit sum overflow, using MaxValue");
             }
 
             stats.FinancialStats["AverageProfit"] = profitData.Any() ? profitData.Average() : 0;
             stats.FinancialStats["CompaniesWithProfit"] = uniqueCompaniesWithProfit.Count;
 
             // Sample data for verification
-            Console.WriteLine("\n?? SAMPLE COMPANIES WITH FINANCIAL DATA:");
+            Console.WriteLine("\n🔍 SAMPLE COMPANIES WITH FINANCIAL DATA:");
             foreach (var company in uniqueCompaniesWithRevenue.Take(3))
             {
                 var latestRecord = company.OrderByDescending(x => x.Nam).First();
                 Console.WriteLine($"\n   Company: {latestRecord.TenDN}");
                 Console.WriteLine($"   Tax Code: {latestRecord.Masothue}");
                 Console.WriteLine($"   Latest Year: {latestRecord.Nam}");
-                Console.WriteLine($"   Revenue: {latestRecord.SR_Doanhthu_Thuan_BH_CCDV:N0} tri?u VND");
-                Console.WriteLine($"   Profit: {latestRecord.SR_Loinhuan_TruocThue:N0} tri?u VND");
-                Console.WriteLine($"   Assets: {latestRecord.Taisan_Tong_CK:N0} tri?u VND");
+                Console.WriteLine($"   Revenue: {latestRecord.SR_Doanhthu_Thuan_BH_CCDV:N0} triệu VND");
+                Console.WriteLine($"   Profit: {latestRecord.SR_Loinhuan_TruocThue:N0} triệu VND");
+                Console.WriteLine($"   Assets: {latestRecord.Taisan_Tong_CK:N0} triệu VND");
                 Console.WriteLine($"   Years present: {string.Join(", ", company.Select(x => x.Nam).OrderBy(x => x))}");
             }
 
-            // Th�m th?ng k� cho t�i s?n cu?i k? (Taisan_Tong_CK) - already calculated above
+            // Thêm thống kê cho tài sản cuối kỳ (Taisan_Tong_CK) - already calculated above
             stats.FinancialStats["TotalAssetsCK"] = stats.FinancialStats["TotalAssets"];
             stats.FinancialStats["CompaniesWithAssetsCK"] = uniqueCompaniesWithAssets.Count;
 
-            Console.WriteLine($"\n? FINAL FINANCIAL STATS CALCULATED:");
+            Console.WriteLine($"\n✅ FINAL FINANCIAL STATS CALCULATED:");
             Console.WriteLine($"   - CompaniesWithRevenue: {stats.FinancialStats["CompaniesWithRevenue"]}");
             Console.WriteLine($"   - CompaniesWithAssets: {stats.FinancialStats["CompaniesWithAssets"]}");
             Console.WriteLine($"   - CompaniesWithProfit: {stats.FinancialStats["CompaniesWithProfit"]}");
-            Console.WriteLine($"   - TotalAssetsCK: {stats.FinancialStats["TotalAssetsCK"]:N0} tri?u VND");
+            Console.WriteLine($"   - TotalAssetsCK: {stats.FinancialStats["TotalAssetsCK"]:N0} triệu VND");
             Console.WriteLine($"   - CompaniesWithAssetsCK: {stats.FinancialStats["CompaniesWithAssetsCK"]}");
-            Console.WriteLine($"   - TotalRevenue: {stats.FinancialStats["TotalRevenue"]:N0} tri?u VND");
-            Console.WriteLine($"   - TotalProfit: {stats.FinancialStats["TotalProfit"]:N0} tri?u VND");
+            Console.WriteLine($"   - TotalRevenue: {stats.FinancialStats["TotalRevenue"]:N0} triệu VND");
+            Console.WriteLine($"   - TotalProfit: {stats.FinancialStats["TotalProfit"]:N0} triệu VND");
         }
 
         private static void CalculateRevenueData(List<QLKH> data, ComprehensiveStats stats)
         {
-            Console.WriteLine($"?? TREND DATA CALCULATION - Starting with {data.Count} total records");
+            Console.WriteLine($"🔍 TREND DATA CALCULATION - Starting with {data.Count} total records");
 
             // Step 1: Check all Nam values in the dataset
             var allYears = data
@@ -1571,8 +1571,8 @@ namespace CIResearch.Controllers
                 .OrderBy(x => x)
                 .ToList();
 
-            Console.WriteLine($"?? ALL YEARS found in Nam column: [{string.Join(", ", allYears)}]");
-            Console.WriteLine($"?? Total records with Nam value: {data.Count(x => x.Nam.HasValue)}");
+            Console.WriteLine($"🔍 ALL YEARS found in Nam column: [{string.Join(", ", allYears)}]");
+            Console.WriteLine($"🔍 Total records with Nam value: {data.Count(x => x.Nam.HasValue)}");
 
             // Step 2: Check revenue and profit data availability by year
             foreach (var year in allYears)
@@ -1582,12 +1582,12 @@ namespace CIResearch.Controllers
                 var profitCount = yearRecords.Count(x => x.SR_Loinhuan_TruocThue.HasValue);
                 var bothCount = yearRecords.Count(x => x.SR_Doanhthu_Thuan_BH_CCDV.HasValue && x.SR_Loinhuan_TruocThue.HasValue);
 
-                Console.WriteLine($"?? Year {year}: Total={yearRecords.Count}, HasRevenue={revenueCount}, HasProfit={profitCount}, HasBoth={bothCount}");
+                Console.WriteLine($"📊 Year {year}: Total={yearRecords.Count}, HasRevenue={revenueCount}, HasProfit={profitCount}, HasBoth={bothCount}");
 
                 // Show sample records for each year
                 if (yearRecords.Count > 0)
                 {
-                    Console.WriteLine($"   ?? Sample records for year {year}:");
+                    Console.WriteLine($"   🔍 Sample records for year {year}:");
                     foreach (var sample in yearRecords.Take(2))
                     {
                         Console.WriteLine($"     - STT: {sample.STT}, Company: '{sample.TenDN}', Nam: {sample.Nam}, Revenue: {sample.SR_Doanhthu_Thuan_BH_CCDV?.ToString("N0") ?? "NULL"}, Profit: {sample.SR_Loinhuan_TruocThue?.ToString("N0") ?? "NULL"}");
@@ -1596,7 +1596,7 @@ namespace CIResearch.Controllers
             }
 
             // Step 3: Filter with detailed logging for each condition
-            Console.WriteLine($"?? FILTERING STEP BY STEP:");
+            Console.WriteLine($"🔍 FILTERING STEP BY STEP:");
 
             var step1_hasYear = data.Where(x => x.Nam.HasValue).ToList();
             Console.WriteLine($"   Step 1 - Has Nam: {step1_hasYear.Count} records");
@@ -1609,22 +1609,22 @@ namespace CIResearch.Controllers
 
             var validRecords = step3_hasProfit.ToList();
 
-            Console.WriteLine($"?? FINAL VALID RECORDS: {validRecords.Count}");
+            Console.WriteLine($"🔍 FINAL VALID RECORDS: {validRecords.Count}");
 
             if (validRecords.Count > 0)
             {
-                Console.WriteLine($"?? Year range in VALID data: {validRecords.Min(x => x.Nam.Value)} - {validRecords.Max(x => x.Nam.Value)}");
-                Console.WriteLine($"?? Years in VALID data: [{string.Join(", ", validRecords.Select(x => x.Nam.Value).Distinct().OrderBy(x => x))}]");
+                Console.WriteLine($"🔍 Year range in VALID data: {validRecords.Min(x => x.Nam.Value)} - {validRecords.Max(x => x.Nam.Value)}");
+                Console.WriteLine($"🔍 Years in VALID data: [{string.Join(", ", validRecords.Select(x => x.Nam.Value).Distinct().OrderBy(x => x))}]");
 
-                Console.WriteLine($"?? Sample VALID records with trend data:");
+                Console.WriteLine($"🔍 Sample VALID records with trend data:");
                 foreach (var sample in validRecords.Take(5))
                 {
-                    Console.WriteLine($"   - STT: {sample.STT}, Company: {sample.TenDN}, Year: {sample.Nam}, Revenue: {sample.SR_Doanhthu_Thuan_BH_CCDV:N0} tri?u VND, Profit: {sample.SR_Loinhuan_TruocThue:N0} tri?u VND");
+                    Console.WriteLine($"   - STT: {sample.STT}, Company: {sample.TenDN}, Year: {sample.Nam}, Revenue: {sample.SR_Doanhthu_Thuan_BH_CCDV:N0} triệu VND, Profit: {sample.SR_Loinhuan_TruocThue:N0} triệu VND");
                 }
             }
 
             // Step 4: Group by year with detailed logging
-            Console.WriteLine($"?? GROUPING BY YEAR:");
+            Console.WriteLine($"🔍 GROUPING BY YEAR:");
             var revenueAndProfitByYear = validRecords
                 .GroupBy(x => x.Nam.Value)
                 .Select(g => new
@@ -1637,7 +1637,7 @@ namespace CIResearch.Controllers
                 .OrderBy(x => x.Year)
                 .ToList();
 
-            Console.WriteLine($"?? TREND CALCULATION RESULTS:");
+            Console.WriteLine($"🔍 TREND CALCULATION RESULTS:");
             if (revenueAndProfitByYear.Any())
             {
                 Console.WriteLine($"   - Total years after grouping: {revenueAndProfitByYear.Count}");
@@ -1645,14 +1645,14 @@ namespace CIResearch.Controllers
 
                 foreach (var yearData in revenueAndProfitByYear)
                 {
-                    Console.WriteLine($"   ?? Year {yearData.Year}: {yearData.CompanyCount} companies, Revenue: {yearData.Revenue:N0} tri?u VND, Profit: {yearData.Profit:N0} tri?u VND");
+                    Console.WriteLine($"   📊 Year {yearData.Year}: {yearData.CompanyCount} companies, Revenue: {yearData.Revenue:N0} triệu VND, Profit: {yearData.Profit:N0} triệu VND");
                 }
-                Console.WriteLine($"? Using REAL trend data from database column Nam, SR_Doanhthu_Thuan_BH_CCDV, SR_Loinhuan_TruocThue");
+                Console.WriteLine($"✅ Using REAL trend data from database column Nam, SR_Doanhthu_Thuan_BH_CCDV, SR_Loinhuan_TruocThue");
             }
             else
             {
-                Console.WriteLine($"? NO TREND DATA FOUND after grouping from database admin_ciresearch.dn_all");
-                Console.WriteLine($"? Check if records have valid values in Nam, SR_Doanhthu_Thuan_BH_CCDV, SR_Loinhuan_TruocThue columns");
+                Console.WriteLine($"❌ NO TREND DATA FOUND after grouping from database sakila.dn_all2");
+                Console.WriteLine($"❌ Check if records have valid values in Nam, SR_Doanhthu_Thuan_BH_CCDV, SR_Loinhuan_TruocThue columns");
             }
 
             // Step 5: Assign to stats with verification
@@ -1660,7 +1660,7 @@ namespace CIResearch.Controllers
             stats.RevenueData = revenueAndProfitByYear.Select(x => (double)x.Revenue).ToList();
             stats.ProfitData = revenueAndProfitByYear.Select(x => (double)x.Profit).ToList();
 
-            Console.WriteLine($"? FINAL ASSIGNMENT TO STATS:");
+            Console.WriteLine($"✅ FINAL ASSIGNMENT TO STATS:");
             Console.WriteLine($"   - stats.Years: [{string.Join(", ", stats.Years)}]");
             Console.WriteLine($"   - stats.RevenueData: [{string.Join(", ", stats.RevenueData.Select(x => $"{x:N0}"))}]");
             Console.WriteLine($"   - stats.ProfitData: [{string.Join(", ", stats.ProfitData.Select(x => $"{x:N0}"))}]");
@@ -1670,8 +1670,8 @@ namespace CIResearch.Controllers
         {
             try
             {
-                Console.WriteLine($"\n?? NEW SIMPLE QUY_MO CHART - DIRECT FROM QUY_MO COLUMN ??");
-                Console.WriteLine($"?? Processing {data.Count} total records");
+                Console.WriteLine($"\n🚨 NEW SIMPLE QUY_MO CHART - DIRECT FROM QUY_MO COLUMN 🚨");
+                Console.WriteLine($"📊 Processing {data.Count} total records");
 
                 // Group companies by their unique identifier to avoid duplicates
                 var uniqueCompanies = data
@@ -1679,7 +1679,7 @@ namespace CIResearch.Controllers
                         .Select(g => g.OrderByDescending(x => x.Nam).First()) // Get latest record for each company
                     .ToList();
 
-                Console.WriteLine($"?? Unique companies: {uniqueCompanies.Count}");
+                Console.WriteLine($"📊 Unique companies: {uniqueCompanies.Count}");
 
                 // GROUP BY QUY_MO with short labels mapping
                 var quyMoGroups = uniqueCompanies
@@ -1687,7 +1687,7 @@ namespace CIResearch.Controllers
                     .GroupBy(x => x.QUY_MO.Trim())
                     .Select(g => new
                     {
-                        QuyMo = GetQuyMoDescription(g.Key), // Use short label (Si�u nh?, Nh?, V?a, L?n)
+                        QuyMo = GetQuyMoDescription(g.Key), // Use short label (Siêu nhỏ, Nhỏ, Vừa, Lớn)
                         SoLuong = g.Count(),
                         MoTa = GetQuyMoDescription(g.Key) // Same as QuyMo for consistency
                     })
@@ -1695,7 +1695,7 @@ namespace CIResearch.Controllers
                     .Cast<object>()
                 .ToList();
 
-                Console.WriteLine($"?? QUY_MO COLUMN ANALYSIS:");
+                Console.WriteLine($"📊 QUY_MO COLUMN ANALYSIS:");
                 Console.WriteLine($"   - Total companies: {uniqueCompanies.Count}");
 
                 var totalWithQuyMo = 0;
@@ -1718,16 +1718,16 @@ namespace CIResearch.Controllers
                 // If no QUY_MO data found, return empty list (let frontend handle it)
                 if (!quyMoGroups.Any())
                 {
-                    Console.WriteLine($"? NO QUY_MO DATA FOUND IN DATABASE!");
+                    Console.WriteLine($"❌ NO QUY_MO DATA FOUND IN DATABASE!");
                     return new List<object>();
                 }
 
-                Console.WriteLine($"? QUY_MO chart data ready - {quyMoGroups.Count} categories");
+                Console.WriteLine($"✅ QUY_MO chart data ready - {quyMoGroups.Count} categories");
                 return quyMoGroups;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"? Error in CalculateCompanySizeData: {ex.Message}");
+                Console.WriteLine($"❌ Error in CalculateCompanySizeData: {ex.Message}");
                 return new List<object>();
             }
         }
@@ -1737,10 +1737,10 @@ namespace CIResearch.Controllers
         {
             return quyMo switch
             {
-                "Doanh nghi?p si�u nh?" => "Si�u nh?",
-                "Doanh nghi?p nh?" => "Nh?",
-                "Doanh nghi?p v?a" => "V?a",
-                "Doanh nghi?p l?n" => "L?n",
+                "Doanh nghiệp siêu nhỏ" => "Siêu nhỏ",
+                "Doanh nghiệp nhỏ" => "Nhỏ",
+                "Doanh nghiệp vừa" => "Vừa",
+                "Doanh nghiệp lớn" => "Lớn",
                 _ => quyMo
             };
         }
@@ -1750,10 +1750,10 @@ namespace CIResearch.Controllers
         {
             return quyMoShort switch
             {
-                "Si�u nh?" => 1,
-                "Nh?" => 2,
-                "V?a" => 3,
-                "L?n" => 4,
+                "Siêu nhỏ" => 1,
+                "Nhỏ" => 2,
+                "Vừa" => 3,
+                "Lớn" => 4,
                 _ => 5
             };
         }
@@ -1763,10 +1763,10 @@ namespace CIResearch.Controllers
         {
             return quyMo switch
             {
-                "Doanh nghi?p si�u nh?" => 1,
-                "Doanh nghi?p nh?" => 2,
-                "Doanh nghi?p v?a" => 3,
-                "Doanh nghi?p l?n" => 4,
+                "Doanh nghiệp siêu nhỏ" => 1,
+                "Doanh nghiệp nhỏ" => 2,
+                "Doanh nghiệp vừa" => 3,
+                "Doanh nghiệp lớn" => 4,
                 _ => 5
             };
         }
@@ -1775,19 +1775,19 @@ namespace CIResearch.Controllers
         private static string MapToSimpleLabel(string quyMoFromDb)
         {
             if (string.IsNullOrWhiteSpace(quyMoFromDb))
-                return "Kh�c";
+                return "Khác";
 
             var normalized = quyMoFromDb.Trim().ToLower();
 
             // Map to simple labels that match frontend expectations
-            if (normalized.Contains("si�u nh?") || normalized.Contains("sieu nho"))
-                return "Si�u nh?";
-            else if (normalized.Contains("nh?") || normalized.Contains("nho"))
-                return "Nh?";
-            else if (normalized.Contains("v?a") || normalized.Contains("vua"))
-                return "V?a";
-            else if (normalized.Contains("l?n") || normalized.Contains("lon"))
-                return "L?n";
+            if (normalized.Contains("siêu nhỏ") || normalized.Contains("sieu nho"))
+                return "Siêu nhỏ";
+            else if (normalized.Contains("nhỏ") || normalized.Contains("nho"))
+                return "Nhỏ";
+            else if (normalized.Contains("vừa") || normalized.Contains("vua"))
+                return "Vừa";
+            else if (normalized.Contains("lớn") || normalized.Contains("lon"))
+                return "Lớn";
             else
                 return quyMoFromDb; // Keep original if no match
         }
@@ -1797,10 +1797,10 @@ namespace CIResearch.Controllers
         {
             return quyMo switch
             {
-                "Si�u nh?" => 1,
-                "Nh?" => 2,
-                "V?a" => 3,
-                "L?n" => 4,
+                "Siêu nhỏ" => 1,
+                "Nhỏ" => 2,
+                "Vừa" => 3,
+                "Lớn" => 4,
                 _ => 5
             };
         }
@@ -1809,17 +1809,17 @@ namespace CIResearch.Controllers
         private static string GetCompanySizeDescription(string quyMo)
         {
             if (string.IsNullOrWhiteSpace(quyMo))
-                return "Kh�ng x�c d?nh";
+                return "Không xác định";
 
             var size = quyMo.Trim().ToLower();
 
             return size switch
             {
-                "si�u nh?" or "sieu nho" => "Doanh nghi?p si�u nh?",
-                "nh?" or "nho" => "Doanh nghi?p nh?",
-                "v?a" or "vua" => "Doanh nghi?p v?a",
-                "l?n" or "lon" => "Doanh nghi?p l?n",
-                _ => $"Quy m�: {quyMo}" // Return original value with prefix
+                "siêu nhỏ" or "sieu nho" => "Doanh nghiệp siêu nhỏ",
+                "nhỏ" or "nho" => "Doanh nghiệp nhỏ",
+                "vừa" or "vua" => "Doanh nghiệp vừa",
+                "lớn" or "lon" => "Doanh nghiệp lớn",
+                _ => $"Quy mô: {quyMo}" // Return original value with prefix
             };
         }
 
@@ -1828,10 +1828,10 @@ namespace CIResearch.Controllers
         {
             return category switch
             {
-                "Doanh nghi?p si�u nh?" => "Doanh nghi?p si�u nh? (DT = 3 t? VND)",
-                "Doanh nghi?p nh?" => "Doanh nghi?p nh? (3 t? < DT = 50 t? VND)",
-                "Doanh nghi?p v?a" => "Doanh nghi?p v?a (50 t? < DT = 300 t? VND)",
-                "Doanh nghi?p l?n" => "Doanh nghi?p l?n (DT > 300 t? VND)",
+                "Doanh nghiệp siêu nhỏ" => "Doanh nghiệp siêu nhỏ (DT ≤ 3 tỷ VND)",
+                "Doanh nghiệp nhỏ" => "Doanh nghiệp nhỏ (3 tỷ < DT ≤ 50 tỷ VND)",
+                "Doanh nghiệp vừa" => "Doanh nghiệp vừa (50 tỷ < DT ≤ 300 tỷ VND)",
+                "Doanh nghiệp lớn" => "Doanh nghiệp lớn (DT > 300 tỷ VND)",
                 _ => category
             };
         }
@@ -1841,10 +1841,10 @@ namespace CIResearch.Controllers
         {
             return category switch
             {
-                "Doanh nghi?p si�u nh?" => 1,
-                "Doanh nghi?p nh?" => 2,
-                "Doanh nghi?p v?a" => 3,
-                "Doanh nghi?p l?n" => 4,
+                "Doanh nghiệp siêu nhỏ" => 1,
+                "Doanh nghiệp nhỏ" => 2,
+                "Doanh nghiệp vừa" => 3,
+                "Doanh nghiệp lớn" => 4,
                 _ => 5
             };
         }
@@ -1892,7 +1892,7 @@ namespace CIResearch.Controllers
             // Financial summary stats for the view
             var financialStats = stats.FinancialStats ?? new Dictionary<string, decimal>();
 
-            Console.WriteLine($"\n? VIEWBAG FINANCIAL ASSIGNMENT FOR YEAR {ViewBag.CurrentAnalysisYear}:");
+            Console.WriteLine($"\n✅ VIEWBAG FINANCIAL ASSIGNMENT FOR YEAR {ViewBag.CurrentAnalysisYear}:");
             Console.WriteLine($"   - Input financialStats count: {financialStats.Count}");
             foreach (var kv in financialStats)
             {
@@ -1903,15 +1903,15 @@ namespace CIResearch.Controllers
             ViewBag.CompaniesWithAssets = (int)(financialStats.GetValueOrDefault("CompaniesWithAssets", 0));
             ViewBag.CompaniesWithProfit = (int)(financialStats.GetValueOrDefault("CompaniesWithProfit", 0));
 
-            // T�nh t?ng t�i s?n cu?i k? (Taisan_Tong_CK) 
+            // Tính tổng tài sản cuối kỳ (Taisan_Tong_CK) 
             ViewBag.TotalAssetsCK = financialStats.GetValueOrDefault("TotalAssetsCK", 0);
             ViewBag.CompaniesWithAssetsCK = (int)(financialStats.GetValueOrDefault("CompaniesWithAssetsCK", 0));
 
-            Console.WriteLine($"\n? FINAL VIEWBAG FINANCIAL ASSIGNMENT:");
+            Console.WriteLine($"\n✅ FINAL VIEWBAG FINANCIAL ASSIGNMENT:");
             Console.WriteLine($"   - ViewBag.CompaniesWithRevenue: {ViewBag.CompaniesWithRevenue}");
             Console.WriteLine($"   - ViewBag.CompaniesWithAssets: {ViewBag.CompaniesWithAssets}");
             Console.WriteLine($"   - ViewBag.CompaniesWithProfit: {ViewBag.CompaniesWithProfit}");
-            Console.WriteLine($"   - ViewBag.TotalAssetsCK: {ViewBag.TotalAssetsCK:N0} tri?u VND");
+            Console.WriteLine($"   - ViewBag.TotalAssetsCK: {ViewBag.TotalAssetsCK:N0} triệu VND");
             Console.WriteLine($"   - ViewBag.CompaniesWithAssetsCK: {ViewBag.CompaniesWithAssetsCK}");
 
             // Technology adoption stats - ensure all have default values
@@ -1923,22 +1923,22 @@ namespace CIResearch.Controllers
             // Region counts for the view - USE DIRECT REGION VALUES FROM DATABASE
             // ViewBag is already assigned correctly in CalculateAllStatistics - DON'T OVERRIDE!
 
-            // Top 3 Business Types (Ph�n lo?i DN) - l?y t? database th?c t?
+            // Top 3 Business Types (Phân loại DN) - lấy từ database thực tế
             var top3BusinessTypes = stats.BusinessTypeCounts
                 .OrderByDescending(x => x.Value)
                 .Take(3)
                 .ToList();
 
-            Console.WriteLine($"\n? TOP 3 BUSINESS TYPES ASSIGNMENT FOR YEAR {ViewBag.CurrentAnalysisYear}:");
+            Console.WriteLine($"\n✅ TOP 3 BUSINESS TYPES ASSIGNMENT FOR YEAR {ViewBag.CurrentAnalysisYear}:");
             for (int i = 0; i < 3; i++)
             {
                 var typeName = i < top3BusinessTypes.Count ? top3BusinessTypes[i].Key : "N/A";
                 var typeCount = i < top3BusinessTypes.Count ? top3BusinessTypes[i].Value : 0;
                 var shortName = i < top3BusinessTypes.Count ? ShortenBusinessTypeName(top3BusinessTypes[i].Key) : "N/A";
-                Console.WriteLine($"   - Top {i + 1}: '{typeName}' ? '{shortName}' ({typeCount} companies)");
+                Console.WriteLine($"   - Top {i + 1}: '{typeName}' → '{shortName}' ({typeCount} companies)");
             }
 
-            // G�n top 3 lo?i h�nh doanh nghi?p v�o ViewBag v?i t�n vi?t t?t
+            // Gán top 3 loại hình doanh nghiệp vào ViewBag với tên viết tắt
             ViewBag.TopBusinessType1Name = top3BusinessTypes.Count > 0 ? ShortenBusinessTypeName(top3BusinessTypes[0].Key) : "N/A";
             ViewBag.TopBusinessType1Count = top3BusinessTypes.Count > 0 ? top3BusinessTypes[0].Value : 0;
 
@@ -1948,7 +1948,7 @@ namespace CIResearch.Controllers
             ViewBag.TopBusinessType3Name = top3BusinessTypes.Count > 2 ? ShortenBusinessTypeName(top3BusinessTypes[2].Key) : "N/A";
             ViewBag.TopBusinessType3Count = top3BusinessTypes.Count > 2 ? top3BusinessTypes[2].Value : 0;
 
-            Console.WriteLine($"\n? FINAL VIEWBAG BUSINESS TYPE ASSIGNMENT:");
+            Console.WriteLine($"\n✅ FINAL VIEWBAG BUSINESS TYPE ASSIGNMENT:");
             Console.WriteLine($"   - ViewBag.TopBusinessType1: '{ViewBag.TopBusinessType1Name}' = {ViewBag.TopBusinessType1Count} companies");
             Console.WriteLine($"   - ViewBag.TopBusinessType2: '{ViewBag.TopBusinessType2Name}' = {ViewBag.TopBusinessType2Count} companies");
             Console.WriteLine($"   - ViewBag.TopBusinessType3: '{ViewBag.TopBusinessType3Name}' = {ViewBag.TopBusinessType3Count} companies");
@@ -1984,19 +1984,19 @@ namespace CIResearch.Controllers
             // Add QuyMoData for company size chart with ULTRA ENHANCED debug
             var quyMoDataForViewBag = stats.CompanySizeData ?? new List<object>();
 
-            Console.WriteLine($"\n?????? ULTRA DEBUG - QUY MO CHART DATA ??????");
-            Console.WriteLine($"?? ViewBag.QuyMoData PREPARATION:");
+            Console.WriteLine($"\n🚨🚨🚨 ULTRA DEBUG - QUY MO CHART DATA 🚨🚨🚨");
+            Console.WriteLine($"📊 ViewBag.QuyMoData PREPARATION:");
             Console.WriteLine($"   - CompanySizeData count: {quyMoDataForViewBag.Count}");
             Console.WriteLine($"   - Is null or empty: {quyMoDataForViewBag == null || !quyMoDataForViewBag.Any()}");
 
             if (quyMoDataForViewBag.Count > 0)
             {
-                Console.WriteLine($"?? DETAILED QUY MO DATA ITEMS:");
+                Console.WriteLine($"📋 DETAILED QUY MO DATA ITEMS:");
                 for (int i = 0; i < quyMoDataForViewBag.Count; i++)
                 {
                     var item = quyMoDataForViewBag[i];
                     var itemProps = item.GetType().GetProperties();
-                    Console.WriteLine($"   ?? Item {i + 1}:");
+                    Console.WriteLine($"   📌 Item {i + 1}:");
                     foreach (var prop in itemProps)
                     {
                         var value = prop.GetValue(item);
@@ -2004,11 +2004,11 @@ namespace CIResearch.Controllers
                     }
                 }
 
-                Console.WriteLine($"\n?? JSON SERIALIZATION TEST:");
+                Console.WriteLine($"\n📊 JSON SERIALIZATION TEST:");
                 var jsonTest = JsonConvert.SerializeObject(quyMoDataForViewBag, Formatting.Indented);
                 Console.WriteLine($"   - JSON Result: {jsonTest}");
 
-                Console.WriteLine($"\n?? FRONTEND EXPECTED FORMAT:");
+                Console.WriteLine($"\n🎯 FRONTEND EXPECTED FORMAT:");
                 Console.WriteLine($"   - Frontend needs: [{{QuyMo: 'label', SoLuong: number, MoTa: 'description'}}]");
                 Console.WriteLine($"   - Current format: [{{see above}}]");
 
@@ -2024,22 +2024,22 @@ namespace CIResearch.Controllers
                     };
                 }).ToList();
 
-                Console.WriteLine($"\n?? FRONTEND COMPATIBLE FORMAT:");
+                Console.WriteLine($"\n🔧 FRONTEND COMPATIBLE FORMAT:");
                 var frontendJson = JsonConvert.SerializeObject(frontendFormat, Formatting.Indented);
                 Console.WriteLine($"   - Frontend JSON: {frontendJson}");
             }
             else
             {
-                Console.WriteLine($"? CRITICAL: NO QUY MO DATA FOR VIEWBAG!");
+                Console.WriteLine($"❌ CRITICAL: NO QUY MO DATA FOR VIEWBAG!");
                 Console.WriteLine($"   - This means chart will be empty");
                 Console.WriteLine($"   - Check CalculateCompanySizeData method");
             }
 
             ViewBag.QuyMoData = quyMoDataForViewBag;
-            Console.WriteLine($"? ViewBag.QuyMoData assigned with {quyMoDataForViewBag.Count} items");
+            Console.WriteLine($"✅ ViewBag.QuyMoData assigned with {quyMoDataForViewBag.Count} items");
 
             // Add TrendData for revenue/profit trend chart with ENHANCED DEBUG
-            Console.WriteLine($"?? VIEWBAG TREND DATA CREATION:");
+            Console.WriteLine($"🔍 VIEWBAG TREND DATA CREATION:");
             Console.WriteLine($"   - stats.Years.Count: {stats.Years.Count}");
             Console.WriteLine($"   - stats.RevenueData.Count: {stats.RevenueData.Count}");
             Console.WriteLine($"   - stats.ProfitData.Count: {stats.ProfitData.Count}");
@@ -2052,7 +2052,7 @@ namespace CIResearch.Controllers
             }
             else
             {
-                Console.WriteLine($"? CRITICAL: NO YEARS DATA FOR TREND CHART!");
+                Console.WriteLine($"❌ CRITICAL: NO YEARS DATA FOR TREND CHART!");
                 Console.WriteLine($"   - This means trend chart will be empty");
                 Console.WriteLine($"   - Check CalculateRevenueData function output");
             }
@@ -2071,12 +2071,12 @@ namespace CIResearch.Controllers
                 };
 
                 trendData.Add(trendItem);
-                Console.WriteLine($"   - TrendData[{i}]: Year={stats.Years[i]}, Revenue={revenueValue:N0} tri?u VND, Profit={profitValue:N0} tri?u VND");
+                Console.WriteLine($"   - TrendData[{i}]: Year={stats.Years[i]}, Revenue={revenueValue:N0} triệu VND, Profit={profitValue:N0} triệu VND");
             }
 
             ViewBag.TrendData = trendData;
-            Console.WriteLine($"? ViewBag.TrendData created with {trendData.Count} items");
-            Console.WriteLine($"?? Final ViewBag.TrendData JSON: {JsonConvert.SerializeObject(trendData)}");
+            Console.WriteLine($"✅ ViewBag.TrendData created with {trendData.Count} items");
+            Console.WriteLine($"🔍 Final ViewBag.TrendData JSON: {JsonConvert.SerializeObject(trendData)}");
 
             // Add missing ViewBag properties that the view expects
             ViewBag.loaihinhData = JsonConvert.SerializeObject(stats.BusinessTypeData ?? new List<object>());
@@ -2098,9 +2098,9 @@ namespace CIResearch.Controllers
                 TotalLabor = stats.TotalLabor,
                 DigitalTech = new
                 {
-                    Internet = stats.BusinessTypeCounts.GetValueOrDefault("C�", 0),
-                    Website = stats.BusinessTypeCounts.GetValueOrDefault("C�", 0),
-                    Software = stats.BusinessTypeCounts.GetValueOrDefault("C�", 0)
+                    Internet = stats.BusinessTypeCounts.GetValueOrDefault("Có", 0),
+                    Website = stats.BusinessTypeCounts.GetValueOrDefault("Có", 0),
+                    Software = stats.BusinessTypeCounts.GetValueOrDefault("Có", 0)
                 },
                 Provinces = stats.ProvinceData.Count,
                 Regions = stats.RegionData.Count,
@@ -2131,7 +2131,7 @@ namespace CIResearch.Controllers
         {
             try
             {
-                Console.WriteLine($"?? ExportToExcel called with filters:");
+                Console.WriteLine($"🔍 ExportToExcel called with filters:");
                 Console.WriteLine($"   - STT: {stt}");
                 Console.WriteLine($"   - Nam: [{string.Join(", ", Nam ?? new List<string>())}]");
                 Console.WriteLine($"   - MaTinh_Dieutra: [{string.Join(", ", MaTinh_Dieutra ?? new List<string>())}]");
@@ -2148,21 +2148,21 @@ namespace CIResearch.Controllers
                 // Apply data limiting based on limitType (same as ViewRawData)
                 var limitedData = ApplyDataLimiting(filteredData, limitType, customStart, customEnd, customFilter, evenStart, evenEnd, oddStart, oddEnd);
 
-                Console.WriteLine($"?? Data for Excel export: {limitedData.Count} records");
+                Console.WriteLine($"📊 Data for Excel export: {limitedData.Count} records");
 
                 using var package = new ExcelPackage();
                 var worksheet = package.Workbook.Worksheets.Add("DuLieu_DN");
 
                 // Headers - All 25 columns from database
                 var headers = new[] {
-                    "STT", "T�n DN", "�?a ch?", "M� t?nh di?u tra", "M� huy?n di?u tra", "M� x� di?u tra",
-                    "DNTB M� t?nh", "DNTB M� huy?n", "DNTB M� x�", "Region", "Lo?i h�nh KTE",
-                    "Email", "�i?n tho?i", "Nam", "M� s? thu?", "V�ng kinh t?", "Quy m�",
-                    "M� ng�nh C5 ch�nh", "T�n ng�nh", "SR Doanh thu thu?n BH CCDV", "SR L?i nhu?n tru?c thu?",
-                    "S? lao d?ng d?u nam", "S? lao d?ng cu?i nam", "T�i s?n t?ng CK", "T�i s?n t?ng DK"
+                    "STT", "Tên DN", "Địa chỉ", "Mã tỉnh điều tra", "Mã huyện điều tra", "Mã xã điều tra",
+                    "DNTB Mã tỉnh", "DNTB Mã huyện", "DNTB Mã xã", "Region", "Loại hình KTE",
+                    "Email", "Điện thoại", "Năm", "Mã số thuế", "Vùng kinh tế", "Quy mô",
+                    "Mã ngành C5 chính", "Tên ngành", "SR Doanh thu thuần BH CCDV", "SR Lợi nhuận trước thuế",
+                    "Số lao động đầu năm", "Số lao động cuối năm", "Tài sản tổng CK", "Tài sản tổng DK"
                 };
 
-                Console.WriteLine($"?? Export columns: {headers.Length} total - {string.Join(", ", headers.Take(5))}... (+{headers.Length - 5} more)");
+                Console.WriteLine($"📊 Export columns: {headers.Length} total - {string.Join(", ", headers.Take(5))}... (+{headers.Length - 5} more)");
 
                 // Style headers
                 for (int i = 0; i < headers.Length; i++)
@@ -2232,25 +2232,25 @@ namespace CIResearch.Controllers
 
                 // Add summary information at the bottom
                 var summaryRow = limitedData.Count + 3;
-                worksheet.Cells[summaryRow, 1].Value = "T?ng s? b?n ghi:";
+                worksheet.Cells[summaryRow, 1].Value = "Tổng số bản ghi:";
                 worksheet.Cells[summaryRow, 2].Value = limitedData.Count;
                 worksheet.Cells[summaryRow, 1].Style.Font.Bold = true;
 
-                worksheet.Cells[summaryRow + 1, 1].Value = "Lo?i gi?i h?n:";
+                worksheet.Cells[summaryRow + 1, 1].Value = "Loại giới hạn:";
                 worksheet.Cells[summaryRow + 1, 2].Value = limitType switch
                 {
-                    "first1000" => "1000 d?u",
-                    "last1000" => "1000 cu?i",
-                    "even" => "STT ch?n",
-                    "odd" => "STT l?",
+                    "first1000" => "1000 đầu",
+                    "last1000" => "1000 cuối",
+                    "even" => "STT chẵn",
+                    "odd" => "STT lẻ",
                     "random" => "Random 1000",
-                    "custom" => "T? ch?n",
-                    "all" => "T?t c?",
+                    "custom" => "Tự chọn",
+                    "all" => "Tất cả",
                     _ => limitType
                 };
                 worksheet.Cells[summaryRow + 1, 1].Style.Font.Bold = true;
 
-                worksheet.Cells[summaryRow + 2, 1].Value = "Xu?t l�c:";
+                worksheet.Cells[summaryRow + 2, 1].Value = "Xuất lúc:";
                 worksheet.Cells[summaryRow + 2, 2].Value = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
                 worksheet.Cells[summaryRow + 2, 1].Style.Font.Bold = true;
 
@@ -2259,7 +2259,7 @@ namespace CIResearch.Controllers
                 var filterInfo = string.IsNullOrEmpty(stt) && (Nam?.Count ?? 0) == 0 ? "TatCa" : "DaLoc";
                 var fileName = $"DuLieu_DN_{filterInfo}_{limitType}_{timestamp}.xlsx";
 
-                Console.WriteLine($"?? Generated Excel file: {fileName} with {limitedData.Count} records and 25 columns");
+                Console.WriteLine($"📊 Generated Excel file: {fileName} with {limitedData.Count} records and 25 columns");
 
                 // Return file for direct download
                 var fileBytes = package.GetAsByteArray();
@@ -2269,12 +2269,12 @@ namespace CIResearch.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"? ExportToExcel error: {ex.Message}");
+                Console.WriteLine($"❌ ExportToExcel error: {ex.Message}");
                 return Json(new
                 {
                     success = false,
                     error = ex.Message,
-                    message = "? L?i khi xu?t Excel: " + ex.Message
+                    message = "❌ Lỗi khi xuất Excel: " + ex.Message
                 });
             }
         }
@@ -2321,65 +2321,65 @@ namespace CIResearch.Controllers
             if (string.IsNullOrEmpty(businessTypeName))
                 return "N/A";
 
-            // T?o t�n vi?t t?t cho c�c lo?i h�nh doanh nghi?p d�i
+            // Tạo tên viết tắt cho các loại hình doanh nghiệp dài
             var shortenedNames = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
-                // C�c lo?i h�nh c? ph?n
-                {"C�ng ty c? ph?n c� v?n Nh� nu?c <= 50%", "CP v?n NN =50%"},
-                {"C�ng ty c? ph?n kh�ng c� v?n Nh� nu?c", "CP kh�ng v?n NN"},
-                {"C�ng ty c? ph?n, C�ng ty TNHH c� v?n Nh� nu?c > 50%", "CP/TNHH v?n NN >50%"},
-                {"C�ng ty c? ph?n", "C? ph?n"},
+                // Các loại hình cổ phần
+                {"Công ty cổ phần có vốn Nhà nước <= 50%", "CP vốn NN ≤50%"},
+                {"Công ty cổ phần không có vốn Nhà nước", "CP không vốn NN"},
+                {"Công ty cổ phẩn, Công ty TNHH có vốn Nhà nước > 50%", "CP/TNHH vốn NN >50%"},
+                {"Công ty cổ phần", "Cổ phần"},
                 
-                // C�c lo?i h�nh TNHH
-                {"C�ng ty tr�ch nhi?m h?u h?n m?t th�nh vi�n", "TNHH 1TV"},
-                {"C�ng ty tr�ch nhi?m h?u h?n hai th�nh vi�n tr? l�n", "TNHH 2TV+"},
-                {"C�ng ty TNHH m?t th�nh vi�n", "TNHH 1TV"},
-                {"C�ng ty TNHH hai th�nh vi�n tr? l�n", "TNHH 2TV+"},
-                {"C�ng ty TNHH", "TNHH"},
+                // Các loại hình TNHH
+                {"Công ty trách nhiệm hữu hạn một thành viên", "TNHH 1TV"},
+                {"Công ty trách nhiệm hữu hạn hai thành viên trở lên", "TNHH 2TV+"},
+                {"Công ty TNHH một thành viên", "TNHH 1TV"},
+                {"Công ty TNHH hai thành viên trở lên", "TNHH 2TV+"},
+                {"Công ty TNHH", "TNHH"},
                 
-                // C�c lo?i h�nh kh�c
-                {"Doanh nghi?p tu nh�n", "DN tu nh�n"},
-                {"H? kinh doanh c� th?", "H? KD c� th?"},
-                {"H?p t�c x�", "HTX"},
-                {"Li�n hi?p h?p t�c x�", "Li�n hi?p HTX"},
-                {"Doanh nghi?p nh� nu?c", "DN nh� nu?c"},
-                {"C�ng ty nh� nu?c", "C�ng ty NN"},
-                {"T?ng c�ng ty nh� nu?c", "T?ng c�ng ty NN"},
+                // Các loại hình khác
+                {"Doanh nghiệp tư nhân", "DN tư nhân"},
+                {"Hộ kinh doanh cá thể", "Hộ KD cá thể"},
+                {"Hợp tác xã", "HTX"},
+                {"Liên hiệp hợp tác xã", "Liên hiệp HTX"},
+                {"Doanh nghiệp nhà nước", "DN nhà nước"},
+                {"Công ty nhà nước", "Công ty NN"},
+                {"Tổng công ty nhà nước", "Tổng công ty NN"},
                 
-                // C�c lo?i h�nh d?u tu nu?c ngo�i
-                {"Doanh nghi?p c� v?n d?u tu nu?c ngo�i", "DN v?n ngo?i"},
-                {"C�ng ty c� v?n d?u tu nu?c ngo�i", "C�ng ty v?n ngo?i"},
-                {"Doanh nghi?p 100% v?n nu?c ngo�i", "DN 100% ngo?i"},
+                // Các loại hình đầu tư nước ngoài
+                {"Doanh nghiệp có vốn đầu tư nước ngoài", "DN vốn ngoại"},
+                {"Công ty có vốn đầu tư nước ngoài", "Công ty vốn ngoại"},
+                {"Doanh nghiệp 100% vốn nước ngoài", "DN 100% ngoại"},
                 
-                // C�c lo?i h�nh kh�c
-                {"�on v? s? nghi?p c� thu", "�V s? nghi?p"},
-                {"T? ch?c t�n d?ng", "T? ch?c TD"},
-                {"Qu? d?u tu", "Qu? �T"}
+                // Các loại hình khác
+                {"Đơn vị sự nghiệp có thu", "ĐV sự nghiệp"},
+                {"Tổ chức tín dụng", "Tổ chức TD"},
+                {"Quỹ đầu tư", "Quỹ ĐT"}
             };
 
-            // Ki?m tra xem c� t�n vi?t t?t kh�ng
+            // Kiểm tra xem có tên viết tắt không
             if (shortenedNames.TryGetValue(businessTypeName, out string shortName))
             {
                 return shortName;
             }
 
-            // N?u kh�ng c� trong dictionary, t? d?ng r�t g?n
+            // Nếu không có trong dictionary, tự động rút gọn
             if (businessTypeName.Length > 20)
             {
-                // Lo?i b? c�c t? thu?ng g?p d? r�t g?n
+                // Loại bỏ các từ thường gặp để rút gọn
                 var shortened = businessTypeName
-                    .Replace("C�ng ty ", "")
-                    .Replace("Doanh nghi?p ", "DN ")
-                    .Replace("tr�ch nhi?m h?u h?n", "TNHH")
-                    .Replace("c? ph?n", "CP")
-                    .Replace("m?t th�nh vi�n", "1TV")
-                    .Replace("hai th�nh vi�n tr? l�n", "2TV+")
-                    .Replace("c� v?n", "v?n")
-                    .Replace("Nh� nu?c", "NN")
-                    .Replace("d?u tu nu?c ngo�i", "ngo?i")
-                    .Replace("tu nh�n", "TN");
+                    .Replace("Công ty ", "")
+                    .Replace("Doanh nghiệp ", "DN ")
+                    .Replace("trách nhiệm hữu hạn", "TNHH")
+                    .Replace("cổ phần", "CP")
+                    .Replace("một thành viên", "1TV")
+                    .Replace("hai thành viên trở lên", "2TV+")
+                    .Replace("có vốn", "vốn")
+                    .Replace("Nhà nước", "NN")
+                    .Replace("đầu tư nước ngoài", "ngoại")
+                    .Replace("tư nhân", "TN");
 
-                // N?u v?n d�i, c?t b?t
+                // Nếu vẫn dài, cắt bớt
                 if (shortened.Length > 20)
                 {
                     shortened = shortened.Substring(0, 17) + "...";
@@ -2408,19 +2408,19 @@ namespace CIResearch.Controllers
         {
             try
             {
-                Console.WriteLine("?? FORCE RELOAD ALL DATA - Clearing all caches...");
+                Console.WriteLine("🔄 FORCE RELOAD ALL DATA - Clearing all caches...");
 
                 // Clear all caches
                 _cache.Remove(DATA_CACHE_KEY);
                 _cache.Remove(SUMMARY_CACHE_KEY);
 
-                Console.WriteLine("?? Caches cleared, loading fresh data from database...");
+                Console.WriteLine("🔄 Caches cleared, loading fresh data from database...");
 
                 // Force reload fresh data
                 var allData = await GetCachedDataAsync();
 
-                Console.WriteLine($"? FORCE RELOAD COMPLETED!");
-                Console.WriteLine($"?? Total records loaded: {allData.Count:N0}");
+                Console.WriteLine($"✅ FORCE RELOAD COMPLETED!");
+                Console.WriteLine($"📊 Total records loaded: {allData.Count:N0}");
 
                 // Check data distribution by year
                 var yearDistribution = allData
@@ -2431,7 +2431,7 @@ namespace CIResearch.Controllers
                     .Take(10)
                     .ToList();
 
-                Console.WriteLine($"?? Data distribution by year (top 10):");
+                Console.WriteLine($"📊 Data distribution by year (top 10):");
                 foreach (var year in yearDistribution)
                 {
                     Console.WriteLine($"   - Year {year.Year}: {year.Count:N0} records");
@@ -2440,28 +2440,28 @@ namespace CIResearch.Controllers
                 return Json(new
                 {
                     success = true,
-                    message = "? All data reloaded successfully from database",
+                    message = "✅ All data reloaded successfully from database",
                     totalRecords = allData.Count,
-                    dataSource = "Real data FROM dn_all2 table - NO LIMITS",
+                    dataSource = "Real data from dn_all2 table - NO LIMITS",
                     yearDistribution = yearDistribution,
                     timestamp = DateTime.Now
                 });
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"? Error in force reload: {ex.Message}");
+                Console.WriteLine($"❌ Error in force reload: {ex.Message}");
                 return Json(new
                 {
                     success = false,
                     error = ex.Message,
-                    message = "? Failed to reload data from database",
+                    message = "❌ Failed to reload data from database",
                     timestamp = DateTime.Now
                 });
             }
         }
 
         /// <summary>
-        /// ?? PERFORMANCE: Preload cache to ensure instant navigation between DN and ViewRawData
+        /// 🚀 PERFORMANCE: Preload cache to ensure instant navigation between DN and ViewRawData
         /// </summary>
         [HttpGet]
         public async Task<IActionResult> PreloadCache()
@@ -2470,26 +2470,26 @@ namespace CIResearch.Controllers
 
             try
             {
-                Console.WriteLine("?? PRELOADING CACHE FOR INSTANT PERFORMANCE...");
+                Console.WriteLine("🚀 PRELOADING CACHE FOR INSTANT PERFORMANCE...");
 
                 // Preload main data cache
                 var allData = await GetCachedDataAsync();
-                Console.WriteLine($"? Main data cached: {allData.Count:N0} records");
+                Console.WriteLine($"✅ Main data cached: {allData.Count:N0} records");
 
                 // Preload filter options cache
                 await PrepareFilterOptionsOptimized();
-                Console.WriteLine($"? Filter options cached");
+                Console.WriteLine($"✅ Filter options cached");
 
                 // Start background cache refresh
                 await StartBackgroundCacheRefresh();
-                Console.WriteLine($"? Background cache refresh started");
+                Console.WriteLine($"✅ Background cache refresh started");
 
                 stopwatch.Stop();
 
                 return Json(new
                 {
                     success = true,
-                    message = "? Cache preloaded successfully - DN ? ViewRawData navigation will be instant",
+                    message = "✅ Cache preloaded successfully - DN ↔ ViewRawData navigation will be instant",
                     totalRecords = allData.Count,
                     preloadTime = stopwatch.ElapsedMilliseconds,
                     cacheConfiguration = new
@@ -2509,12 +2509,12 @@ namespace CIResearch.Controllers
             catch (Exception ex)
             {
                 stopwatch.Stop();
-                Console.WriteLine($"? Error in cache preload: {ex.Message}");
+                Console.WriteLine($"❌ Error in cache preload: {ex.Message}");
                 return Json(new
                 {
                     success = false,
                     error = ex.Message,
-                    message = "? Failed to preload cache",
+                    message = "❌ Failed to preload cache",
                     preloadTime = stopwatch.ElapsedMilliseconds,
                     timestamp = DateTime.Now
                 });
@@ -2584,7 +2584,7 @@ namespace CIResearch.Controllers
             ViewBag.BusinessTypeCounts = new Dictionary<string, int>();
             ViewBag.FinancialStats = new Dictionary<string, decimal>();
 
-            Console.WriteLine("? All ViewBag properties initialized with empty/default values");
+            Console.WriteLine("✅ All ViewBag properties initialized with empty/default values");
         }
 
 
@@ -2598,8 +2598,8 @@ namespace CIResearch.Controllers
         {
             try
             {
-                Console.WriteLine("?? VERIFYING REAL DATA FROM DATABASE");
-                Console.WriteLine($"?? Connection: {_connectionString}");
+                Console.WriteLine("🔍 VERIFYING REAL DATA FROM DATABASE");
+                Console.WriteLine($"🔍 Connection: {_connectionString}");
 
                 var allData = await GetCachedDataAsync();
                 var stats = CalculateAllStatistics(allData);
@@ -2609,7 +2609,7 @@ namespace CIResearch.Controllers
                     DatabaseConnection = _connectionString,
                     TotalRecordsFromDatabase = allData.Count,
 
-                    // V�ng Kinh T? t? c?t Vungkinhte
+                    // Vùng Kinh Tế từ cột Vungkinhte
                     VungKinhTeStats = new
                     {
                         RecordsWithVungkinhte = allData.Count(x => !string.IsNullOrEmpty(x.Vungkinhte)),
@@ -2622,7 +2622,7 @@ namespace CIResearch.Controllers
                         ProcessedRegionData = stats.RegionData
                     },
 
-                    // Business Types t? c?t Loaihinhkte
+                    // Business Types từ cột Loaihinhkte
                     BusinessTypeStats = new
                     {
                         RecordsWithBusinessType = allData.Count(x => !string.IsNullOrEmpty(x.Loaihinhkte)),
@@ -2635,7 +2635,7 @@ namespace CIResearch.Controllers
                         ProcessedBusinessTypeData = stats.BusinessTypeData
                     },
 
-                    // Financial Data th?c t?
+                    // Financial Data thực tế
                     FinancialStats = new
                     {
                         RecordsWithRevenue = allData.Count(x => x.SR_Doanhthu_Thuan_BH_CCDV.HasValue),
@@ -2646,26 +2646,26 @@ namespace CIResearch.Controllers
                         ProcessedFinancialStats = stats.FinancialStats
                     },
 
-                    // Company Size Data th?c t?
+                    // Company Size Data thực tế
                     CompanySizeStats = new
                     {
                         ProcessedSizeData = stats.CompanySizeData,
                         RevenueDistribution = allData
                             .Where(x => x.SR_Doanhthu_Thuan_BH_CCDV.HasValue && x.SR_Doanhthu_Thuan_BH_CCDV.Value > 0)
-                            .Select(x => x.SR_Doanhthu_Thuan_BH_CCDV.Value / 1000m) // Convert tri?u to t? VND
+                            .Select(x => x.SR_Doanhthu_Thuan_BH_CCDV.Value / 1000m) // Convert triệu to tỷ VND
                             .GroupBy(x =>
-                                x <= 3 ? "Si�u nh? (= 3 t?)" :
-                                x <= 50 ? "Nh? (3-50 t?)" :
-                                x <= 300 ? "V?a (50-300 t?)" : "L?n (> 300 t?)")
+                                x <= 3 ? "Siêu nhỏ (≤ 3 tỷ)" :
+                                x <= 50 ? "Nhỏ (3-50 tỷ)" :
+                                x <= 300 ? "Vừa (50-300 tỷ)" : "Lớn (> 300 tỷ)")
                             .Select(g => new { Category = g.Key, Count = g.Count() })
                             .ToList()
                     },
 
                     Summary = new
                     {
-                        Message = "? ALL DATA IS REAL FROM DATABASE - NO DEMO DATA",
+                        Message = "✅ ALL DATA IS REAL FROM DATABASE - NO DEMO DATA",
                         DatabaseStatus = "CONNECTED",
-                        DataSource = "admin_ciresearch.dn_all",
+                        DataSource = "sakila.dn_all2",
                         LastChecked = DateTime.Now
                     }
                 };
@@ -2677,7 +2677,7 @@ namespace CIResearch.Controllers
                 return Json(new
                 {
                     Error = ex.Message,
-                    Message = "? DATABASE CONNECTION FAILED",
+                    Message = "❌ DATABASE CONNECTION FAILED",
                     DatabaseConnection = _connectionString,
                     LastChecked = DateTime.Now
                 });
@@ -2689,16 +2689,16 @@ namespace CIResearch.Controllers
         {
             try
             {
-                Console.WriteLine("?? Testing database connection and data...");
+                Console.WriteLine("🧪 Testing database connection and data...");
 
                 using var conn = new MySqlConnection(_connectionString);
                 await conn.OpenAsync();
-                Console.WriteLine("? Database connection successful");
+                Console.WriteLine("✅ Database connection successful");
 
                 // Test simple query
                 using var cmd = new MySqlCommand("SELECT COUNT(*) FROM dn_all2", conn);
                 var count = await cmd.ExecuteScalarAsync();
-                Console.WriteLine($"?? Total records in dn_all: {count}");
+                Console.WriteLine($"📊 Total records in dn_all2: {count}");
 
                 // Test sample data
                 using var cmd2 = new MySqlCommand("SELECT STT, TenDN, Region, Vungkinhte, MaTinh_Dieutra, Loaihinhkte FROM dn_all2 LIMIT 10", conn);
@@ -2718,7 +2718,7 @@ namespace CIResearch.Controllers
                     });
                 }
 
-                Console.WriteLine($"?? Sample data retrieved: {sampleData.Count} records");
+                Console.WriteLine($"📋 Sample data retrieved: {sampleData.Count} records");
 
                 return Json(new
                 {
@@ -2730,7 +2730,7 @@ namespace CIResearch.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"? Database test failed: {ex.Message}");
+                Console.WriteLine($"❌ Database test failed: {ex.Message}");
                 return Json(new
                 {
                     success = false,
@@ -2759,7 +2759,7 @@ namespace CIResearch.Controllers
                         .OrderByDescending(x => x.Count)
                         .ToList(),
                     BusinessTypes = stats.BusinessTypeData,
-                    ConnectionString = "Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;",
+                    ConnectionString = "Server=127.0.0.1;Database=sakila;User=admin_dbciresearch;Password=9t52$7sBx;",
                     DatabaseTable = "dn_all2"
                 };
 
@@ -2777,7 +2777,7 @@ namespace CIResearch.Controllers
             try
             {
                 var allData = await GetCachedDataAsync();
-                Console.WriteLine($"?? Testing VungKinhTe Chart - Total records: {allData.Count}");
+                Console.WriteLine($"🔍 Testing VungKinhTe Chart - Total records: {allData.Count}");
 
                 // Test raw Vungkinhte data from database
                 var vungKinhTeRaw = allData
@@ -2787,7 +2787,7 @@ namespace CIResearch.Controllers
                     .OrderByDescending(x => x.SoLuong)
                     .ToList();
 
-                Console.WriteLine($"?? Raw Vungkinhte data:");
+                Console.WriteLine($"🔍 Raw Vungkinhte data:");
                 foreach (var item in vungKinhTeRaw)
                 {
                     Console.WriteLine($"   - {item.Vungkinhte}: {item.SoLuong}");
@@ -2795,7 +2795,7 @@ namespace CIResearch.Controllers
 
                 var result = new
                 {
-                    DatabaseConnection = "? Connected to Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;",
+                    DatabaseConnection = "✅ Connected to Server=127.0.0.1;Database=sakila;User=admin_dbciresearch;Password=9t52$7sBx;",
                     TableUsed = "dn_all2",
                     ColumnUsed = "Vungkinhte",
                     TotalRecords = allData.Count,
@@ -2812,7 +2812,7 @@ namespace CIResearch.Controllers
                 {
                     Error = ex.Message,
                     StackTrace = ex.StackTrace,
-                    DatabaseConnection = "? Failed to connect to Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;"
+                    DatabaseConnection = "❌ Failed to connect to Server=127.0.0.1;Database=sakila;User=admin_dbciresearch;Password=9t52$7sBx;"
                 });
             }
         }
@@ -2824,22 +2824,22 @@ namespace CIResearch.Controllers
             {
                 using var conn = new MySqlConnection(_connectionString);
                 await conn.OpenAsync();
-                Console.WriteLine("? Database connected for industry test");
+                Console.WriteLine("✅ Database connected for industry test");
 
                 // Test TEN_NGANH column existence and data  
-                var columnExistsQuery = "SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = 'admin_ciresearch' AND table_name = 'dn_all' AND column_name = 'TEN_NGANH'";
+                var columnExistsQuery = "SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = 'sakila' AND table_name = 'dn_all2' AND column_name = 'TEN_NGANH'";
                 using var cmd1 = new MySqlCommand(columnExistsQuery, conn);
                 var columnExists = Convert.ToInt32(await cmd1.ExecuteScalarAsync()) > 0;
 
-                Console.WriteLine($"?? Column TEN_NGANH exists in dn_all: {columnExists}");
+                Console.WriteLine($"🔍 Column TEN_NGANH exists in dn_all2: {columnExists}");
 
                 if (!columnExists)
                 {
                     return Json(new
                     {
                         success = false,
-                        message = "? Column TEN_NGANH does not exist in dn_all2 table",
-                        connectionString = "Server=localhost;Database=admin_ciresearch;User=root;Password=***",
+                        message = "❌ Column TEN_NGANH does not exist in dn_all2 table",
+                        connectionString = "Server=localhost;Database=sakila;User=root;Password=***",
                         timestamp = DateTime.Now
                     });
                 }
@@ -2866,7 +2866,7 @@ namespace CIResearch.Controllers
                     });
                 }
 
-                Console.WriteLine($"?? Found {industries.Count} industries in TEN_NGANH column");
+                Console.WriteLine($"🔍 Found {industries.Count} industries in TEN_NGANH column");
                 foreach (var industry in industries.Take(5))
                 {
                     var ind = (dynamic)industry;
@@ -2876,10 +2876,10 @@ namespace CIResearch.Controllers
                 return Json(new
                 {
                     success = true,
-                    message = $"? Industry data test successful. Found {industries.Count} industries from TEN_NGANH column",
+                    message = $"✅ Industry data test successful. Found {industries.Count} industries from TEN_NGANH column",
                     data = industries,
-                    connectionString = "Server=localhost;Database=admin_ciresearch;User=root;Password=***",
-                    database = "admin_ciresearch",
+                    connectionString = "Server=localhost;Database=sakila;User=root;Password=***",
+                    database = "sakila",
                     table = "dn_all2",
                     column = "TEN_NGANH",
                     totalIndustries = industries.Count,
@@ -2888,12 +2888,12 @@ namespace CIResearch.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"? Industry test failed: {ex.Message}");
+                Console.WriteLine($"❌ Industry test failed: {ex.Message}");
                 return Json(new
                 {
                     success = false,
-                    message = $"? Industry data test failed: {ex.Message}",
-                    connectionString = "Server=localhost;Database=admin_ciresearch;User=root;Password=***",
+                    message = $"❌ Industry data test failed: {ex.Message}",
+                    connectionString = "Server=localhost;Database=sakila;User=root;Password=***",
                     timestamp = DateTime.Now
                 });
             }
@@ -2905,14 +2905,14 @@ namespace CIResearch.Controllers
             try
             {
                 var allData = await GetCachedDataAsync();
-                Console.WriteLine($"?? Testing Company Size Data - Total records: {allData.Count}");
+                Console.WriteLine($"🧪 Testing Company Size Data - Total records: {allData.Count}");
 
                 // Raw revenue data analysis
                 var revenueRecords = allData
                     .Where(x => x.SR_Doanhthu_Thuan_BH_CCDV.HasValue && x.SR_Doanhthu_Thuan_BH_CCDV.Value > 0)
                     .ToList();
 
-                Console.WriteLine($"?? Records with revenue > 0: {revenueRecords.Count}");
+                Console.WriteLine($"🔍 Records with revenue > 0: {revenueRecords.Count}");
 
                 // Detailed revenue analysis
                 var revenueAnalysis = revenueRecords
@@ -2921,9 +2921,9 @@ namespace CIResearch.Controllers
                         TenDN = x.TenDN,
                         RevenueTrieuVND = x.SR_Doanhthu_Thuan_BH_CCDV.Value,
                         RevenueTyVND = x.SR_Doanhthu_Thuan_BH_CCDV.Value / 1000m,
-                        Category = x.SR_Doanhthu_Thuan_BH_CCDV.Value / 1000m <= 3 ? "Si�u nh?" :
-                                  x.SR_Doanhthu_Thuan_BH_CCDV.Value / 1000m <= 50 ? "Nh?" :
-                                  x.SR_Doanhthu_Thuan_BH_CCDV.Value / 1000m <= 300 ? "V?a" : "L?n"
+                        Category = x.SR_Doanhthu_Thuan_BH_CCDV.Value / 1000m <= 3 ? "Siêu nhỏ" :
+                                  x.SR_Doanhthu_Thuan_BH_CCDV.Value / 1000m <= 50 ? "Nhỏ" :
+                                  x.SR_Doanhthu_Thuan_BH_CCDV.Value / 1000m <= 300 ? "Vừa" : "Lớn"
                     })
                     .OrderByDescending(x => x.RevenueTrieuVND)
                     .Take(10)
@@ -2935,35 +2935,35 @@ namespace CIResearch.Controllers
                 return Json(new
                 {
                     success = true,
-                    message = "? Company Size Data Test Successful",
+                    message = "✅ Company Size Data Test Successful",
                     totalRecords = allData.Count,
                     recordsWithRevenue = revenueRecords.Count,
                     top10RevenueCompanies = revenueAnalysis,
                     companySizeDistribution = companySizeData,
                     databaseInfo = new
                     {
-                        connectionString = "Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;",
+                        connectionString = "Server=127.0.0.1;Database=sakila;User=admin_dbciresearch;Password=9t52$7sBx;",
                         table = "dn_all2",
                         revenueColumn = "SR_Doanhthu_Thuan_BH_CCDV",
-                        unit = "tri?u VND"
+                        unit = "triệu VND"
                     },
                     categoryDefinitions = new
                     {
-                        sieuNho = "Doanh thu = 3 t? VND",
-                        nho = "3 t? < Doanh thu = 50 t? VND",
-                        vua = "50 t? < Doanh thu = 300 t? VND",
-                        lon = "Doanh thu > 300 t? VND & T�i s?n > 100 t? VND"
+                        sieuNho = "Doanh thu ≤ 3 tỷ VND",
+                        nho = "3 tỷ < Doanh thu ≤ 50 tỷ VND",
+                        vua = "50 tỷ < Doanh thu ≤ 300 tỷ VND",
+                        lon = "Doanh thu > 300 tỷ VND & Tài sản > 100 tỷ VND"
                     },
                     lastChecked = DateTime.Now
                 });
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"? Company Size test failed: {ex.Message}");
+                Console.WriteLine($"❌ Company Size test failed: {ex.Message}");
                 return Json(new
                 {
                     success = false,
-                    message = $"? Company Size Data Test Failed: {ex.Message}",
+                    message = $"❌ Company Size Data Test Failed: {ex.Message}",
                     error = ex.StackTrace,
                     lastChecked = DateTime.Now
                 });
@@ -2984,7 +2984,7 @@ namespace CIResearch.Controllers
                 var result = new
                 {
                     success = true,
-                    message = "? ViewBag Test Successful",
+                    message = "✅ ViewBag Test Successful",
                     viewBagQuyMoData = ViewBag.QuyMoData,
                     viewBagQuyMoDataType = ViewBag.QuyMoData?.GetType().Name,
                     viewBagQuyMoDataCount = ViewBag.QuyMoData != null ? ((List<object>)ViewBag.QuyMoData).Count : 0,
@@ -2994,7 +2994,7 @@ namespace CIResearch.Controllers
                     lastChecked = DateTime.Now
                 };
 
-                Console.WriteLine($"?? TEST ViewBag.QuyMoData:");
+                Console.WriteLine($"🔍 TEST ViewBag.QuyMoData:");
                 Console.WriteLine($"   - ViewBag.QuyMoData: {JsonConvert.SerializeObject(ViewBag.QuyMoData)}");
                 Console.WriteLine($"   - Html.Raw would output: {JsonConvert.SerializeObject(ViewBag.QuyMoData ?? new List<object>())}");
 
@@ -3005,7 +3005,7 @@ namespace CIResearch.Controllers
                 return Json(new
                 {
                     success = false,
-                    message = $"? ViewBag Test Failed: {ex.Message}",
+                    message = $"❌ ViewBag Test Failed: {ex.Message}",
                     error = ex.StackTrace,
                     lastChecked = DateTime.Now
                 });
@@ -3017,7 +3017,7 @@ namespace CIResearch.Controllers
         {
             try
             {
-                Console.WriteLine("?? DEBUGGING RAW TREND DATA FROM DATABASE");
+                Console.WriteLine("🔍 DEBUGGING RAW TREND DATA FROM DATABASE");
 
                 using var conn = new MySqlConnection(_connectionString);
                 await conn.OpenAsync();
@@ -3105,11 +3105,11 @@ namespace CIResearch.Controllers
                 return Json(new
                 {
                     success = true,
-                    message = "? Raw Data Debug Complete",
+                    message = "✅ Raw Data Debug Complete",
 
-                    database = "admin_ciresearch",
+                    database = "sakila",
                     table = "dn_all2",
-                    connectionString = "Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;",
+                    connectionString = "Server=127.0.0.1;Database=sakila;User=admin_dbciresearch;Password=9t52$7sBx;",
 
                     rawDataSample = rawData,
                     databaseStatistics = dbStats,
@@ -3140,7 +3140,7 @@ namespace CIResearch.Controllers
                 return Json(new
                 {
                     success = false,
-                    message = $"? Raw Data Debug FAILED: {ex.Message}",
+                    message = $"❌ Raw Data Debug FAILED: {ex.Message}",
                     error = ex.StackTrace,
                     timestamp = DateTime.Now
                 });
@@ -3152,10 +3152,10 @@ namespace CIResearch.Controllers
         {
             try
             {
-                Console.WriteLine("?? Testing Trend Data from Database...");
+                Console.WriteLine("🧪 Testing Trend Data from Database...");
 
                 var allData = await GetCachedDataAsync();
-                Console.WriteLine($"?? Total records loaded: {allData.Count}");
+                Console.WriteLine($"🔍 Total records loaded: {allData.Count}");
 
                 // Test trend data calculation
                 var stats = CalculateAllStatistics(allData);
@@ -3198,8 +3198,8 @@ namespace CIResearch.Controllers
                 return Json(new
                 {
                     success = true,
-                    message = "? Trend Data Test SUCCESSFUL",
-                    database = "admin_ciresearch",
+                    message = "✅ Trend Data Test SUCCESSFUL",
+                    database = "sakila",
                     table = "dn_all2",
                     columns = new { year = "Nam", revenue = "SR_Doanhthu_Thuan_BH_CCDV", profit = "SR_Loinhuan_TruocThue" },
 
@@ -3223,8 +3223,8 @@ namespace CIResearch.Controllers
                         totalRecords = allData.Count,
                         recordsWithTrendData = allData.Count(x => x.Nam.HasValue && x.SR_Doanhthu_Thuan_BH_CCDV.HasValue && x.SR_Loinhuan_TruocThue.HasValue),
                         yearsAvailable = stats.Years.Count,
-                        dataSource = "REAL database data from admin_ciresearch.dn_all",
-                        confirmRealData = "? Chart uses actual data from Nam, SR_Doanhthu_Thuan_BH_CCDV, SR_Loinhuan_TruocThue columns"
+                        dataSource = "REAL database data from sakila.dn_all2",
+                        confirmRealData = "✅ Chart uses actual data from Nam, SR_Doanhthu_Thuan_BH_CCDV, SR_Loinhuan_TruocThue columns"
                     },
 
                     timestamp = DateTime.Now
@@ -3232,12 +3232,12 @@ namespace CIResearch.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"? Trend test failed: {ex.Message}");
+                Console.WriteLine($"❌ Trend test failed: {ex.Message}");
                 return Json(new
                 {
                     success = false,
-                    message = $"? Trend Data Test FAILED: {ex.Message}",
-                    connectionString = "Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;",
+                    message = $"❌ Trend Data Test FAILED: {ex.Message}",
+                    connectionString = "Server=127.0.0.1;Database=sakila;User=admin_dbciresearch;Password=9t52$7sBx;",
                     timestamp = DateTime.Now
                 });
             }
@@ -3257,21 +3257,21 @@ namespace CIResearch.Controllers
                     DatabaseConnected = connectionTest.IsConnected,
                     message = connectionTest.Message,
                     details = connectionTest.Details,
-                    connectionString = "Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch",
+                    connectionString = "Server=127.0.0.1;Database=sakila;User=admin_dbciresearch",
                     timestamp = DateTime.Now
                 });
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"? TestDatabaseConnection error: {ex.Message}");
+                Console.WriteLine($"❌ TestDatabaseConnection error: {ex.Message}");
                 return Json(new
                 {
                     success = false,
                     DatabaseConnected = false,
-                    message = "? L?i ki?m tra k?t n?i database!",
+                    message = "❌ Lỗi kiểm tra kết nối database!",
                     error = ex.Message,
-                    details = $"L?i chi ti?t: {ex.Message}",
-                    connectionString = "Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch",
+                    details = $"Lỗi chi tiết: {ex.Message}",
+                    connectionString = "Server=127.0.0.1;Database=sakila;User=admin_dbciresearch",
                     timestamp = DateTime.Now
                 });
             }
@@ -3282,14 +3282,14 @@ namespace CIResearch.Controllers
         {
             try
             {
-                Console.WriteLine("?? DEBUG TREND PROCESSING - STEP BY STEP");
+                Console.WriteLine("🔍 DEBUG TREND PROCESSING - STEP BY STEP");
 
                 // Clear cache to force fresh data
                 _cache.Remove(DATA_CACHE_KEY);
 
                 // Load fresh data
                 var allData = await GetCachedDataAsync();
-                Console.WriteLine($"?? Total records loaded: {allData.Count}");
+                Console.WriteLine($"🔍 Total records loaded: {allData.Count}");
 
                 // Check ALL Nam values first
                 var allNamValues = allData
@@ -3299,7 +3299,7 @@ namespace CIResearch.Controllers
                     .OrderBy(x => x)
                     .ToList();
 
-                Console.WriteLine($"?? ALL DISTINCT Nam values: [{string.Join(", ", allNamValues)}]");
+                Console.WriteLine($"🔍 ALL DISTINCT Nam values: [{string.Join(", ", allNamValues)}]");
 
                 // Check each year individually
                 var yearAnalysis = new List<object>();
@@ -3327,7 +3327,7 @@ namespace CIResearch.Controllers
                         }).ToList()
                     });
 
-                    Console.WriteLine($"?? Year {year}: Total={yearRecords.Count}, Revenue={hasRevenue}, Profit={hasProfit}, Both={hasBoth}");
+                    Console.WriteLine($"📊 Year {year}: Total={yearRecords.Count}, Revenue={hasRevenue}, Profit={hasProfit}, Both={hasBoth}");
                 }
 
                 // Now run the actual calculation
@@ -3337,7 +3337,7 @@ namespace CIResearch.Controllers
                 return Json(new
                 {
                     success = true,
-                    message = "? Trend Processing Debug Complete",
+                    message = "✅ Trend Processing Debug Complete",
 
                     totalRecords = allData.Count,
                     allYearsFound = allNamValues,
@@ -3366,7 +3366,7 @@ namespace CIResearch.Controllers
                 return Json(new
                 {
                     success = false,
-                    message = $"? Trend Processing Debug FAILED: {ex.Message}",
+                    message = $"❌ Trend Processing Debug FAILED: {ex.Message}",
                     error = ex.StackTrace,
                     timestamp = DateTime.Now
                 });
@@ -3437,7 +3437,7 @@ namespace CIResearch.Controllers
                     // Regional distribution for unique companies in this year
                     var regionalDistribution = uniqueCompaniesInYear
                         .Where(x => !string.IsNullOrEmpty(x.Vungkinhte) || !string.IsNullOrEmpty(x.Region))
-                        .GroupBy(x => x.Vungkinhte ?? x.Region ?? "Kh�c")
+                        .GroupBy(x => x.Vungkinhte ?? x.Region ?? "Khác")
                         .Select(g => new
                         {
                             Region = g.Key,
@@ -3477,7 +3477,7 @@ namespace CIResearch.Controllers
                 return Json(new
                 {
                     success = true,
-                    message = "? Unique Companies and Labor Count Test Completed",
+                    message = "✅ Unique Companies and Labor Count Test Completed",
                     totalRecordsInDatabase = allData.Count,
                     availableYears = availableYears,
                     testResults = testResults,
@@ -3491,7 +3491,7 @@ namespace CIResearch.Controllers
                 {
                     success = false,
                     error = ex.Message,
-                    message = "? Unique Companies and Labor Count Test Failed",
+                    message = "❌ Unique Companies and Labor Count Test Failed",
                     timestamp = DateTime.Now
                 });
             }
@@ -3528,8 +3528,8 @@ namespace CIResearch.Controllers
                 return Json(new
                 {
                     success = true,
-                    message = "? ViewBag.TrendData Test Successful",
-                    database = "admin_ciresearch",
+                    message = "✅ ViewBag.TrendData Test Successful",
+                    database = "sakila",
                     table = "dn_all2",
                     columns = new { year = "Nam", revenue = "SR_Doanhthu_Thuan_BH_CCDV", profit = "SR_Loinhuan_TruocThue" },
                     rawStatsData = new
@@ -3550,7 +3550,7 @@ namespace CIResearch.Controllers
                 {
                     success = false,
                     error = ex.Message,
-                    message = "? ViewBag.TrendData Test Failed",
+                    message = "❌ ViewBag.TrendData Test Failed",
                     timestamp = DateTime.Now
                 });
             }
@@ -3561,19 +3561,19 @@ namespace CIResearch.Controllers
         {
             try
             {
-                Console.WriteLine("?? GetTrendChartData: Processing request for Force Chart format...");
+                Console.WriteLine("🧪 GetTrendChartData: Processing request for Force Chart format...");
 
                 var allData = await GetCachedDataAsync();
                 var stats = CalculateAllStatistics(allData);
 
-                Console.WriteLine($"?? Found {stats.Years.Count} years: [{string.Join(", ", stats.Years)}]");
-                Console.WriteLine($"?? Revenue data points: {stats.RevenueData.Count}");
-                Console.WriteLine($"?? Profit data points: {stats.ProfitData.Count}");
+                Console.WriteLine($"📊 Found {stats.Years.Count} years: [{string.Join(", ", stats.Years)}]");
+                Console.WriteLine($"📊 Revenue data points: {stats.RevenueData.Count}");
+                Console.WriteLine($"📊 Profit data points: {stats.ProfitData.Count}");
 
                 // Convert years to string labels
                 var labels = stats.Years.Select(y => y.ToString()).ToList();
 
-                // Convert data from tri?u VND to t? VND and apply extreme value handling
+                // Convert data from triệu VND to tỷ VND and apply extreme value handling
                 var revenueData = stats.RevenueData.Select(r => Math.Round(r / 1000, 2)).ToList();
 
                 var profitData = stats.ProfitData.Select(p =>
@@ -3583,14 +3583,14 @@ namespace CIResearch.Controllers
                     // Log extreme values but don't cap them - show real data
                     if (Math.Abs(profitInBillion) > 100000)
                     {
-                        Console.WriteLine($"?? Large value detected: {profitInBillion:N2} t? VND - showing real data");
+                        Console.WriteLine($"📊 Large value detected: {profitInBillion:N2} tỷ VND - showing real data");
                     }
 
                     return Math.Round(profitInBillion, 2);
                 }).ToList();
 
-                Console.WriteLine($"?? Processed revenue data (t? VND): [{string.Join(", ", revenueData)}]");
-                Console.WriteLine($"?? Processed profit data (t? VND): [{string.Join(", ", profitData)}]");
+                Console.WriteLine($"📊 Processed revenue data (tỷ VND): [{string.Join(", ", revenueData)}]");
+                Console.WriteLine($"📊 Processed profit data (tỷ VND): [{string.Join(", ", profitData)}]");
 
                 // Return Chart.js compatible format exactly like Force Chart
                 var chartData = new
@@ -3603,7 +3603,7 @@ namespace CIResearch.Controllers
                         {
                             new
                             {
-                                label = "Doanh thu (t? VND)",
+                                label = "Doanh thu (tỷ VND)",
                                 data = revenueData,
                                 borderColor = "#28a745",
                                 backgroundColor = "rgba(40, 167, 69, 0.1)",
@@ -3618,7 +3618,7 @@ namespace CIResearch.Controllers
                             },
                             new
                             {
-                                label = "L?i nhu?n (t? VND)",
+                                label = "Lợi nhuận (tỷ VND)",
                                 data = profitData,
                                 borderColor = "#fd7e14",
                                 backgroundColor = "rgba(253, 126, 20, 0.1)",
@@ -3635,26 +3635,26 @@ namespace CIResearch.Controllers
                     },
                     metadata = new
                     {
-                        database = "admin_ciresearch",
+                        database = "sakila",
                         table = "dn_all2",
                         totalRecords = allData.Count,
                         years = stats.Years.Count,
-                        message = "? Real data from database in Chart.js format",
+                        message = "✅ Real data from database in Chart.js format",
                         timestamp = DateTime.Now,
-                        dataSource = "Real database: Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;"
+                        dataSource = "Real database: Server=127.0.0.1;Database=sakila;User=admin_dbciresearch;Password=9t52$7sBx;"
                     }
                 };
 
-                Console.WriteLine("? Chart data prepared successfully in Force Chart format");
+                Console.WriteLine("✅ Chart data prepared successfully in Force Chart format");
                 return Json(chartData);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"? Error in GetTrendChartData: {ex.Message}");
+                Console.WriteLine($"❌ Error in GetTrendChartData: {ex.Message}");
                 return Json(new
                 {
                     success = false,
-                    message = $"? Failed to get trend chart data: {ex.Message}",
+                    message = $"❌ Failed to get trend chart data: {ex.Message}",
                     timestamp = DateTime.Now
                 });
             }
@@ -3672,8 +3672,8 @@ namespace CIResearch.Controllers
                 var columnCheckQuery = @"
                     SELECT COUNT(*) 
                     FROM information_schema.columns 
-                    WHERE table_schema = 'admin_ciresearch' 
-                    AND table_name = 'dn_all' 
+                    WHERE table_schema = 'sakila' 
+                    AND table_name = 'dn_all2' 
                     AND column_name = 'TEN_NGANH'";
                 using var cmd1 = new MySqlCommand(columnCheckQuery, conn);
                 var columnExists = Convert.ToInt32(await cmd1.ExecuteScalarAsync()) > 0;
@@ -3684,7 +3684,7 @@ namespace CIResearch.Controllers
                     {
                         success = false,
                         message = "Column TEN_NGANH does not exist in dn_all2 table",
-                        database = "admin_ciresearch",
+                        database = "sakila",
                         table = "dn_all2"
                     });
                 }
@@ -3761,7 +3761,7 @@ namespace CIResearch.Controllers
                 {
                     success = true,
                     message = "Industry data verification completed",
-                    database = "admin_ciresearch",
+                    database = "sakila",
                     table = "dn_all2",
                     column = "TEN_NGANH",
                     dataQuality = qualityStats,
@@ -3777,7 +3777,7 @@ namespace CIResearch.Controllers
                     success = false,
                     message = $"Error verifying industry data: {ex.Message}",
                     error = ex.StackTrace,
-                    database = "admin_ciresearch",
+                    database = "sakila",
                     table = "dn_all2",
                     timestamp = DateTime.Now
                 });
@@ -3801,7 +3801,7 @@ namespace CIResearch.Controllers
                 var sortColumn = int.Parse(Request.Form["order[0][column]"]);
                 var sortDirection = Request.Form["order[0][dir]"];
 
-                Console.WriteLine($"?? Pagination request: draw={draw}, start={start}, length={length}, search='{searchValue}'");
+                Console.WriteLine($"🔍 Pagination request: draw={draw}, start={start}, length={length}, search='{searchValue}'");
 
                 // Get filtered data count first for performance
                 var allData = await GetCachedDataAsync();
@@ -3870,7 +3870,7 @@ namespace CIResearch.Controllers
                     })
                     .ToList();
 
-                Console.WriteLine($"? Sample record structure:");
+                Console.WriteLine($"✅ Sample record structure:");
                 if (pagedData.Count > 0)
                 {
                     var sample = pagedData[0];
@@ -3881,7 +3881,7 @@ namespace CIResearch.Controllers
                     }
                 }
 
-                Console.WriteLine($"? Returning {pagedData.Count} records out of {totalFiltered} filtered from {allData.Count} total");
+                Console.WriteLine($"✅ Returning {pagedData.Count} records out of {totalFiltered} filtered from {allData.Count} total");
 
                 // Return DataTables format
                 return Json(new
@@ -3894,7 +3894,7 @@ namespace CIResearch.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"? Pagination error: {ex.Message}");
+                Console.WriteLine($"❌ Pagination error: {ex.Message}");
                 return Json(new
                 {
                     draw = 0,
@@ -3914,11 +3914,11 @@ namespace CIResearch.Controllers
                 // Check cache first for summary data
                 if (_cache.TryGetValue(SUMMARY_CACHE_KEY, out object? cachedSummary) && cachedSummary != null)
                 {
-                    Console.WriteLine("? Using cached summary data");
+                    Console.WriteLine("✅ Using cached summary data");
                     return Json(cachedSummary);
                 }
 
-                Console.WriteLine("?? Calculating fresh summary data...");
+                Console.WriteLine("🔍 Calculating fresh summary data...");
                 var allData = await GetCachedDataAsync();
 
                 var summaryData = new
@@ -3937,12 +3937,12 @@ namespace CIResearch.Controllers
                     .SetSize(1);
                 _cache.Set(SUMMARY_CACHE_KEY, summaryData, summaryOptions);
 
-                Console.WriteLine($"? Summary calculated and cached: {summaryData.totalRecords} records");
+                Console.WriteLine($"✅ Summary calculated and cached: {summaryData.totalRecords} records");
                 return Json(summaryData);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"? GetDataSummary error: {ex.Message}");
+                Console.WriteLine($"❌ GetDataSummary error: {ex.Message}");
                 return Json(new
                 {
                     success = false,
@@ -3960,10 +3960,10 @@ namespace CIResearch.Controllers
         {
             try
             {
-                Console.WriteLine("?? Testing Pagination API directly...");
+                Console.WriteLine("🧪 Testing Pagination API directly...");
 
                 var allData = await GetCachedDataAsync();
-                Console.WriteLine($"?? Total data count: {allData.Count}");
+                Console.WriteLine($"📊 Total data count: {allData.Count}");
 
                 // Take first few records and show their structure
                 var sampleData = allData.Take(3)
@@ -3984,7 +3984,7 @@ namespace CIResearch.Controllers
                     })
                     .ToList();
 
-                Console.WriteLine("?? Sample data structure:");
+                Console.WriteLine("📊 Sample data structure:");
                 foreach (var item in sampleData)
                 {
                     Console.WriteLine($"   STT: {item.STT}, Nam: {item.Nam}, MaTinh_Dieutra: '{item.MaTinh_Dieutra}'");
@@ -3993,7 +3993,7 @@ namespace CIResearch.Controllers
                 return Json(new
                 {
                     success = true,
-                    message = "? Pagination API structure test",
+                    message = "✅ Pagination API structure test",
                     totalRecords = allData.Count,
                     sampleData = sampleData,
                     dataTableFormat = new
@@ -4008,7 +4008,7 @@ namespace CIResearch.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"? Test pagination API error: {ex.Message}");
+                Console.WriteLine($"❌ Test pagination API error: {ex.Message}");
                 return Json(new
                 {
                     success = false,
@@ -4028,8 +4028,8 @@ namespace CIResearch.Controllers
                 var allData = await GetCachedDataAsync();
                 var currentYear = GetCurrentAnalysisYear(allData, null);
 
-                Console.WriteLine($"?? DEBUG REGIONAL DATA - Total records: {allData.Count}");
-                Console.WriteLine($"?? Current analysis year: {currentYear}");
+                Console.WriteLine($"🔍 DEBUG REGIONAL DATA - Total records: {allData.Count}");
+                Console.WriteLine($"🔍 Current analysis year: {currentYear}");
 
                 // Filter to current year and get unique companies
                 var currentYearData = allData.Where(x => x.Nam == currentYear).ToList();
@@ -4039,15 +4039,15 @@ namespace CIResearch.Controllers
                     .Select(g => g.First())
                     .ToList();
 
-                Console.WriteLine($"?? Records in year {currentYear}: {currentYearData.Count}");
-                Console.WriteLine($"?? Unique companies in year: {uniqueCompaniesInYear.Count}");
+                Console.WriteLine($"🔍 Records in year {currentYear}: {currentYearData.Count}");
+                Console.WriteLine($"🔍 Unique companies in year: {uniqueCompaniesInYear.Count}");
 
                 // Check data availability
                 var withVungkinhte = uniqueCompaniesInYear.Count(x => !string.IsNullOrEmpty(x.Vungkinhte));
                 var withRegion = uniqueCompaniesInYear.Count(x => !string.IsNullOrEmpty(x.Region));
                 var withEither = uniqueCompaniesInYear.Count(x => !string.IsNullOrEmpty(x.Vungkinhte) || !string.IsNullOrEmpty(x.Region));
 
-                Console.WriteLine($"?? Data availability:");
+                Console.WriteLine($"🔍 Data availability:");
                 Console.WriteLine($"   - With Vungkinhte: {withVungkinhte}");
                 Console.WriteLine($"   - With Region: {withRegion}");
                 Console.WriteLine($"   - With either: {withEither}");
@@ -4082,7 +4082,7 @@ namespace CIResearch.Controllers
                 // Combined distribution using fallback logic
                 var combinedDistribution = uniqueCompaniesInYear
                     .Where(x => !string.IsNullOrEmpty(x.Vungkinhte) || !string.IsNullOrEmpty(x.Region))
-                    .GroupBy(x => x.Vungkinhte ?? x.Region ?? "Kh�c")
+                    .GroupBy(x => x.Vungkinhte ?? x.Region ?? "Khác")
                     .Select(g => new { Field = g.Key, Count = g.Count() })
                     .OrderByDescending(x => x.Count)
                     .ToList();
@@ -4090,7 +4090,7 @@ namespace CIResearch.Controllers
                 return Json(new
                 {
                     success = true,
-                    message = "? Regional data debug completed",
+                    message = "✅ Regional data debug completed",
                     totalRecords = allData.Count,
                     currentYear = currentYear,
                     recordsInYear = currentYearData.Count,
@@ -4122,7 +4122,7 @@ namespace CIResearch.Controllers
                 {
                     success = false,
                     error = ex.Message,
-                    message = "? Regional data debug failed",
+                    message = "❌ Regional data debug failed",
                     timestamp = DateTime.Now
                 });
             }
@@ -4137,7 +4137,7 @@ namespace CIResearch.Controllers
                 var currentYear = GetCurrentAnalysisYear(allData, null);
                 var currentYearData = allData.Where(x => x.Nam == currentYear).ToList();
 
-                Console.WriteLine($"?? QUICK REGIONAL TEST - Year {currentYear}");
+                Console.WriteLine($"🔍 QUICK REGIONAL TEST - Year {currentYear}");
                 Console.WriteLine($"   - Total records in year: {currentYearData.Count}");
 
                 // Check raw field values
@@ -4163,7 +4163,7 @@ namespace CIResearch.Controllers
                 return Json(new
                 {
                     success = true,
-                    message = "? Quick regional test completed",
+                    message = "✅ Quick regional test completed",
                     currentYear = currentYear,
                     totalRecords = currentYearData.Count,
                     withVungkinhte = withVungkinhte,
@@ -4197,7 +4197,7 @@ namespace CIResearch.Controllers
                 return Json(new
                 {
                     success = true,
-                    message = "? ViewBag Assignment Test",
+                    message = "✅ ViewBag Assignment Test",
                     viewBagValues = new
                     {
                         MienBacCount = ViewBag.MienBacCount,
@@ -4228,8 +4228,8 @@ namespace CIResearch.Controllers
                 var allData = await GetCachedDataAsync();
                 var currentYear = GetCurrentAnalysisYear(allData, null);
 
-                Console.WriteLine($"?? BUSINESS TYPE TEST - Total records: {allData.Count}");
-                Console.WriteLine($"?? Current analysis year: {currentYear}");
+                Console.WriteLine($"🔍 BUSINESS TYPE TEST - Total records: {allData.Count}");
+                Console.WriteLine($"🔍 Current analysis year: {currentYear}");
 
                 // Filter to current year and get unique companies
                 var currentYearData = allData.Where(x => x.Nam == currentYear).ToList();
@@ -4239,13 +4239,13 @@ namespace CIResearch.Controllers
                     .Select(g => g.First())
                     .ToList();
 
-                Console.WriteLine($"?? Records in year {currentYear}: {currentYearData.Count}");
-                Console.WriteLine($"?? Unique companies in year: {uniqueCompaniesInYear.Count}");
+                Console.WriteLine($"🔍 Records in year {currentYear}: {currentYearData.Count}");
+                Console.WriteLine($"🔍 Unique companies in year: {uniqueCompaniesInYear.Count}");
 
                 // Check business type data availability
                 var withBusinessType = uniqueCompaniesInYear.Count(x => !string.IsNullOrEmpty(x.Loaihinhkte));
 
-                Console.WriteLine($"?? Business type data availability:");
+                Console.WriteLine($"🔍 Business type data availability:");
                 Console.WriteLine($"   - With Loaihinhkte: {withBusinessType}");
 
                 // Business type distribution
@@ -4262,7 +4262,7 @@ namespace CIResearch.Controllers
                 return Json(new
                 {
                     success = true,
-                    message = "? Business Type data test completed",
+                    message = "✅ Business Type data test completed",
                     totalRecords = allData.Count,
                     currentYear = currentYear,
                     recordsInYear = currentYearData.Count,
@@ -4297,7 +4297,7 @@ namespace CIResearch.Controllers
                 {
                     success = false,
                     error = ex.Message,
-                    message = "? Business Type data test failed",
+                    message = "❌ Business Type data test failed",
                     timestamp = DateTime.Now
                 });
             }
@@ -4311,8 +4311,8 @@ namespace CIResearch.Controllers
                 var allData = await GetCachedDataAsync();
                 var currentYear = GetCurrentAnalysisYear(allData, null);
 
-                Console.WriteLine($"?? FINANCIAL DATA TEST - Total records: {allData.Count}");
-                Console.WriteLine($"?? Current analysis year: {currentYear}");
+                Console.WriteLine($"🔍 FINANCIAL DATA TEST - Total records: {allData.Count}");
+                Console.WriteLine($"🔍 Current analysis year: {currentYear}");
 
                 // Filter to current year and get unique companies
                 var currentYearData = allData.Where(x => x.Nam == currentYear).ToList();
@@ -4322,15 +4322,15 @@ namespace CIResearch.Controllers
                     .Select(g => g.First())
                     .ToList();
 
-                Console.WriteLine($"?? Records in year {currentYear}: {currentYearData.Count}");
-                Console.WriteLine($"?? Unique companies in year: {uniqueCompaniesInYear.Count}");
+                Console.WriteLine($"🔍 Records in year {currentYear}: {currentYearData.Count}");
+                Console.WriteLine($"🔍 Unique companies in year: {uniqueCompaniesInYear.Count}");
 
                 // Financial data availability
                 var withRevenue = uniqueCompaniesInYear.Count(x => x.SR_Doanhthu_Thuan_BH_CCDV.HasValue && x.SR_Doanhthu_Thuan_BH_CCDV.Value > 0);
                 var withProfit = uniqueCompaniesInYear.Count(x => x.SR_Loinhuan_TruocThue.HasValue);
                 var withAssets = uniqueCompaniesInYear.Count(x => x.Taisan_Tong_CK.HasValue && x.Taisan_Tong_CK.Value > 0);
 
-                Console.WriteLine($"?? Financial data availability:");
+                Console.WriteLine($"🔍 Financial data availability:");
                 Console.WriteLine($"   - With Revenue > 0: {withRevenue}");
                 Console.WriteLine($"   - With Profit data: {withProfit}");
                 Console.WriteLine($"   - With Assets > 0: {withAssets}");
@@ -4364,7 +4364,7 @@ namespace CIResearch.Controllers
                 return Json(new
                 {
                     success = true,
-                    message = "? Financial data test completed",
+                    message = "✅ Financial data test completed",
                     totalRecords = allData.Count,
                     currentYear = currentYear,
                     recordsInYear = currentYearData.Count,
@@ -4387,12 +4387,12 @@ namespace CIResearch.Controllers
                     sampleCompanies = sampleCompanies,
                     databaseInfo = new
                     {
-                        database = "admin_ciresearch",
+                        database = "sakila",
                         table = "dn_all2",
                         revenueColumn = "SR_Doanhthu_Thuan_BH_CCDV",
                         profitColumn = "SR_Loinhuan_TruocThue",
                         assetsColumn = "Taisan_Tong_CK",
-                        unit = "tri?u VND"
+                        unit = "triệu VND"
                     },
                     timestamp = DateTime.Now
                 });
@@ -4403,7 +4403,7 @@ namespace CIResearch.Controllers
                 {
                     success = false,
                     error = ex.Message,
-                    message = "? Financial data test failed",
+                    message = "❌ Financial data test failed",
                     timestamp = DateTime.Now
                 });
             }
@@ -4416,7 +4416,7 @@ namespace CIResearch.Controllers
             {
                 var allData = await GetCachedDataAsync();
 
-                Console.WriteLine($"?? FILTER OPTIONS - Processing {allData.Count} records");
+                Console.WriteLine($"🔍 FILTER OPTIONS - Processing {allData.Count} records");
 
                 // Get available years from database
                 var availableYears = allData
@@ -4426,7 +4426,7 @@ namespace CIResearch.Controllers
                     .OrderByDescending(x => int.Parse(x))
                     .ToList();
 
-                Console.WriteLine($"?? Years found: [{string.Join(", ", availableYears)}]");
+                Console.WriteLine($"🔍 Years found: [{string.Join(", ", availableYears)}]");
 
                 // Get business types from Loaihinhkte column
                 var businessTypes = allData
@@ -4436,7 +4436,7 @@ namespace CIResearch.Controllers
                     .OrderBy(x => x)
                     .ToList();
 
-                Console.WriteLine($"?? Business types found: {businessTypes.Count}");
+                Console.WriteLine($"🔍 Business types found: {businessTypes.Count}");
 
                 // Get provinces from MaTinh_Dieutra column
                 var provinces = allData
@@ -4446,7 +4446,7 @@ namespace CIResearch.Controllers
                     .OrderBy(x => x)
                     .ToList();
 
-                Console.WriteLine($"?? Provinces found: {provinces.Count}");
+                Console.WriteLine($"🔍 Provinces found: {provinces.Count}");
 
                 // Get economic zones from Vungkinhte column
                 var economicZones = allData
@@ -4456,7 +4456,7 @@ namespace CIResearch.Controllers
                     .OrderBy(x => x)
                     .ToList();
 
-                Console.WriteLine($"?? Economic zones found: {economicZones.Count}");
+                Console.WriteLine($"🔍 Economic zones found: {economicZones.Count}");
 
                 // Get regions from Region column
                 var regions = allData
@@ -4466,18 +4466,18 @@ namespace CIResearch.Controllers
                     .OrderBy(x => x)
                     .ToList();
 
-                Console.WriteLine($"?? Regions found: {regions.Count}");
+                Console.WriteLine($"🔍 Regions found: {regions.Count}");
 
                 // Get company size categories based on revenue data
-                var companySizeCategories = new List<string> { "Si�u nh?", "Nh?", "V?a", "L?n" };
+                var companySizeCategories = new List<string> { "Siêu nhỏ", "Nhỏ", "Vừa", "Lớn" };
 
                 var filterOptions = new
                 {
                     success = true,
-                    message = "? Filter options loaded from database",
+                    message = "✅ Filter options loaded from database",
                     dataSource = new
                     {
-                        database = "admin_ciresearch",
+                        database = "sakila",
                         table = "dn_all2",
                         totalRecords = allData.Count
                     },
@@ -4505,12 +4505,12 @@ namespace CIResearch.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"? Error getting filter options: {ex.Message}");
+                Console.WriteLine($"❌ Error getting filter options: {ex.Message}");
                 return Json(new
                 {
                     success = false,
                     error = ex.Message,
-                    message = "? Failed to load filter options from database",
+                    message = "❌ Failed to load filter options from database",
                     timestamp = DateTime.Now
                 });
             }
@@ -4523,13 +4523,13 @@ namespace CIResearch.Controllers
             {
                 var allData = await GetCachedDataAsync();
 
-                Console.WriteLine($"?? TOP REVENUE COMPANIES - Processing {allData.Count} records");
+                Console.WriteLine($"🔍 TOP REVENUE COMPANIES - Processing {allData.Count} records");
 
                 // Check revenue column data availability first
                 var totalWithRevenue = allData.Count(x => x.SR_Doanhthu_Thuan_BH_CCDV.HasValue);
                 var totalWithPositiveRevenue = allData.Count(x => x.SR_Doanhthu_Thuan_BH_CCDV.HasValue && x.SR_Doanhthu_Thuan_BH_CCDV.Value > 0);
 
-                Console.WriteLine($"?? REVENUE DATA AVAILABILITY:");
+                Console.WriteLine($"🔍 REVENUE DATA AVAILABILITY:");
                 Console.WriteLine($"   - Total records: {allData.Count}");
                 Console.WriteLine($"   - Records with SR_Doanhthu_Thuan_BH_CCDV: {totalWithRevenue}");
                 Console.WriteLine($"   - Records with revenue > 0: {totalWithPositiveRevenue}");
@@ -4542,15 +4542,15 @@ namespace CIResearch.Controllers
                                x.Nam.HasValue)
                     .ToList();
 
-                Console.WriteLine($"?? Records with revenue data: {companiesWithRevenue.Count}");
+                Console.WriteLine($"🔍 Records with revenue data: {companiesWithRevenue.Count}");
 
                 if (companiesWithRevenue.Count == 0)
                 {
-                    Console.WriteLine($"? NO COMPANIES WITH REVENUE DATA FOUND!");
+                    Console.WriteLine($"❌ NO COMPANIES WITH REVENUE DATA FOUND!");
                     return Json(new
                     {
                         success = false,
-                        message = "? Kh�ng t�m th?y d? li?u doanh thu t? c?t SR_Doanhthu_Thuan_BH_CCDV",
+                        message = "❌ Không tìm thấy dữ liệu doanh thu từ cột SR_Doanhthu_Thuan_BH_CCDV",
                         debug = new
                         {
                             totalRecords = allData.Count,
@@ -4585,19 +4585,19 @@ namespace CIResearch.Controllers
                     .Take(3)
                     .ToList();
 
-                Console.WriteLine($"?? Top 3 companies by average revenue ({companyAverages.Count} found):");
+                Console.WriteLine($"🔍 Top 3 companies by average revenue ({companyAverages.Count} found):");
                 foreach (var company in companyAverages)
                 {
-                    Console.WriteLine($"   - {company.CompanyName} ({company.Masothue}): {company.AverageRevenue:N2} tri?u VND avg over {company.YearsCount} years");
+                    Console.WriteLine($"   - {company.CompanyName} ({company.Masothue}): {company.AverageRevenue:N2} triệu VND avg over {company.YearsCount} years");
                 }
 
                 if (companyAverages.Count == 0)
                 {
-                    Console.WriteLine($"? NO COMPANIES FOUND AFTER GROUPING!");
+                    Console.WriteLine($"❌ NO COMPANIES FOUND AFTER GROUPING!");
                     return Json(new
                     {
                         success = false,
-                        message = "? Kh�ng t�m th?y doanh nghi?p n�o c� d? d? li?u doanh thu",
+                        message = "❌ Không tìm thấy doanh nghiệp nào có đủ dữ liệu doanh thu",
                         debug = new
                         {
                             filteredRecords = companiesWithRevenue.Count,
@@ -4644,7 +4644,7 @@ namespace CIResearch.Controllers
                 var chartData = new
                 {
                     success = true,
-                    message = "? Top 3 companies revenue chart data",
+                    message = "✅ Top 3 companies revenue chart data",
                     data = new
                     {
                         labels = allYears.Select(y => y.ToString()).ToList(),
@@ -4655,7 +4655,7 @@ namespace CIResearch.Controllers
                         totalCompanies = companyAverages.Count,
                         yearsRange = allYears.Any() ? $"{allYears.FirstOrDefault()}-{allYears.LastOrDefault()}" : "No years",
                         dataSource = "Revenue from SR_Doanhthu_Thuan_BH_CCDV column",
-                        unit = "t? VND"
+                        unit = "tỷ VND"
                     },
                     debug = new
                     {
@@ -4680,12 +4680,12 @@ namespace CIResearch.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"? Error getting top companies revenue chart: {ex.Message}");
+                Console.WriteLine($"❌ Error getting top companies revenue chart: {ex.Message}");
                 return Json(new
                 {
                     success = false,
                     error = ex.Message,
-                    message = "? Failed to get top companies revenue data",
+                    message = "❌ Failed to get top companies revenue data",
                     timestamp = DateTime.Now
                 });
             }
@@ -4698,7 +4698,7 @@ namespace CIResearch.Controllers
             {
                 var allData = await GetCachedDataAsync();
 
-                Console.WriteLine($"?? TOP PROFIT COMPANIES - Processing {allData.Count} records");
+                Console.WriteLine($"🔍 TOP PROFIT COMPANIES - Processing {allData.Count} records");
 
                 // Get companies with profit data across multiple years
                 var companiesWithProfit = allData
@@ -4707,7 +4707,7 @@ namespace CIResearch.Controllers
                                x.Nam.HasValue)
                     .ToList();
 
-                Console.WriteLine($"?? Records with profit data: {companiesWithProfit.Count}");
+                Console.WriteLine($"🔍 Records with profit data: {companiesWithProfit.Count}");
 
                 // Group by company and calculate average profit across years
                 var companyAverages = companiesWithProfit
@@ -4732,19 +4732,19 @@ namespace CIResearch.Controllers
                     .Take(3)
                     .ToList();
 
-                Console.WriteLine($"?? Top 3 companies by average profit:");
+                Console.WriteLine($"🔍 Top 3 companies by average profit:");
                 foreach (var company in companyAverages)
                 {
-                    Console.WriteLine($"   - {company.CompanyName} ({company.Masothue}): {company.AverageProfit:N2} tri?u VND avg over {company.YearsCount} years");
+                    Console.WriteLine($"   - {company.CompanyName} ({company.Masothue}): {company.AverageProfit:N2} triệu VND avg over {company.YearsCount} years");
                 }
 
                 if (companyAverages.Count == 0)
                 {
-                    Console.WriteLine($"? NO COMPANIES FOUND AFTER GROUPING!");
+                    Console.WriteLine($"❌ NO COMPANIES FOUND AFTER GROUPING!");
                     return Json(new
                     {
                         success = false,
-                        message = "? Kh�ng t�m th?y doanh nghi?p n�o c� d? d? li?u l?i nhu?n",
+                        message = "❌ Không tìm thấy doanh nghiệp nào có đủ dữ liệu lợi nhuận",
                         debug = new
                         {
                             filteredRecords = companiesWithProfit.Count,
@@ -4791,7 +4791,7 @@ namespace CIResearch.Controllers
                 var chartData = new
                 {
                     success = true,
-                    message = "? Top 3 companies profit chart data",
+                    message = "✅ Top 3 companies profit chart data",
                     data = new
                     {
                         labels = allYears.Select(y => y.ToString()).ToList(),
@@ -4802,7 +4802,7 @@ namespace CIResearch.Controllers
                         totalCompanies = companyAverages.Count,
                         yearsRange = $"{allYears.FirstOrDefault()}-{allYears.LastOrDefault()}",
                         dataSource = "Profit from SR_Loinhuan_TruocThue column",
-                        unit = "t? VND"
+                        unit = "tỷ VND"
                     },
                     timestamp = DateTime.Now
                 };
@@ -4811,12 +4811,12 @@ namespace CIResearch.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"? Error getting top companies profit chart: {ex.Message}");
+                Console.WriteLine($"❌ Error getting top companies profit chart: {ex.Message}");
                 return Json(new
                 {
                     success = false,
                     error = ex.Message,
-                    message = "? Failed to get top companies profit data",
+                    message = "❌ Failed to get top companies profit data",
                     timestamp = DateTime.Now
                 });
             }
@@ -4832,14 +4832,14 @@ namespace CIResearch.Controllers
                     return Json(new
                     {
                         success = false,
-                        message = "? M� s? thu? kh�ng du?c d? tr?ng",
+                        message = "❌ Mã số thuế không được để trống",
                         timestamp = DateTime.Now
                     });
                 }
 
                 var allData = await GetCachedDataAsync();
 
-                Console.WriteLine($"?? SEARCH COMPANY - Looking for tax code: {masothue}");
+                Console.WriteLine($"🔍 SEARCH COMPANY - Looking for tax code: {masothue}");
 
                 // Find company by tax code
                 var companyData = allData
@@ -4854,14 +4854,14 @@ namespace CIResearch.Controllers
                     return Json(new
                     {
                         success = false,
-                        message = $"? Kh�ng t�m th?y doanh nghi?p v?i m� s? thu?: {masothue}",
+                        message = $"❌ Không tìm thấy doanh nghiệp với mã số thuế: {masothue}",
                         timestamp = DateTime.Now
                     });
                 }
 
                 var companyName = companyData.FirstOrDefault()?.TenDN ?? "Unknown";
 
-                Console.WriteLine($"?? Found company: {companyName} with {companyData.Count} year records");
+                Console.WriteLine($"🔍 Found company: {companyName} with {companyData.Count} year records");
 
                 // Prepare revenue data
                 var revenueData = companyData
@@ -4888,7 +4888,7 @@ namespace CIResearch.Controllers
                 var result = new
                 {
                     success = true,
-                    message = $"? T�m th?y d? li?u cho doanh nghi?p: {companyName}",
+                    message = $"✅ Tìm thấy dữ liệu cho doanh nghiệp: {companyName}",
                     company = new
                     {
                         masothue = masothue,
@@ -4928,7 +4928,7 @@ namespace CIResearch.Controllers
                         {
                             new
                             {
-                                label = $"L?i nhu?n - {companyName}",
+                                label = $"Lợi nhuận - {companyName}",
                                 data = years.Select(year =>
                                 {
                                     var yearProfit = profitData.FirstOrDefault(p => p.Year == year);
@@ -4959,12 +4959,12 @@ namespace CIResearch.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"? Error searching company by tax code: {ex.Message}");
+                Console.WriteLine($"❌ Error searching company by tax code: {ex.Message}");
                 return Json(new
                 {
                     success = false,
                     error = ex.Message,
-                    message = $"? L?i khi t�m ki?m m� s? thu?: {masothue}",
+                    message = $"❌ Lỗi khi tìm kiếm mã số thuế: {masothue}",
                     timestamp = DateTime.Now
                 });
             }
@@ -4977,7 +4977,7 @@ namespace CIResearch.Controllers
             {
                 var allData = await GetCachedDataAsync();
 
-                Console.WriteLine($"?? DEBUG REVENUE DATA - Total records: {allData.Count}");
+                Console.WriteLine($"🔍 DEBUG REVENUE DATA - Total records: {allData.Count}");
 
                 // Check revenue column availability
                 var totalWithRevenue = allData.Count(x => x.SR_Doanhthu_Thuan_BH_CCDV.HasValue);
@@ -5037,7 +5037,7 @@ namespace CIResearch.Controllers
                 var result = new
                 {
                     success = true,
-                    message = "? Revenue data debug completed",
+                    message = "✅ Revenue data debug completed",
                     summary = new
                     {
                         totalRecords = allData.Count,
@@ -5049,8 +5049,8 @@ namespace CIResearch.Controllers
                     {
                         columnName = "SR_Doanhthu_Thuan_BH_CCDV",
                         dataType = "decimal",
-                        unit = "tri?u VND",
-                        convertedUnit = "t? VND (chia 1000)"
+                        unit = "triệu VND",
+                        convertedUnit = "tỷ VND (chia 1000)"
                     },
                     sampleData = sampleRevenueData,
                     distributionByYear = revenueByYear,
@@ -5062,12 +5062,12 @@ namespace CIResearch.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"? Error in debug revenue data: {ex.Message}");
+                Console.WriteLine($"❌ Error in debug revenue data: {ex.Message}");
                 return Json(new
                 {
                     success = false,
                     error = ex.Message,
-                    message = "? Failed to debug revenue data",
+                    message = "❌ Failed to debug revenue data",
                     timestamp = DateTime.Now
                 });
             }
@@ -5080,14 +5080,14 @@ namespace CIResearch.Controllers
 
             try
             {
-                Console.WriteLine($"?? OPTIMIZED MARKET SHARE CHART - Starting SQL-based calculation...");
+                Console.WriteLine($"🚀 OPTIMIZED MARKET SHARE CHART - Starting SQL-based calculation...");
 
                 // Determine target year
                 int targetYear;
                 if (nam.HasValue)
                 {
                     targetYear = nam.Value;
-                    Console.WriteLine($"?? Using specified year: {targetYear}");
+                    Console.WriteLine($"🔍 Using specified year: {targetYear}");
                 }
                 else
                 {
@@ -5098,14 +5098,14 @@ namespace CIResearch.Controllers
                     using var cmdYear = new MySqlCommand(yearQuery, connYear);
                     var result = await cmdYear.ExecuteScalarAsync();
                     targetYear = result != DBNull.Value ? Convert.ToInt32(result) : DateTime.Now.Year;
-                    Console.WriteLine($"?? Using latest available year: {targetYear}");
+                    Console.WriteLine($"🔍 Using latest available year: {targetYear}");
                 }
 
                 using var conn = new MySqlConnection(_connectionString);
                 await conn.OpenAsync();
 
-                // ?? STEP 1: Get total market revenue and company count for the year
-                Console.WriteLine($"?? STEP 1: Calculating total market metrics...");
+                // 🚀 STEP 1: Get total market revenue and company count for the year
+                Console.WriteLine($"📊 STEP 1: Calculating total market metrics...");
                 var totalMarketQuery = @"
                     SELECT 
                         COUNT(DISTINCT Masothue) AS TotalCompanies,
@@ -5131,18 +5131,18 @@ namespace CIResearch.Controllers
                 }
                 readerTotal.Close();
 
-                Console.WriteLine($"?? MARKET METRICS:");
+                Console.WriteLine($"📊 MARKET METRICS:");
                 Console.WriteLine($"   - Total Companies: {totalCompanies:N0}");
                 Console.WriteLine($"   - Companies with Positive Revenue: {companiesWithPositiveRevenue:N0}");
-                Console.WriteLine($"   - Total Market Revenue: {totalMarketRevenue:N0} tri?u VND = {totalMarketRevenue / 1000:N2} t? VND");
+                Console.WriteLine($"   - Total Market Revenue: {totalMarketRevenue:N0} triệu VND = {totalMarketRevenue / 1000:N2} tỷ VND");
 
                 if (totalMarketRevenue <= 0 || companiesWithPositiveRevenue == 0)
                 {
-                    Console.WriteLine($"? NO VALID MARKET DATA FOR YEAR {targetYear}!");
+                    Console.WriteLine($"❌ NO VALID MARKET DATA FOR YEAR {targetYear}!");
                     return Json(new
                     {
                         success = false,
-                        message = $"? Kh�ng t�m th?y d? li?u market share cho nam {targetYear}",
+                        message = $"❌ Không tìm thấy dữ liệu market share cho năm {targetYear}",
                         debug = new
                         {
                             targetYear = targetYear,
@@ -5154,8 +5154,8 @@ namespace CIResearch.Controllers
                     });
                 }
 
-                // ?? STEP 2: Get Top 10 companies with highest revenue
-                Console.WriteLine($"?? STEP 2: Getting Top 10 companies...");
+                // 🚀 STEP 2: Get Top 10 companies with highest revenue
+                Console.WriteLine($"📊 STEP 2: Getting Top 10 companies...");
                 var top10Query = @"
                     SELECT 
                         Masothue,
@@ -5196,15 +5196,15 @@ namespace CIResearch.Controllers
                 }
                 readerTop10.Close();
 
-                Console.WriteLine($"?? TOP 10 COMPANIES:");
+                Console.WriteLine($"📊 TOP 10 COMPANIES:");
                 foreach (var company in top10Companies)
                 {
                     var comp = (dynamic)company;
-                    Console.WriteLine($"   #{comp.Rank}. {comp.CompanyName}: {comp.MarketShare}% ({comp.RevenueInBillion} t? VND)");
+                    Console.WriteLine($"   #{comp.Rank}. {comp.CompanyName}: {comp.MarketShare}% ({comp.RevenueInBillion} tỷ VND)");
                 }
 
-                // ?? STEP 3: Calculate "Others" group and additional statistics
-                Console.WriteLine($"?? STEP 3: Calculating Others group and statistics...");
+                // 🚀 STEP 3: Calculate "Others" group and additional statistics
+                Console.WriteLine($"📊 STEP 3: Calculating Others group and statistics...");
                 decimal othersRevenue = totalMarketRevenue - top10TotalRevenue;
                 int othersCount = companiesWithPositiveRevenue - top10Companies.Count;
                 decimal othersMarketShare = Math.Round((othersRevenue / totalMarketRevenue) * 100, 4);
@@ -5212,7 +5212,7 @@ namespace CIResearch.Controllers
                 // Calculate Top 10 total market share
                 decimal top10TotalMarketShare = Math.Round((top10TotalRevenue / totalMarketRevenue) * 100, 4);
 
-                // ?? STEP 3.1: Get additional revenue statistics (negative, zero)
+                // 🚀 STEP 3.1: Get additional revenue statistics (negative, zero)
                 var additionalStatsQuery = @"
                     SELECT 
                         COUNT(DISTINCT CASE WHEN SR_Doanhthu_Thuan_BH_CCDV < 0 THEN Masothue END) AS CompaniesWithNegativeRevenue,
@@ -5242,17 +5242,17 @@ namespace CIResearch.Controllers
                 }
                 readerStats.Close();
 
-                Console.WriteLine($"?? DETAILED STATISTICS:");
+                Console.WriteLine($"📊 DETAILED STATISTICS:");
                 Console.WriteLine($"   - Others Companies: {othersCount}");
-                Console.WriteLine($"   - Others Revenue: {othersRevenue:N0} tri?u VND = {othersRevenue / 1000:N2} t? VND");
+                Console.WriteLine($"   - Others Revenue: {othersRevenue:N0} triệu VND = {othersRevenue / 1000:N2} tỷ VND");
                 Console.WriteLine($"   - Others Market Share: {othersMarketShare}%");
                 Console.WriteLine($"   - Top 10 Market Share: {top10TotalMarketShare}%");
                 Console.WriteLine($"   - Companies with Negative Revenue: {companiesWithNegativeRevenue}");
                 Console.WriteLine($"   - Companies with Zero Revenue: {companiesWithZeroRevenue}");
-                Console.WriteLine($"   - Total Positive Revenue: {totalPositiveRevenue:N0} tri?u VND");
-                Console.WriteLine($"   - Total Negative Revenue: {totalNegativeRevenue:N0} tri?u VND");
+                Console.WriteLine($"   - Total Positive Revenue: {totalPositiveRevenue:N0} triệu VND");
+                Console.WriteLine($"   - Total Negative Revenue: {totalNegativeRevenue:N0} triệu VND");
 
-                // ?? STEP 4: Prepare chart data
+                // 🚀 STEP 4: Prepare chart data
                 var chartLabels = new List<string>();
                 var marketShareValues = new List<decimal>();
                 var revenueValues = new List<decimal>();
@@ -5278,11 +5278,11 @@ namespace CIResearch.Controllers
                 stopwatch.Stop();
                 var executionTime = stopwatch.ElapsedMilliseconds;
 
-                // ?? STEP 5: Validate market share totals
+                // 🚀 STEP 5: Validate market share totals
                 var totalMarketShareCheck = marketShareValues.Sum();
-                Console.WriteLine($"?? MARKET SHARE VALIDATION:");
+                Console.WriteLine($"🔍 MARKET SHARE VALIDATION:");
                 Console.WriteLine($"   - Total Market Share: {totalMarketShareCheck:N4}%");
-                Console.WriteLine($"   - Should be � 100%: {Math.Abs(totalMarketShareCheck - 100m) < 0.01m}");
+                Console.WriteLine($"   - Should be ≈ 100%: {Math.Abs(totalMarketShareCheck - 100m) < 0.01m}");
 
                 // Generate colors for the chart
                 var colors = new[]
@@ -5295,7 +5295,7 @@ namespace CIResearch.Controllers
                 var chartData = new
                 {
                     success = true,
-                    message = "? Optimized market share analysis completed - SQL-based calculation",
+                    message = "✅ Optimized market share analysis completed - SQL-based calculation",
                     data = new
                     {
                         labels = chartLabels,
@@ -5312,7 +5312,7 @@ namespace CIResearch.Controllers
                             },
                             new
                             {
-                                label = "Doanh thu (t? VND)",
+                                label = "Doanh thu (tỷ VND)",
                                 data = revenueValues,
                                 backgroundColor = colors.Take(chartLabels.Count).Select(c => c + "40").ToArray(),
                                 borderColor = colors.Take(chartLabels.Count).ToArray(),
@@ -5334,7 +5334,7 @@ namespace CIResearch.Controllers
                         totalMarketRevenue = Math.Round(totalMarketRevenue / 1000, 2),
                         top10SharePercentage = top10TotalMarketShare,
                         othersSharePercentage = othersMarketShare,
-                        marketShareFormula = "Market Share = (Doanh thu DN / T?ng doanh thu th? tru?ng) � 100%",
+                        marketShareFormula = "Market Share = (Doanh thu DN / Tổng doanh thu thị trường) × 100%",
                         dataSource = $"Optimized SQL queries for year {targetYear}",
                         executionTime = executionTime,
                         optimization = new
@@ -5385,8 +5385,8 @@ namespace CIResearch.Controllers
                             totalMarketShareValidation = Math.Round(totalMarketShareCheck, 2),
                             shouldBe100Percent = Math.Abs(totalMarketShareCheck - 100m) < 0.01m,
                             calculationAccuracy = Math.Abs(totalMarketShareCheck - 100m) < 0.01m
-                                ? "Ch�nh x�c 100%"
-                                : $"{Math.Abs(100 - totalMarketShareCheck):0.0000}% kh�c bi?t",
+                                ? "Chính xác 100%"
+                                : $"{Math.Abs(100 - totalMarketShareCheck):0.0000}% khác biệt",
                             top10SharePercentage = top10TotalMarketShare,
                             othersSharePercentage = othersMarketShare,
                             companiesWithPositiveRevenue = companiesWithPositiveRevenue,
@@ -5407,7 +5407,7 @@ namespace CIResearch.Controllers
                     timestamp = DateTime.Now
                 };
 
-                Console.WriteLine($"? OPTIMIZED MARKET SHARE CHART COMPLETED:");
+                Console.WriteLine($"✅ OPTIMIZED MARKET SHARE CHART COMPLETED:");
                 Console.WriteLine($"   - SQL execution: {executionTime}ms");
                 Console.WriteLine($"   - Top 10 companies: {top10Companies.Count}");
                 Console.WriteLine($"   - Others: {othersCount} companies");
@@ -5418,13 +5418,13 @@ namespace CIResearch.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"? Error getting market share chart: {ex.Message}");
-                Console.WriteLine($"? Stack trace: {ex.StackTrace}");
+                Console.WriteLine($"❌ Error getting market share chart: {ex.Message}");
+                Console.WriteLine($"❌ Stack trace: {ex.StackTrace}");
                 return Json(new
                 {
                     success = false,
                     error = ex.Message,
-                    message = "? Failed to get market share data",
+                    message = "❌ Failed to get market share data",
                     stackTrace = ex.StackTrace,
                     timestamp = DateTime.Now
                 });
@@ -5443,7 +5443,7 @@ namespace CIResearch.Controllers
                 var vungkinhteFilter = Request.Form["Vungkinhte"].ToList();
                 var quyMoFilter = Request.Form["QuyMo"].ToList();
 
-                Console.WriteLine($"?? FILTERED STATISTICS REQUEST:");
+                Console.WriteLine($"🔍 FILTERED STATISTICS REQUEST:");
                 Console.WriteLine($"   - Nam: [{string.Join(", ", namFilter)}]");
                 Console.WriteLine($"   - MaTinh: [{string.Join(", ", maTinhFilter)}]");
                 Console.WriteLine($"   - Loaihinhkte: [{string.Join(", ", loaihinhkteFilter)}]");
@@ -5453,11 +5453,11 @@ namespace CIResearch.Controllers
                 var allData = await GetCachedDataAsync();
                 var filteredData = ApplyFiltersOptimized(allData, "", namFilter, maTinhFilter, null, loaihinhkteFilter, vungkinhteFilter);
 
-                Console.WriteLine($"?? Filtered from {allData.Count} to {filteredData.Count} records");
+                Console.WriteLine($"📊 Filtered from {allData.Count} to {filteredData.Count} records");
 
                 // Get current analysis year
                 int currentYear = GetCurrentAnalysisYear(filteredData, namFilter);
-                Console.WriteLine($"?? Analysis year: {currentYear}");
+                Console.WriteLine($"📅 Analysis year: {currentYear}");
 
                 // Filter data for the current analysis year
                 var currentYearData = FilterDataByYear(filteredData, currentYear);
@@ -5485,9 +5485,9 @@ namespace CIResearch.Controllers
                     .GroupBy(x => x.Region)
                     .ToDictionary(g => g.Key, g => g.Count());
 
-                var mienBacCount = regionGrouping.GetValueOrDefault("Mi?n B?c", 0);
-                var mienTrungCount = regionGrouping.GetValueOrDefault("Mi?n Trung", 0);
-                var mienNamCount = regionGrouping.GetValueOrDefault("Mi?n Nam", 0);
+                var mienBacCount = regionGrouping.GetValueOrDefault("Miền Bắc", 0);
+                var mienTrungCount = regionGrouping.GetValueOrDefault("Miền Trung", 0);
+                var mienNamCount = regionGrouping.GetValueOrDefault("Miền Nam", 0);
 
                 // Business type distribution
                 var companiesWithBusinessType = uniqueCompaniesInYear
@@ -5504,18 +5504,18 @@ namespace CIResearch.Controllers
                     .Take(3)
                     .ToList();
 
-                Console.WriteLine($"? CALCULATED STATISTICS:");
+                Console.WriteLine($"✅ CALCULATED STATISTICS:");
                 Console.WriteLine($"   - Total Companies: {totalCompanies}");
                 Console.WriteLine($"   - Total Labor: {safeTotalLabor:N0}");
-                Console.WriteLine($"   - Mi?n B?c: {mienBacCount}");
-                Console.WriteLine($"   - Mi?n Trung: {mienTrungCount}");
-                Console.WriteLine($"   - Mi?n Nam: {mienNamCount}");
+                Console.WriteLine($"   - Miền Bắc: {mienBacCount}");
+                Console.WriteLine($"   - Miền Trung: {mienTrungCount}");
+                Console.WriteLine($"   - Miền Nam: {mienNamCount}");
                 Console.WriteLine($"   - Top 3 Business Types: {string.Join(", ", top3BusinessTypes.Select(x => $"{x.Key}: {x.Value}"))}");
 
                 var result = new
                 {
                     success = true,
-                    message = "? Statistics calculated successfully",
+                    message = "✅ Statistics calculated successfully",
                     statistics = new
                     {
                         totalCompanies = totalCompanies,
@@ -5569,12 +5569,12 @@ namespace CIResearch.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"? Error getting filtered statistics: {ex.Message}");
+                Console.WriteLine($"❌ Error getting filtered statistics: {ex.Message}");
                 return Json(new
                 {
                     success = false,
                     error = ex.Message,
-                    message = "? Failed to get filtered statistics",
+                    message = "❌ Failed to get filtered statistics",
                     timestamp = DateTime.Now
                 });
             }
@@ -5587,7 +5587,7 @@ namespace CIResearch.Controllers
             {
                 var targetYear = year ?? GetLatestYear(await GetCachedDataAsync());
 
-                Console.WriteLine($"?? COMPARING CODE CALCULATION VS DATABASE FOR YEAR {targetYear}");
+                Console.WriteLine($"🔍 COMPARING CODE CALCULATION VS DATABASE FOR YEAR {targetYear}");
 
                 // 1. Get what CODE thinks
                 var allData = await GetCachedDataAsync();
@@ -5603,7 +5603,7 @@ namespace CIResearch.Controllers
                     .Where(x => !x.SR_Doanhthu_Thuan_BH_CCDV.HasValue)
                     .ToList();
 
-                Console.WriteLine($"?? CODE CALCULATION:");
+                Console.WriteLine($"📊 CODE CALCULATION:");
                 Console.WriteLine($"   - Total unique companies: {uniqueCompaniesInYear.Count}");
                 Console.WriteLine($"   - Companies without revenue data (NULL): {codeNullCompanies.Count}");
 
@@ -5643,25 +5643,25 @@ namespace CIResearch.Controllers
                     {
                         dbNullCount++;
                         dbNullCompanies.Add($"{masothue} - {tendn}");
-                        Console.WriteLine($"   ?? DATABASE NULL: {masothue} - {tendn}");
+                        Console.WriteLine($"   🚨 DATABASE NULL: {masothue} - {tendn}");
                     }
                 }
 
-                Console.WriteLine($"?? DATABASE ACTUAL DATA:");
+                Console.WriteLine($"💾 DATABASE ACTUAL DATA:");
                 Console.WriteLine($"   - Total companies in DB: {dbTotalCount}");
                 Console.WriteLine($"   - Companies with NULL revenue in DB: {dbNullCount}");
 
-                Console.WriteLine($"?? COMPARISON:");
+                Console.WriteLine($"🔍 COMPARISON:");
                 Console.WriteLine($"   - Code thinks NULL count: {codeNullCompanies.Count}");
                 Console.WriteLine($"   - Database actual NULL count: {dbNullCount}");
                 Console.WriteLine($"   - Match? {codeNullCompanies.Count == dbNullCount}");
 
                 if (codeNullCompanies.Count != dbNullCount)
                 {
-                    Console.WriteLine($"\n?? MISMATCH DETECTED! Investigating...");
+                    Console.WriteLine($"\n🚨 MISMATCH DETECTED! Investigating...");
 
                     // List companies that code thinks are NULL
-                    Console.WriteLine($"?? Companies CODE thinks are NULL:");
+                    Console.WriteLine($"🔍 Companies CODE thinks are NULL:");
                     foreach (var company in codeNullCompanies)
                     {
                         Console.WriteLine($"   - {company.Masothue} - {company.TenDN} (HasValue: {company.SR_Doanhthu_Thuan_BH_CCDV.HasValue})");
@@ -5696,7 +5696,7 @@ namespace CIResearch.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"? ERROR in CompareCodeVsDatabase: {ex.Message}");
+                Console.WriteLine($"❌ ERROR in CompareCodeVsDatabase: {ex.Message}");
                 return Json(new { success = false, error = ex.Message });
             }
         }
@@ -5708,7 +5708,7 @@ namespace CIResearch.Controllers
             {
                 var targetYear = year ?? GetLatestYear(await GetCachedDataAsync());
 
-                Console.WriteLine($"?? DEBUGGING REVENUE DATA IN DATABASE FOR YEAR {targetYear}");
+                Console.WriteLine($"🔍 DEBUGGING REVENUE DATA IN DATABASE FOR YEAR {targetYear}");
 
                 using var conn = new MySqlConnection(_connectionString);
                 await conn.OpenAsync();
@@ -5757,7 +5757,7 @@ namespace CIResearch.Controllers
                         case "NULL":
                             nullCount++;
                             nullCompanies.Add(company);
-                            Console.WriteLine($"?? NULL REVENUE: STT={company.STT}, TenDN='{company.TenDN}', Masothue='{company.Masothue}'");
+                            Console.WriteLine($"🚨 NULL REVENUE: STT={company.STT}, TenDN='{company.TenDN}', Masothue='{company.Masothue}'");
                             break;
                         case "ZERO":
                             zeroCount++;
@@ -5774,7 +5774,7 @@ namespace CIResearch.Controllers
                 var result = new
                 {
                     success = true,
-                    message = "? Database revenue data analysis completed",
+                    message = "✅ Database revenue data analysis completed",
                     targetYear = targetYear,
                     summary = new
                     {
@@ -5787,8 +5787,8 @@ namespace CIResearch.Controllers
                     nullCompanies = nullCompanies,
                     databaseQuery = query.Replace("@year", targetYear.ToString()),
                     explanation = nullCount == 0 ?
-                        "? All companies have revenue data in database (no NULL values)" :
-                        $"?? Found {nullCount} companies with NULL revenue in database",
+                        "✅ All companies have revenue data in database (no NULL values)" :
+                        $"🚨 Found {nullCount} companies with NULL revenue in database",
                     timestamp = DateTime.Now
                 };
 
@@ -5800,7 +5800,7 @@ namespace CIResearch.Controllers
                 {
                     success = false,
                     error = ex.Message,
-                    message = "? Failed to debug revenue data in database",
+                    message = "❌ Failed to debug revenue data in database",
                     timestamp = DateTime.Now
                 });
             }
@@ -5816,7 +5816,7 @@ namespace CIResearch.Controllers
                 // Determine analysis year
                 int targetYear = year ?? GetLatestYear(allData);
 
-                Console.WriteLine($"?? DEBUGGING COMPANY COUNT DISCREPANCY FOR YEAR: {targetYear}");
+                Console.WriteLine($"🔍 DEBUGGING COMPANY COUNT DISCREPANCY FOR YEAR: {targetYear}");
 
                 // Get all companies for the year (same as Statistics Cards)
                 var currentYearData = FilterDataByYear(allData, targetYear);
@@ -5840,7 +5840,7 @@ namespace CIResearch.Controllers
                     .Where(c => !companiesWithRevenue.Any(cr => cr.Masothue == c.Masothue))
                     .ToList();
 
-                Console.WriteLine($"?? ANALYSIS RESULTS:");
+                Console.WriteLine($"📊 ANALYSIS RESULTS:");
                 Console.WriteLine($"   - Total Companies (Cards): {allCompaniesInYear.Count}");
                 Console.WriteLine($"   - Companies with Revenue > 0 (Market Share): {companiesWithRevenue.Count}");
                 Console.WriteLine($"   - Companies without Revenue data: {companiesWithoutRevenue.Count}");
@@ -5871,7 +5871,7 @@ namespace CIResearch.Controllers
                 var result = new
                 {
                     success = true,
-                    message = "? Company count discrepancy analysis completed",
+                    message = "✅ Company count discrepancy analysis completed",
                     analysisYear = targetYear,
                     summary = new
                     {
@@ -5911,12 +5911,12 @@ namespace CIResearch.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"? Error debugging company count discrepancy: {ex.Message}");
+                Console.WriteLine($"❌ Error debugging company count discrepancy: {ex.Message}");
                 return Json(new
                 {
                     success = false,
                     error = ex.Message,
-                    message = "? Failed to debug company count discrepancy",
+                    message = "❌ Failed to debug company count discrepancy",
                     timestamp = DateTime.Now
                 });
             }
@@ -5927,7 +5927,7 @@ namespace CIResearch.Controllers
         {
             try
             {
-                Console.WriteLine("?? TESTING QUY_MO COLUMN DATA...");
+                Console.WriteLine("🔍 TESTING QUY_MO COLUMN DATA...");
 
                 var allData = await GetCachedDataAsync();
 
@@ -5952,7 +5952,7 @@ namespace CIResearch.Controllers
                 var companiesWithoutQuyMo = allData.Count(x => string.IsNullOrWhiteSpace(x.QUY_MO));
                 var companiesWithQuyMo = allData.Count(x => !string.IsNullOrWhiteSpace(x.QUY_MO));
 
-                Console.WriteLine($"?? QUY_MO COLUMN ANALYSIS:");
+                Console.WriteLine($"📊 QUY_MO COLUMN ANALYSIS:");
                 Console.WriteLine($"   - Total companies: {allData.Count}");
                 Console.WriteLine($"   - Companies with QUY_MO: {companiesWithQuyMo}");
                 Console.WriteLine($"   - Companies without QUY_MO: {companiesWithoutQuyMo}");
@@ -5966,7 +5966,7 @@ namespace CIResearch.Controllers
                 return Json(new
                 {
                     success = true,
-                    database = "admin_ciresearch",
+                    database = "sakila",
                     table = "dn_all2",
                     column = "QUY_MO",
                     totalCompanies = allData.Count,
@@ -5979,7 +5979,7 @@ namespace CIResearch.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"? Error testing QUY_MO column: {ex.Message}");
+                Console.WriteLine($"❌ Error testing QUY_MO column: {ex.Message}");
                 return Json(new
                 {
                     success = false,
@@ -5994,14 +5994,14 @@ namespace CIResearch.Controllers
         {
             try
             {
-                Console.WriteLine("?? TESTING FIXED QUY MO CHART...");
+                Console.WriteLine("🧪 TESTING FIXED QUY MO CHART...");
 
                 var allData = await GetCachedDataAsync();
 
                 // Test the fixed CalculateCompanySizeData method
                 var companySizeData = CalculateCompanySizeData(allData);
 
-                Console.WriteLine($"?? FIXED CHART TEST RESULTS:");
+                Console.WriteLine($"📊 FIXED CHART TEST RESULTS:");
                 Console.WriteLine($"   - Company size categories found: {companySizeData.Count}");
 
                 foreach (var category in companySizeData)
@@ -6014,7 +6014,7 @@ namespace CIResearch.Controllers
                 var chartData = new
                 {
                     success = true,
-                    message = "? Fixed Quy m� chart test successful",
+                    message = "✅ Fixed Quy mô chart test successful",
                     data = new
                     {
                         categories = companySizeData.Select(x =>
@@ -6033,10 +6033,10 @@ namespace CIResearch.Controllers
                     },
                     expectedCategories = new[]
                     {
-                        "Doanh nghi?p si�u nh?",
-                        "Doanh nghi?p nh?",
-                        "Doanh nghi?p v?a",
-                        "Doanh nghi?p l?n"
+                        "Doanh nghiệp siêu nhỏ",
+                        "Doanh nghiệp nhỏ",
+                        "Doanh nghiệp vừa",
+                        "Doanh nghiệp lớn"
                     },
                     chartReady = companySizeData.Count > 0,
                     totalCompanies = companySizeData.Select(x => (int)((dynamic)x).SoLuong).Sum(),
@@ -6047,12 +6047,12 @@ namespace CIResearch.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"? Error testing fixed Quy m� chart: {ex.Message}");
+                Console.WriteLine($"❌ Error testing fixed Quy mô chart: {ex.Message}");
                 return Json(new
                 {
                     success = false,
                     error = ex.Message,
-                    message = "? Failed to test fixed Quy m� chart",
+                    message = "❌ Failed to test fixed Quy mô chart",
                     timestamp = DateTime.Now
                 });
             }
@@ -6063,14 +6063,14 @@ namespace CIResearch.Controllers
         {
             try
             {
-                Console.WriteLine("?? TESTING SIMPLE QUY_MO CHART...");
+                Console.WriteLine("🧪 TESTING SIMPLE QUY_MO CHART...");
 
                 var allData = await GetCachedDataAsync();
 
                 // Test the simple CalculateCompanySizeData method
                 var companySizeData = CalculateCompanySizeData(allData);
 
-                Console.WriteLine($"?? SIMPLE CHART TEST RESULTS:");
+                Console.WriteLine($"📊 SIMPLE CHART TEST RESULTS:");
                 Console.WriteLine($"   - Company size categories found: {companySizeData.Count}");
 
                 foreach (var category in companySizeData)
@@ -6087,7 +6087,7 @@ namespace CIResearch.Controllers
                 return Json(new
                 {
                     success = true,
-                    message = "? Simple Quy m� chart test successful",
+                    message = "✅ Simple Quy mô chart test successful",
                     simpleLabels = chartLabels,
                     simpleValues = chartValues,
                     totalCompanies = chartValues.Sum(),
@@ -6104,7 +6104,7 @@ namespace CIResearch.Controllers
                     chartReady = companySizeData.Count > 0,
                     dataMapping = new
                     {
-                        note = "Labels are now simple: Si�u nh?, Nh?, V?a, L?n instead of Doanh nghi?p xxx",
+                        note = "Labels are now simple: Siêu nhỏ, Nhỏ, Vừa, Lớn instead of Doanh nghiệp xxx",
                         source = "Direct from QUY_MO column, mapped to simple labels",
                         fallback = "If no QUY_MO data, creates minimal fallback"
                     },
@@ -6113,12 +6113,12 @@ namespace CIResearch.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"? Error testing simple Quy m� chart: {ex.Message}");
+                Console.WriteLine($"❌ Error testing simple Quy mô chart: {ex.Message}");
                 return Json(new
                 {
                     success = false,
                     error = ex.Message,
-                    message = "? Failed to test simple Quy m� chart",
+                    message = "❌ Failed to test simple Quy mô chart",
                     timestamp = DateTime.Now
                 });
             }
@@ -6129,30 +6129,30 @@ namespace CIResearch.Controllers
         {
             try
             {
-                Console.WriteLine("\n?????? FULL QUY MO CHART PIPELINE DEBUG ??????");
+                Console.WriteLine("\n🚨🚨🚨 FULL QUY MO CHART PIPELINE DEBUG 🚨🚨🚨");
 
                 var allData = await GetCachedDataAsync();
 
                 // Step 1: Test CalculateCompanySizeData
-                Console.WriteLine("\n?? STEP 1: TESTING CalculateCompanySizeData");
+                Console.WriteLine("\n📊 STEP 1: TESTING CalculateCompanySizeData");
                 var companySizeData = CalculateCompanySizeData(allData);
 
                 // Step 2: Test CalculateAllStatistics 
-                Console.WriteLine("\n?? STEP 2: TESTING CalculateAllStatistics");
+                Console.WriteLine("\n📊 STEP 2: TESTING CalculateAllStatistics");
                 var stats = CalculateAllStatistics(allData);
 
                 // Step 3: Test AssignStatsToViewBag
-                Console.WriteLine("\n?? STEP 3: TESTING AssignStatsToViewBag");
+                Console.WriteLine("\n📊 STEP 3: TESTING AssignStatsToViewBag");
                 AssignStatsToViewBag(stats);
 
                 // Step 4: Final ViewBag output
-                Console.WriteLine("\n?? STEP 4: FINAL VIEWBAG OUTPUT");
+                Console.WriteLine("\n📊 STEP 4: FINAL VIEWBAG OUTPUT");
                 var viewBagQuyMoData = ViewBag.QuyMoData as List<object>;
 
                 return Json(new
                 {
                     success = true,
-                    message = "? Full Quy m� chart pipeline debug completed",
+                    message = "✅ Full Quy mô chart pipeline debug completed",
 
                     step1_CalculateCompanySizeData = new
                     {
@@ -6223,13 +6223,13 @@ namespace CIResearch.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"? Error in full pipeline debug: {ex.Message}");
+                Console.WriteLine($"❌ Error in full pipeline debug: {ex.Message}");
                 return Json(new
                 {
                     success = false,
                     error = ex.Message,
                     stackTrace = ex.StackTrace,
-                    message = "? Failed to debug full Quy m� chart pipeline",
+                    message = "❌ Failed to debug full Quy mô chart pipeline",
                     timestamp = DateTime.Now
                 });
             }
@@ -6240,19 +6240,19 @@ namespace CIResearch.Controllers
         {
             try
             {
-                Console.WriteLine("?? TESTING NEW QUY_MO CHART - CLEAN VERSION ??");
+                Console.WriteLine("🚨 TESTING NEW QUY_MO CHART - CLEAN VERSION 🚨");
 
                 var allData = await GetCachedDataAsync();
 
                 // Test the new CalculateCompanySizeData method
                 var companySizeData = CalculateCompanySizeData(allData);
 
-                Console.WriteLine($"?? NEW CHART TEST RESULTS:");
+                Console.WriteLine($"📊 NEW CHART TEST RESULTS:");
                 Console.WriteLine($"   - Company size categories found: {companySizeData.Count}");
 
                 if (companySizeData.Count > 0)
                 {
-                    Console.WriteLine($"?? QUY_MO COLUMN ANALYSIS:");
+                    Console.WriteLine($"📊 QUY_MO COLUMN ANALYSIS:");
                     Console.WriteLine($"   - Total companies: 10000");
                     Console.WriteLine($"   - Companies with QUY_MO: 10000");
                     Console.WriteLine($"   - Companies without QUY_MO: 0");
@@ -6269,7 +6269,7 @@ namespace CIResearch.Controllers
                 var frontendData = new
                 {
                     success = true,
-                    message = "? NEW QUY_MO Chart ready - Direct from QUY_MO column",
+                    message = "✅ NEW QUY_MO Chart ready - Direct from QUY_MO column",
                     chartData = new
                     {
                         labels = companySizeData.Select(x => ((dynamic)x).QuyMo).ToList(),
@@ -6289,14 +6289,14 @@ namespace CIResearch.Controllers
                     expectedOutput = new
                     {
                         note = "Backend now returns exact QUY_MO values from database",
-                        format = "[{QuyMo: 'Doanh nghi?p xxx', SoLuong: number, MoTa: 'description'}]",
+                        format = "[{QuyMo: 'Doanh nghiệp xxx', SoLuong: number, MoTa: 'description'}]",
                         noMapping = "No complex mapping logic - direct from QUY_MO column",
                         categories = new[]
                         {
-                            "Doanh nghi?p si�u nh?",
-                            "Doanh nghi?p nh?",
-                            "Doanh nghi?p v?a",
-                            "Doanh nghi?p l?n"
+                            "Doanh nghiệp siêu nhỏ",
+                            "Doanh nghiệp nhỏ",
+                            "Doanh nghiệp vừa",
+                            "Doanh nghiệp lớn"
                         }
                     },
                     metadata = new
@@ -6314,12 +6314,12 @@ namespace CIResearch.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"? Error testing new QUY_MO chart: {ex.Message}");
+                Console.WriteLine($"❌ Error testing new QUY_MO chart: {ex.Message}");
                 return Json(new
                 {
                     success = false,
                     error = ex.Message,
-                    message = "? Failed to test new QUY_MO chart",
+                    message = "❌ Failed to test new QUY_MO chart",
                     timestamp = DateTime.Now
                 });
             }
@@ -6330,16 +6330,16 @@ namespace CIResearch.Controllers
         {
             try
             {
-                Console.WriteLine("?????? DEBUG VUNG KINH TE CHART ISSUE ??????");
+                Console.WriteLine("🚨🚨🚨 DEBUG VUNG KINH TE CHART ISSUE 🚨🚨🚨");
 
                 var allData = await GetCachedDataAsync();
                 var currentYear = GetCurrentAnalysisYear(allData, null);
 
-                Console.WriteLine($"?? TOTAL RECORDS: {allData.Count}");
-                Console.WriteLine($"?? CURRENT ANALYSIS YEAR: {currentYear}");
+                Console.WriteLine($"🔍 TOTAL RECORDS: {allData.Count}");
+                Console.WriteLine($"🔍 CURRENT ANALYSIS YEAR: {currentYear}");
 
                 // 1. CHECK RAW VUNGKINHTE DATA IN ALL YEARS
-                Console.WriteLine("\n?? STEP 1: RAW VUNGKINHTE DATA (ALL YEARS)");
+                Console.WriteLine("\n📊 STEP 1: RAW VUNGKINHTE DATA (ALL YEARS)");
                 var allVungkinhteValues = allData
                     .Where(x => !string.IsNullOrEmpty(x.Vungkinhte))
                     .GroupBy(x => x.Vungkinhte.Trim())
@@ -6358,14 +6358,14 @@ namespace CIResearch.Controllers
                     .OrderByDescending(x => x.Count)
                     .ToList();
 
-                Console.WriteLine($"?? RAW VUNGKINHTE VALUES (ALL YEARS):");
+                Console.WriteLine($"🔍 RAW VUNGKINHTE VALUES (ALL YEARS):");
                 foreach (var vung in allVungkinhteValues)
                 {
                     Console.WriteLine($"   - '{vung.Vungkinhte}': {vung.Count} records across years [{string.Join(", ", vung.Years)}]");
                 }
 
                 // 2. CHECK VUNGKINHTE DATA FOR CURRENT YEAR ONLY
-                Console.WriteLine($"\n?? STEP 2: VUNGKINHTE DATA FOR YEAR {currentYear} ONLY");
+                Console.WriteLine($"\n📊 STEP 2: VUNGKINHTE DATA FOR YEAR {currentYear} ONLY");
                 var currentYearData = allData.Where(x => x.Nam == currentYear).ToList();
 
                 var currentYearVungkinhte = currentYearData
@@ -6384,14 +6384,14 @@ namespace CIResearch.Controllers
                     .OrderByDescending(x => x.Count)
                     .ToList();
 
-                Console.WriteLine($"?? VUNGKINHTE VALUES FOR YEAR {currentYear}:");
+                Console.WriteLine($"🔍 VUNGKINHTE VALUES FOR YEAR {currentYear}:");
                 foreach (var vung in currentYearVungkinhte)
                 {
                     Console.WriteLine($"   - '{vung.Vungkinhte}': {vung.Count} records");
                 }
 
                 // 3. CHECK UNIQUE COMPANIES LOGIC (SAME AS CHART)
-                Console.WriteLine($"\n?? STEP 3: UNIQUE COMPANIES LOGIC FOR YEAR {currentYear}");
+                Console.WriteLine($"\n📊 STEP 3: UNIQUE COMPANIES LOGIC FOR YEAR {currentYear}");
                 var uniqueCompaniesInYear = currentYearData
                     .Where(x => !string.IsNullOrEmpty(x.Masothue))
                     .GroupBy(x => x.Masothue)
@@ -6403,13 +6403,13 @@ namespace CIResearch.Controllers
                     })
                     .ToList();
 
-                Console.WriteLine($"?? UNIQUE COMPANIES IN YEAR {currentYear}: {uniqueCompaniesInYear.Count}");
+                Console.WriteLine($"🔍 UNIQUE COMPANIES IN YEAR {currentYear}: {uniqueCompaniesInYear.Count}");
 
                 var companiesWithVungKinhTe = uniqueCompaniesInYear
                     .Where(x => !string.IsNullOrEmpty(x.Record.Vungkinhte))
                     .ToList();
 
-                Console.WriteLine($"?? UNIQUE COMPANIES WITH VUNGKINHTE: {companiesWithVungKinhTe.Count}");
+                Console.WriteLine($"🔍 UNIQUE COMPANIES WITH VUNGKINHTE: {companiesWithVungKinhTe.Count}");
 
                 var regionGrouping = companiesWithVungKinhTe
                     .GroupBy(x => x.Record.Vungkinhte.Trim())
@@ -6426,17 +6426,17 @@ namespace CIResearch.Controllers
                     .OrderByDescending(x => x.Count)
                     .ToList();
 
-                Console.WriteLine($"?? UNIQUE COMPANIES GROUPED BY VUNGKINHTE:");
+                Console.WriteLine($"🔍 UNIQUE COMPANIES GROUPED BY VUNGKINHTE:");
                 foreach (var vung in regionGrouping)
                 {
                     Console.WriteLine($"   - '{vung.Vungkinhte}': {vung.Count} unique companies");
                 }
 
                 // 4. TEST CURRENT CHART LOGIC
-                Console.WriteLine($"\n?? STEP 4: CURRENT CHART LOGIC TEST");
+                Console.WriteLine($"\n📊 STEP 4: CURRENT CHART LOGIC TEST");
                 var stats = CalculateAllStatistics(allData);
 
-                Console.WriteLine($"?? STATS.REGIONDATA COUNT: {stats.RegionData.Count}");
+                Console.WriteLine($"🔍 STATS.REGIONDATA COUNT: {stats.RegionData.Count}");
                 foreach (var region in stats.RegionData)
                 {
                     var regionObj = (dynamic)region;
@@ -6444,7 +6444,7 @@ namespace CIResearch.Controllers
                 }
 
                 // 5. CHECK DATABASE DIRECTLY
-                Console.WriteLine($"\n?? STEP 5: DATABASE DIRECT CHECK");
+                Console.WriteLine($"\n📊 STEP 5: DATABASE DIRECT CHECK");
                 using var conn = new MySqlConnection(_connectionString);
                 await conn.OpenAsync();
 
@@ -6467,7 +6467,7 @@ namespace CIResearch.Controllers
                 }
 
                 // 6. CHECK FOR YEAR-SPECIFIC ISSUES
-                Console.WriteLine($"\n?? STEP 6: YEAR-SPECIFIC CHECK");
+                Console.WriteLine($"\n📊 STEP 6: YEAR-SPECIFIC CHECK");
                 var queryByYear = @"
                     SELECT Nam, Vungkinhte, COUNT(*) as Count
                     FROM dn_all2 
@@ -6493,9 +6493,9 @@ namespace CIResearch.Controllers
                 return Json(new
                 {
                     success = true,
-                    message = "? Vung Kinh Te chart debug completed",
+                    message = "✅ Vung Kinh Te chart debug completed",
 
-                    issue = "Chart ch? hi?n th? '�?ng b?ng S�ng H?ng' - debugging t?t c? steps",
+                    issue = "Chart chỉ hiển thị 'Đồng bằng Sông Hồng' - debugging tất cả steps",
 
                     step1_AllYearsRawData = new
                     {
@@ -6549,17 +6549,17 @@ namespace CIResearch.Controllers
                     {
                         possibleIssues = new[]
                         {
-                            "1. D? li?u trong year hi?n t?i ch? c� 1 v�ng",
-                            "2. Logic unique companies filter out c�c v�ng kh�c",
-                            "3. Database th?c s? ch? c� 1 v�ng cho year n�y",
-                            "4. C� bug trong grouping logic"
+                            "1. Dữ liệu trong year hiện tại chỉ có 1 vùng",
+                            "2. Logic unique companies filter out các vùng khác",
+                            "3. Database thực sự chỉ có 1 vùng cho year này",
+                            "4. Có bug trong grouping logic"
                         },
 
                         checkThese = new[]
                         {
-                            "So s�nh step2 vs step5 - raw data should match",
-                            "So s�nh step3 vs step2 - unique logic shouldn't change distribution",
-                            "Check step6 - xem year kh�c c� nhi?u v�ng kh�ng"
+                            "So sánh step2 vs step5 - raw data should match",
+                            "So sánh step3 vs step2 - unique logic shouldn't change distribution",
+                            "Check step6 - xem year khác có nhiều vùng không"
                         }
                     },
 
@@ -6568,13 +6568,13 @@ namespace CIResearch.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"? Error debugging Vung Kinh Te chart: {ex.Message}");
+                Console.WriteLine($"❌ Error debugging Vung Kinh Te chart: {ex.Message}");
                 return Json(new
                 {
                     success = false,
                     error = ex.Message,
                     stackTrace = ex.StackTrace,
-                    message = "? Failed to debug Vung Kinh Te chart",
+                    message = "❌ Failed to debug Vung Kinh Te chart",
                     timestamp = DateTime.Now
                 });
             }
@@ -6585,7 +6585,7 @@ namespace CIResearch.Controllers
         {
             try
             {
-                Console.WriteLine("?? VERIFYING TOTAL RECORDS - Checking if all data is loaded...");
+                Console.WriteLine("🔍 VERIFYING TOTAL RECORDS - Checking if all data is loaded...");
 
                 // Get data from application cache/memory
                 var allData = await GetCachedDataAsync();
@@ -6599,7 +6599,7 @@ namespace CIResearch.Controllers
                 using var cmd = new MySqlCommand(countQuery, conn);
                 var dbRecordCount = Convert.ToInt32(await cmd.ExecuteScalarAsync());
 
-                Console.WriteLine($"?? RECORD COUNT COMPARISON:");
+                Console.WriteLine($"📊 RECORD COUNT COMPARISON:");
                 Console.WriteLine($"   - Database total: {dbRecordCount:N0} records");
                 Console.WriteLine($"   - Application loaded: {appRecordCount:N0} records");
                 Console.WriteLine($"   - Match: {appRecordCount == dbRecordCount}");
@@ -6624,8 +6624,8 @@ namespace CIResearch.Controllers
                 {
                     success = true,
                     message = appRecordCount == dbRecordCount ?
-                        "? ALL DATA LOADED SUCCESSFULLY - No missing records" :
-                        "?? Data count mismatch detected",
+                        "✅ ALL DATA LOADED SUCCESSFULLY - No missing records" :
+                        "⚠️ Data count mismatch detected",
 
                     recordCounts = new
                     {
@@ -6651,9 +6651,9 @@ namespace CIResearch.Controllers
                     systemInfo = new
                     {
                         loadTime = DateTime.Now,
-                        dataSource = "Real data FROM dn_all2 table",
+                        dataSource = "Real data from dn_all2 table",
                         limitRemoved = "LIMIT 50000 has been removed - loading ALL data",
-                        connectionString = "Server=localhost;Database=admin_ciresearch;User=root;Password=***"
+                        connectionString = "Server=localhost;Database=sakila;User=root;Password=***"
                     }
                 };
 
@@ -6661,12 +6661,12 @@ namespace CIResearch.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"? Error verifying total records: {ex.Message}");
+                Console.WriteLine($"❌ Error verifying total records: {ex.Message}");
                 return Json(new
                 {
                     success = false,
                     error = ex.Message,
-                    message = "? Failed to verify total records",
+                    message = "❌ Failed to verify total records",
                     timestamp = DateTime.Now
                 });
             }
@@ -6679,14 +6679,14 @@ namespace CIResearch.Controllers
 
             try
             {
-                Console.WriteLine($"?? OPTIMIZED MARKET SHARE CHART - Starting...");
+                Console.WriteLine($"🚀 OPTIMIZED MARKET SHARE CHART - Starting...");
 
                 // Determine target year
                 int targetYear;
                 if (nam.HasValue)
                 {
                     targetYear = nam.Value;
-                    Console.WriteLine($"?? Using specified year: {targetYear}");
+                    Console.WriteLine($"🔍 Using specified year: {targetYear}");
                 }
                 else
                 {
@@ -6697,13 +6697,13 @@ namespace CIResearch.Controllers
                     using var cmdYear = new MySqlCommand(yearQuery, connYear);
                     var result = await cmdYear.ExecuteScalarAsync();
                     targetYear = result != DBNull.Value ? Convert.ToInt32(result) : DateTime.Now.Year;
-                    Console.WriteLine($"?? Using latest available year: {targetYear}");
+                    Console.WriteLine($"🔍 Using latest available year: {targetYear}");
                 }
 
                 using var conn = new MySqlConnection(_connectionString);
                 await conn.OpenAsync();
 
-                // ?? OPTIMIZED SQL QUERY - Calculate everything at database level
+                // 🚀 OPTIMIZED SQL QUERY - Calculate everything at database level
                 var optimizedQuery = @"
                     WITH TotalRevenue AS (
                         -- Step 1: Calculate total market revenue for the year
@@ -6790,7 +6790,7 @@ namespace CIResearch.Controllers
                     
                     ORDER BY CompanyRank;";
 
-                Console.WriteLine($"?? Executing optimized SQL query for year {targetYear}...");
+                Console.WriteLine($"🔍 Executing optimized SQL query for year {targetYear}...");
 
                 var marketShareData = new List<dynamic>();
                 using var cmd = new MySqlCommand(optimizedQuery, conn);
@@ -6815,7 +6815,7 @@ namespace CIResearch.Controllers
                 stopwatch.Stop();
                 var executionTime = stopwatch.ElapsedMilliseconds;
 
-                Console.WriteLine($"?? OPTIMIZED QUERY RESULTS:");
+                Console.WriteLine($"📊 OPTIMIZED QUERY RESULTS:");
                 Console.WriteLine($"   - Execution time: {executionTime}ms");
                 Console.WriteLine($"   - Records returned: {marketShareData.Count}");
                 Console.WriteLine($"   - Market share data calculated at database level");
@@ -6839,11 +6839,11 @@ namespace CIResearch.Controllers
                         availableYears.Add(readerYears.GetInt32("Nam"));
                     }
 
-                    Console.WriteLine($"? NO MARKET SHARE DATA FOR YEAR {targetYear}!");
+                    Console.WriteLine($"❌ NO MARKET SHARE DATA FOR YEAR {targetYear}!");
                     return Json(new
                     {
                         success = false,
-                        message = $"? Kh�ng t�m th?y d? li?u market share cho nam {targetYear}",
+                        message = $"❌ Không tìm thấy dữ liệu market share cho năm {targetYear}",
                         debug = new
                         {
                             targetYear = targetYear,
@@ -6880,7 +6880,7 @@ namespace CIResearch.Controllers
                 var chartData = new
                 {
                     success = true,
-                    message = "? Optimized market share analysis completed",
+                    message = "✅ Optimized market share analysis completed",
                     data = new
                     {
                         labels = chartLabels,
@@ -6897,7 +6897,7 @@ namespace CIResearch.Controllers
                             },
                             new
                             {
-                                label = "Doanh thu (t? VND)",
+                                label = "Doanh thu (tỷ VND)",
                                 data = revenueValues,
                                 backgroundColor = colors.Take(chartLabels.Count).Select(c => c + "40").ToArray(),
                                 borderColor = colors.Take(chartLabels.Count).ToArray(),
@@ -6956,7 +6956,7 @@ namespace CIResearch.Controllers
                             totalMarketShareValidation = Math.Round(totalMarketShare, 2),
                             shouldBe100Percent = Math.Abs(totalMarketShare - 100m) < 0.1m,
                             calculationAccuracy = Math.Abs(totalMarketShare - 100m) < 0.1m ?
-                                "Ch�nh x�c 100%" : $"{Math.Abs(100 - totalMarketShare):0.00}% kh�c bi?t"
+                                "Chính xác 100%" : $"{Math.Abs(100 - totalMarketShare):0.00}% khác biệt"
                         }
                     },
                     performance = new
@@ -6966,15 +6966,15 @@ namespace CIResearch.Controllers
                         scalability = "Optimized for millions of records",
                         comparison = new
                         {
-                            oldMethod = "Load all data ? Filter ? Calculate ? 30-60 seconds",
-                            newMethod = $"Direct SQL calculation ? {executionTime}ms",
+                            oldMethod = "Load all data → Filter → Calculate → 30-60 seconds",
+                            newMethod = $"Direct SQL calculation → {executionTime}ms",
                             improvement = executionTime < 5000 ? "50-100x faster" : "Significant improvement"
                         }
                     },
                     timestamp = DateTime.Now
                 };
 
-                Console.WriteLine($"? OPTIMIZED MARKET SHARE CHART COMPLETED:");
+                Console.WriteLine($"✅ OPTIMIZED MARKET SHARE CHART COMPLETED:");
                 Console.WriteLine($"   - Query execution: {executionTime}ms");
                 Console.WriteLine($"   - Top 10 companies: {top10Companies.Count}");
                 Console.WriteLine($"   - Market share total: {totalMarketShare:N2}%");
@@ -6985,13 +6985,13 @@ namespace CIResearch.Controllers
             catch (Exception ex)
             {
                 stopwatch.Stop();
-                Console.WriteLine($"? Error in optimized market share chart: {ex.Message}");
-                Console.WriteLine($"? Execution time before error: {stopwatch.ElapsedMilliseconds}ms");
+                Console.WriteLine($"❌ Error in optimized market share chart: {ex.Message}");
+                Console.WriteLine($"❌ Execution time before error: {stopwatch.ElapsedMilliseconds}ms");
                 return Json(new
                 {
                     success = false,
                     error = ex.Message,
-                    message = "? Failed to get optimized market share data",
+                    message = "❌ Failed to get optimized market share data",
                     stackTrace = ex.StackTrace,
                     executionTime = stopwatch.ElapsedMilliseconds,
                     timestamp = DateTime.Now
@@ -7005,17 +7005,17 @@ namespace CIResearch.Controllers
             try
             {
                 var targetYear = nam ?? GetLatestYear(await GetCachedDataAsync());
-                Console.WriteLine($"?? MARKET SHARE PERFORMANCE TEST - Year: {targetYear}");
+                Console.WriteLine($"🚀 MARKET SHARE PERFORMANCE TEST - Year: {targetYear}");
 
                 var performanceResults = new
                 {
                     success = true,
-                    message = "? Market Share Performance Test Completed",
+                    message = "✅ Market Share Performance Test Completed",
                     targetYear = targetYear,
 
                     oldMethod = new
                     {
-                        description = "Load all data into memory ? Filter ? Calculate",
+                        description = "Load all data into memory → Filter → Calculate",
                         endpoint = "/DN/GetMarketShareChart",
                         steps = new[]
                         {
@@ -7070,7 +7070,7 @@ namespace CIResearch.Controllers
                         testOldMethod = new
                         {
                             url = $"/DN/GetMarketShareChart?nam={targetYear}",
-                            warning = "?? Will load all data into memory - may take 30-60 seconds",
+                            warning = "⚠️ Will load all data into memory - may take 30-60 seconds",
                             expectedBehavior = "Slow response, high memory usage"
                         },
                         testNewMethod = new
@@ -7083,7 +7083,7 @@ namespace CIResearch.Controllers
                         {
                             steps = new[]
                             {
-                                "1. Open browser developer tools (F12) ? Network tab",
+                                "1. Open browser developer tools (F12) → Network tab",
                                 "2. Test old method and record response time",
                                 "3. Test new method and record response time",
                                 "4. Compare execution times in console logs"
@@ -7111,7 +7111,7 @@ namespace CIResearch.Controllers
                     timestamp = DateTime.Now
                 };
 
-                Console.WriteLine($"?? PERFORMANCE TEST SETUP COMPLETE:");
+                Console.WriteLine($"📊 PERFORMANCE TEST SETUP COMPLETE:");
                 Console.WriteLine($"   - Old method: {performanceResults.oldMethod.endpoint}");
                 Console.WriteLine($"   - New method: {performanceResults.newOptimizedMethod.endpoint}");
                 Console.WriteLine($"   - Expected improvement: {performanceResults.expectedImprovements.speedImprovement}");
@@ -7120,12 +7120,12 @@ namespace CIResearch.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"? Error in performance test setup: {ex.Message}");
+                Console.WriteLine($"❌ Error in performance test setup: {ex.Message}");
                 return Json(new
                 {
                     success = false,
                     error = ex.Message,
-                    message = "? Failed to setup performance test",
+                    message = "❌ Failed to setup performance test",
                     timestamp = DateTime.Now
                 });
             }
@@ -7138,7 +7138,7 @@ namespace CIResearch.Controllers
 
             try
             {
-                Console.WriteLine($"?? FLEXIBLE MARKET SHARE CHART - Starting...");
+                Console.WriteLine($"🚀 FLEXIBLE MARKET SHARE CHART - Starting...");
 
                 // Determine target year
                 int targetYear;
@@ -7161,7 +7161,7 @@ namespace CIResearch.Controllers
                 int currentPage = page ?? 1;
                 int recordsPerPage = pageSize ?? 50;
 
-                Console.WriteLine($"?? Parameters: Year={targetYear}, TopCount={displayCount}, Page={currentPage}, PageSize={recordsPerPage}, IncludeAll={includeAll}");
+                Console.WriteLine($"🔍 Parameters: Year={targetYear}, TopCount={displayCount}, Page={currentPage}, PageSize={recordsPerPage}, IncludeAll={includeAll}");
 
                 using var conn = new MySqlConnection(_connectionString);
                 await conn.OpenAsync();
@@ -7207,10 +7207,10 @@ namespace CIResearch.Controllers
                 }
                 readerOverview.Close();
 
-                Console.WriteLine($"?? MARKET OVERVIEW:");
+                Console.WriteLine($"📊 MARKET OVERVIEW:");
                 Console.WriteLine($"   - Total Companies: {marketOverview.TotalCompanies:N0}");
                 Console.WriteLine($"   - Companies with Revenue: {marketOverview.CompaniesWithPositiveRevenue:N0}");
-                Console.WriteLine($"   - Total Market Revenue: {marketOverview.TotalMarketRevenue:N0} tri?u VND");
+                Console.WriteLine($"   - Total Market Revenue: {marketOverview.TotalMarketRevenue:N0} triệu VND");
 
                 // Get companies with flexible pagination
                 string companiesQuery;
@@ -7311,8 +7311,8 @@ namespace CIResearch.Controllers
                 {
                     success = true,
                     message = includeAll ?
-                        "? Complete market view with full transparency" :
-                        $"? Top {companies.Count} companies analysis",
+                        "✅ Complete market view with full transparency" :
+                        $"✅ Top {companies.Count} companies analysis",
 
                     marketOverview = new
                     {
@@ -7375,7 +7375,7 @@ namespace CIResearch.Controllers
                     timestamp = DateTime.Now
                 };
 
-                Console.WriteLine($"? FLEXIBLE MARKET SHARE COMPLETED:");
+                Console.WriteLine($"✅ FLEXIBLE MARKET SHARE COMPLETED:");
                 Console.WriteLine($"   - View: {chartData.currentView.viewType}");
                 Console.WriteLine($"   - Companies shown: {companies.Count}/{totalRecords}");
                 Console.WriteLine($"   - Execution: {executionTime}ms");
@@ -7385,12 +7385,12 @@ namespace CIResearch.Controllers
             catch (Exception ex)
             {
                 stopwatch.Stop();
-                Console.WriteLine($"? Error in flexible market share chart: {ex.Message}");
+                Console.WriteLine($"❌ Error in flexible market share chart: {ex.Message}");
                 return Json(new
                 {
                     success = false,
                     error = ex.Message,
-                    message = "? Failed to get flexible market share data",
+                    message = "❌ Failed to get flexible market share data",
                     executionTime = stopwatch.ElapsedMilliseconds,
                     timestamp = DateTime.Now
                 });
@@ -7402,7 +7402,7 @@ namespace CIResearch.Controllers
         {
             try
             {
-                Console.WriteLine("?? TESTING CUSTOM LIMIT VALIDATION");
+                Console.WriteLine("🧪 TESTING CUSTOM LIMIT VALIDATION");
 
                 var testCases = new[]
                 {
@@ -7438,7 +7438,7 @@ namespace CIResearch.Controllers
                         testPassed = testPassed
                     });
 
-                    Console.WriteLine($"?? Test: {test.limitType} {test.customStart}-{test.customEnd}");
+                    Console.WriteLine($"🧪 Test: {test.limitType} {test.customStart}-{test.customEnd}");
                     Console.WriteLine($"   Expected: {test.expected}, Actual: {actualResult}, Passed: {testPassed}");
                     if (!string.IsNullOrEmpty(validationResult))
                     {
@@ -7449,7 +7449,7 @@ namespace CIResearch.Controllers
                 return Json(new
                 {
                     success = true,
-                    message = "? Custom limit validation tests completed",
+                    message = "✅ Custom limit validation tests completed",
                     testResults = results,
                     summary = new
                     {
@@ -7469,12 +7469,12 @@ namespace CIResearch.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"? Error testing validation: {ex.Message}");
+                Console.WriteLine($"❌ Error testing validation: {ex.Message}");
                 return Json(new
                 {
                     success = false,
                     error = ex.Message,
-                    message = "? Failed to test custom limit validation",
+                    message = "❌ Failed to test custom limit validation",
                     timestamp = DateTime.Now
                 });
             }
@@ -7489,7 +7489,7 @@ namespace CIResearch.Controllers
 
             try
             {
-                Console.WriteLine("?? TESTING PERFORMANCE OPTIMIZATIONS...");
+                Console.WriteLine("🚀 TESTING PERFORMANCE OPTIMIZATIONS...");
 
                 var testResults = new List<object>();
 
@@ -7541,7 +7541,7 @@ namespace CIResearch.Controllers
                 return Json(new
                 {
                     success = true,
-                    message = "? Performance optimization tests completed",
+                    message = "✅ Performance optimization tests completed",
                     results = testResults,
                     summary = new
                     {
@@ -7552,11 +7552,11 @@ namespace CIResearch.Controllers
                     },
                     optimizations = new
                     {
-                        methodLevelMemoization = "? Active",
-                        filterOptionsCaching = "? Active",
-                        filteredDataCaching = "? Active",
-                        backgroundRefresh = "? Active",
-                        intelligentCacheKeys = "? Active"
+                        methodLevelMemoization = "✅ Active",
+                        filterOptionsCaching = "✅ Active",
+                        filteredDataCaching = "✅ Active",
+                        backgroundRefresh = "✅ Active",
+                        intelligentCacheKeys = "✅ Active"
                     },
                     timestamp = DateTime.Now
                 });
@@ -7567,7 +7567,7 @@ namespace CIResearch.Controllers
                 {
                     success = false,
                     error = ex.Message,
-                    message = "? Performance optimization test failed",
+                    message = "❌ Performance optimization test failed",
                     timestamp = DateTime.Now
                 });
             }
@@ -7578,7 +7578,7 @@ namespace CIResearch.Controllers
         {
             try
             {
-                Console.WriteLine("?? COMPARING OLD VS NEW PERFORMANCE...");
+                Console.WriteLine("⚖️ COMPARING OLD VS NEW PERFORMANCE...");
 
                 var allData = await GetCachedDataAsync();
                 var testFilters = new List<string> { "2020", "2023" };
@@ -7586,7 +7586,7 @@ namespace CIResearch.Controllers
                 var results = new
                 {
                     success = true,
-                    message = "? Performance comparison completed",
+                    message = "✅ Performance comparison completed",
 
                     oldMethod = new
                     {
@@ -7616,7 +7616,7 @@ namespace CIResearch.Controllers
 
                     cacheStatus = new
                     {
-                        methodCacheEntries = _dn2MethodCache.Count,
+                        methodCacheEntries = _methodCache.Count,
                         memoryCacheActive = true,
                         backgroundRefreshActive = true
                     },
@@ -7655,7 +7655,7 @@ namespace CIResearch.Controllers
                 return Json(new
                 {
                     success = true,
-                    message = "? All performance caches cleared successfully",
+                    message = "✅ All performance caches cleared successfully",
                     cacheStatus = new
                     {
                         mainDataCache = "Cleared",
@@ -7672,7 +7672,7 @@ namespace CIResearch.Controllers
                 {
                     success = false,
                     error = ex.Message,
-                    message = "? Failed to clear performance caches",
+                    message = "❌ Failed to clear performance caches",
                     timestamp = DateTime.Now
                 });
             }
@@ -7688,16 +7688,16 @@ namespace CIResearch.Controllers
                 return Json(new
                 {
                     success = true,
-                    message = "? Cache statistics retrieved",
+                    message = "✅ Cache statistics retrieved",
 
                     cacheStatistics = new
                     {
                         methodCache = new
                         {
-                            entries = _dn2MethodCache.Count,
-                            timestamps = _dn2MethodCacheTimestamps.Count,
-                            timeout = _dn2MethodCacheTimeout.TotalMinutes,
-                            sampleKeys = _dn2MethodCache.Keys.Take(5).ToList()
+                            entries = _methodCache.Count,
+                            timestamps = _methodCacheTimestamps.Count,
+                            timeout = _methodCacheTimeout.TotalMinutes,
+                            sampleKeys = _methodCache.Keys.Take(5).ToList()
                         },
 
                         filterOptionsCache = new
@@ -7770,7 +7770,7 @@ namespace CIResearch.Controllers
         {
             try
             {
-                Console.WriteLine("?? TESTING NAVIGATION PERFORMANCE AFTER OPTIMIZATION...");
+                Console.WriteLine("🧪 TESTING NAVIGATION PERFORMANCE AFTER OPTIMIZATION...");
 
                 var results = new List<object>();
 
@@ -7803,7 +7803,7 @@ namespace CIResearch.Controllers
                 return Json(new
                 {
                     success = true,
-                    message = "? Navigation performance test completed",
+                    message = "✅ Navigation performance test completed",
 
                     performanceResults = results,
 
@@ -7846,12 +7846,12 @@ namespace CIResearch.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"? Error in navigation performance test: {ex.Message}");
+                Console.WriteLine($"❌ Error in navigation performance test: {ex.Message}");
                 return Json(new
                 {
                     success = false,
                     error = ex.Message,
-                    message = "? Failed to test navigation performance",
+                    message = "❌ Failed to test navigation performance",
                     timestamp = DateTime.Now
                 });
             }
@@ -7862,12 +7862,12 @@ namespace CIResearch.Controllers
         {
             try
             {
-                Console.WriteLine("?? TESTING EXCEL EXPORT WITH ALL 25 COLUMNS...");
+                Console.WriteLine("🧪 TESTING EXCEL EXPORT WITH ALL 25 COLUMNS...");
 
                 var allData = await GetCachedDataAsync();
                 var testData = allData.Take(5).ToList(); // Get first 5 records for testing
 
-                Console.WriteLine($"?? Test data: {testData.Count} records");
+                Console.WriteLine($"📊 Test data: {testData.Count} records");
 
                 // Test each field to ensure they exist in the model
                 var fieldTests = new List<string>();
@@ -7901,13 +7901,13 @@ namespace CIResearch.Controllers
                     fieldTests.Add($"Taisan_Tong_DK: {item.Taisan_Tong_DK?.ToString("N2") ?? "NULL"}");
                 }
 
-                Console.WriteLine("?? Field availability test:");
+                Console.WriteLine("📋 Field availability test:");
                 fieldTests.ForEach(test => Console.WriteLine($"   {test}"));
 
                 return Json(new
                 {
                     success = true,
-                    message = "? All 25 fields are available in the model",
+                    message = "✅ All 25 fields are available in the model",
                     totalRecords = allData.Count,
                     testRecords = testData.Count,
                     fieldTests = fieldTests,
@@ -7916,12 +7916,12 @@ namespace CIResearch.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"? TestExcelExport error: {ex.Message}");
+                Console.WriteLine($"❌ TestExcelExport error: {ex.Message}");
                 return Json(new
                 {
                     success = false,
                     error = ex.Message,
-                    message = "? Error testing Excel export: " + ex.Message
+                    message = "❌ Error testing Excel export: " + ex.Message
                 });
             }
         }
@@ -7932,7 +7932,7 @@ namespace CIResearch.Controllers
             try
             {
                 var targetYear = nam ?? GetLatestYear(await GetCachedDataAsync());
-                Console.WriteLine($"?? MARKET SHARE INSIGHTS - Year: {targetYear}");
+                Console.WriteLine($"🔍 MARKET SHARE INSIGHTS - Year: {targetYear}");
 
                 using var conn = new MySqlConnection(_connectionString);
                 await conn.OpenAsync();
@@ -8030,7 +8030,7 @@ namespace CIResearch.Controllers
                     };
                 }
 
-                Console.WriteLine($"?? MARKET INSIGHTS:");
+                Console.WriteLine($"📊 MARKET INSIGHTS:");
                 var dynamicInsights = (dynamic)insights;
                 Console.WriteLine($"   - Market Structure: {dynamicInsights.marketStructure.type}");
                 Console.WriteLine($"   - Total Companies: {dynamicInsights.metrics.totalCompanies}");
@@ -8040,12 +8040,12 @@ namespace CIResearch.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"? Error in market insights: {ex.Message}");
+                Console.WriteLine($"❌ Error in market insights: {ex.Message}");
                 return Json(new
                 {
                     success = false,
                     error = ex.Message,
-                    message = "? Failed to analyze market insights",
+                    message = "❌ Failed to analyze market insights",
                     timestamp = DateTime.Now
                 });
             }
