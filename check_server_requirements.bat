@@ -44,7 +44,7 @@ if exist "%SystemRoot%\System32\inetsrv\aspnetcorev2.dll" (
 echo.
 echo Checking MySQL Connection...
 echo Please ensure MySQL is accessible from this server
-echo Connection string: Server=localhost;Database=sakila;User=root;Password=1234
+echo Connection string: Server=localhost;Database=sakila;User=root;Password=1234;
 
 echo.
 echo ====================================

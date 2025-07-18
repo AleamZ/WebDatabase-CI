@@ -27,7 +27,7 @@ namespace CIResearch.Controllers
     public class DNController_Optimized : Controller
     {
         private readonly IMemoryCache _cache;
-        private string _connectionString = "Server=localhost;Database=sakila;User=root;Password=1234";
+        private string _connectionString = "Server=localhost;Database=sakila;User=root;Password=1234;";
         private const string DATA_CACHE_KEY = "dn_all_data";
         private const int CACHE_DURATION_MINUTES = 30;
 
@@ -579,8 +579,8 @@ namespace CIResearch.Controllers
         {
             try
             {
-                const string fromEmail = "huan220vn@gmail.com";
-                const string fromPassword = "tctn ztgb yqfd ynmp";
+                const string fromEmail = "ciresearch.dn@gmail.com";
+                const string fromPassword = "mhip zhvj dhpd zrgo";
 
                 using var message = new MailMessage
                 {

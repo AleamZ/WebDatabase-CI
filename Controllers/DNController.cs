@@ -31,7 +31,7 @@ namespace CIResearch.Controllers
     public class DNController : Controller
     {
         private readonly IMemoryCache _cache;
-        private string _connectionString = "Server=localhost;Database=sakila;User=root;Password=1234";
+        private string _connectionString = "Server=localhost;Database=sakila;User=root;Password=1234;";
 
         // Multi-level cache keys for comprehensive caching
         private const string DATA_CACHE_KEY = "dn_all";
@@ -168,6 +168,12 @@ namespace CIResearch.Controllers
             int? rangeEnd = null,
             int? stepSize = null)
         {
+            // Nếu exportType là 'first' và exportCount chưa có giá trị, mặc định lấy 1000 dòng đầu tiên
+            if (exportType == "first" && !exportCount.HasValue)
+            {
+                exportCount = 1000;
+            }
+
             try
             {
                 Console.WriteLine($"🔍 ViewRawData called with filters:");
@@ -2325,8 +2331,8 @@ namespace CIResearch.Controllers
         {
             try
             {
-                const string fromEmail = "datnguyentien.work@gmail.com";
-                const string fromPassword = "ubux rmon zfka pvse"; // App password (không phải mật khẩu tài khoản)
+                const string fromEmail = "ciresearch.dn@gmail.com";
+                const string fromPassword = "mhip zhvj dhpd zrgo"; // App password (không phải mật khẩu tài khoản)
 
                 using var message = new System.Net.Mail.MailMessage
                 {
@@ -2358,8 +2364,8 @@ namespace CIResearch.Controllers
         {
             try
             {
-                const string fromEmail = "datnguyentien.work@gmail.com";
-                const string fromPassword = "ubux rmon zfka pvse";
+                const string fromEmail = "ciresearch.dn@gmail.com";
+                const string fromPassword = "mhip zhvj dhpd zrgo";
 
                 using var message = new MailMessage
                 {
@@ -2834,7 +2840,7 @@ namespace CIResearch.Controllers
                         .OrderByDescending(x => x.Count)
                         .ToList(),
                     BusinessTypes = stats.BusinessTypeData,
-                    ConnectionString = "Server=localhost;Database=sakila;User=root;Password=1234",
+                    ConnectionString = "Server=localhost;Database=sakila;User=root;Password=1234;",
                     DatabaseTable = "dn_all"
                 };
 
@@ -2870,7 +2876,7 @@ namespace CIResearch.Controllers
 
                 var result = new
                 {
-                    DatabaseConnection = "✅ Connected to Server=localhost;Database=sakila;User=root;Password=1234",
+                    DatabaseConnection = "✅ Connected to Server=localhost;Database=sakila;User=root;Password=1234;",
                     TableUsed = "dn_all",
                     ColumnUsed = "Vungkinhte",
                     TotalRecords = allData.Count,
@@ -2887,7 +2893,7 @@ namespace CIResearch.Controllers
                 {
                     Error = ex.Message,
                     StackTrace = ex.StackTrace,
-                    DatabaseConnection = "❌ Failed to connect to Server=localhost;Database=sakila;User=root;Password=1234"
+                    DatabaseConnection = "❌ Failed to connect to Server=localhost;Database=sakila;User=root;Password=1234;"
                 });
             }
         }
@@ -3017,7 +3023,7 @@ namespace CIResearch.Controllers
                     companySizeDistribution = companySizeData,
                     databaseInfo = new
                     {
-                        connectionString = "Server=localhost;Database=sakila;User=root;Password=1234",
+                        connectionString = "Server=localhost;Database=sakila;User=root;Password=1234;",
                         table = "dn_all",
                         revenueColumn = "SR_Doanhthu_Thuan_BH_CCDV",
                         unit = "triệu VND"
@@ -3184,7 +3190,7 @@ namespace CIResearch.Controllers
 
                     database = "sakila",
                     table = "dn_all",
-                    connectionString = "Server=localhost;Database=sakila;User=root;Password=1234",
+                    connectionString = "Server=localhost;Database=sakila;User=root;Password=1234;",
 
                     rawDataSample = rawData,
                     databaseStatistics = dbStats,
@@ -3312,7 +3318,7 @@ namespace CIResearch.Controllers
                 {
                     success = false,
                     message = $"❌ Trend Data Test FAILED: {ex.Message}",
-                    connectionString = "Server=localhost;Database=sakila;User=root;Password=1234",
+                    connectionString = "Server=localhost;Database=sakila;User=root;Password=1234;",
                     timestamp = DateTime.Now
                 });
             }
@@ -3332,7 +3338,7 @@ namespace CIResearch.Controllers
                     DatabaseConnected = connectionTest.IsConnected,
                     message = connectionTest.Message,
                     details = connectionTest.Details,
-                    connectionString = "Server=localhost;Database=sakila;User=root;Password=1234",
+                    connectionString = "Server=localhost;Database=sakila;User=root;Password=1234;",
                     timestamp = DateTime.Now
                 });
             }
@@ -3346,7 +3352,7 @@ namespace CIResearch.Controllers
                     message = "❌ Lỗi kiểm tra kết nối database!",
                     error = ex.Message,
                     details = $"Lỗi chi tiết: {ex.Message}",
-                    connectionString = "Server=localhost;Database=sakila;User=root;Password=1234",
+                    connectionString = "Server=localhost;Database=sakila;User=root;Password=1234;",
                     timestamp = DateTime.Now
                 });
             }
@@ -3716,7 +3722,7 @@ namespace CIResearch.Controllers
                         years = stats.Years.Count,
                         message = "✅ Real data from database in Chart.js format",
                         timestamp = DateTime.Now,
-                        dataSource = "Real database: Server=localhost;Database=sakila;User=root;Password=1234"
+                        dataSource = "Real database: Server=localhost;Database=sakila;User=root;Password=1234;"
                     }
                 };
 

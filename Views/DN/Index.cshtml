@@ -1021,7 +1021,7 @@
                 <div class="col-md-6">
                     <a href="#" class="nav-brand">
                         <i class="fas fa-building"></i>
-                        CÔNG TY TNHH CI RESEARCH test upload
+                        CÔNG TY TNHH CI RESEARCH
                     </a>
                 </div>
                 <div class="col-md-4 text-end">
@@ -2007,7 +2007,7 @@ function initVungKinhTeChart() {
     // ONLY USE REAL DATA FROM DATABASE - NO SAMPLE DATA
     if (!vungKinhTeData || vungKinhTeData.length === 0) {
         console.log('⚠️ No real data from database - chart will be empty');
-        console.log('⚠️ Expected database: Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;');
+        console.log('⚠️ Expected database: Server=localhost;Database=sakila;User=root;Password=1234;');
         console.log('⚠️ Expected data from Vungkinhte column');
         vungKinhTeData = [];
     }
@@ -2020,7 +2020,7 @@ function initVungKinhTeChart() {
     // NO DEFAULT SAMPLE DATA - Only show empty chart if no database data
     if (total === 0) {
         console.log('⚠️ No valid data from database - displaying empty chart');
-        console.log('⚠️ Database connection: Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;');
+        console.log('⚠️ Database connection: Server=localhost;Database=sakila;User=root;Password=1234;');
         console.log('⚠️ Check Vungkinhte column in dn_all table for 7 economic zones');
         console.log('⚠️ Expected: Đông Nam Bộ, Đồng bằng Sông Hồng, Duyên hải Nam Trung Bộ, Bắc Trung Bộ, ĐBSCL, Tây Nguyên, Trung du và Miền núi Bắc Bộ');
         labels = ['Không có dữ liệu Vùng Kinh Tế'];
@@ -2902,7 +2902,7 @@ function initIndustryChart() {
         
         console.log('🔍 INDUSTRY DATA DEBUG:');
         console.log('📊 Industry data from ViewBag:', industryData);
-        console.log('📊 Data source: Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx; TEN_NGANH column');
+        console.log('📊 Data source: Server=localhost;Database=sakila;User=root;Password=1234; TEN_NGANH column');
         console.log('📊 Number of industries:', industryData ? industryData.length : 0);
         
         if (industryData && industryData.length > 0) {
@@ -2925,7 +2925,7 @@ function initIndustryChart() {
     // Check if we have real data from database TEN_NGANH column
     if (!industryData || industryData.length === 0) {
         console.error('❌ No real industry data from TEN_NGANH column!');
-        console.error('📊 Database connection: Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;');
+        console.error('📊 Database connection: Server=localhost;Database=sakila;User=root;Password=1234;');
         console.error('📊 Expected data from TEN_NGANH column not found');
         console.error('❌ Chart creation will be aborted - NO FALLBACK DATA');
         
@@ -2955,7 +2955,7 @@ function initIndustryChart() {
     // Validate data quality - MUST have real data from database TEN_NGANH column
     if (total === 0) {
         console.error('❌ CRITICAL: No valid industry data from TEN_NGANH column!');
-        console.error('❌ Database: Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;');
+        console.error('❌ Database: Server=localhost;Database=sakila;User=root;Password=1234;');
         console.error('❌ Expected TEN_NGANH column data not found');
         console.error('❌ Check database connection and data availability');
         

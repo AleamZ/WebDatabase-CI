@@ -12,7 +12,7 @@ namespace CIResearch.Controllers
 {
     public class Admin : Controller
     {
-        private string _connectionString = "Server=localhost;Database=sakila;User=root;Password=1234DefaultCommandTimeout=1000;ConnectionTimeout=1000;";
+        private string _connectionString = "Server=localhost;Database=sakila;User=root;Password=1234;DefaultCommandTimeout=1000;ConnectionTimeout=1000;";
 
         public ActionResult Index(string stt = "", List<string> code = null, List<string> projectName = null, List<string> year = null,
     string contactObject = "", List<string> sbjnum = null, string fullname = "",

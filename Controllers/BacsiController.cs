@@ -29,7 +29,7 @@ namespace CIResearch.Controllers
 
 
 
-        private string _connectionString = "Server=localhost;Database=sakila;User=root;Password=1234DefaultCommandTimeout=1000;ConnectionTimeout=1000;";
+        private string _connectionString = "Server=localhost;Database=sakila;User=root;Password=1234;DefaultCommandTimeout=1000;ConnectionTimeout=1000;";
         private readonly IMemoryCache _cache;
 
         public BacsiController(IMemoryCache cache)

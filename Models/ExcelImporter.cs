@@ -13,7 +13,7 @@ namespace CIResearch.Models
         public ExcelImporter(IConfiguration configuration)
         {
             _connectionString = configuration.GetConnectionString("DefaultConnection")
-                ?? "Server=localhost;Database=sakila;User=root;Password=1234";
+                ?? "Server=localhost;Database=sakila;User=root;Password=1234;";
         }
         // Hàm để lấy STT lớn nhất từ Excel
         public int GetMaxSttFromExcel(string filePath)

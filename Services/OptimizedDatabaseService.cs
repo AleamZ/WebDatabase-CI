@@ -42,7 +42,7 @@ public class OptimizedDatabaseService : IOptimizedDatabaseService, IDisposable
         ILogger<OptimizedDatabaseService> logger)
     {
         _connectionString = configuration.GetConnectionString("DefaultConnection")
-            ?? "Server=localhost;Database=sakila;User=root;Password=1234";
+            ?? "Server=localhost;Database=sakila;User=root;Password=1234;";
         _cache = cache;
         _logger = logger;
         _metrics = new DatabasePerformanceMetrics();

@@ -702,11 +702,11 @@
                     <div class="user-info">
                         @if (Context.Session.GetString("Username") != null)
                         {
-                                        <span>Xin chào @Context.Session.GetString("Username")!</span>
+                                            <span>Xin chào @Context.Session.GetString("Username")!</span>
                         }
                         else
                         {
-                                        <span>Khách</span>
+                                            <span>Khách</span>
                         }
                     </div>
                 </div>
@@ -771,9 +771,9 @@
                                         <input type="text" class="search-box" placeholder="Tìm kiếm năm" oninput="filterOptions(this)">
                                         @foreach (var year in new List<string> { "2018", "2019", "2020", "2021", "2022", "2023", "2024" })
                                         {
-                                                        <label>
-                                                            <input type="checkbox" name="Nam" value="@year" @(ViewBag.Nam?.Contains(year) == true ? "checked" : "") /> @year
-                                                        </label>
+                                                            <label>
+                                                                <input type="checkbox" name="Nam" value="@year" @(ViewBag.Nam?.Contains(year) == true ? "checked" : "") /> @year
+                                                            </label>
                                         }
                                     </div>
                     </div>
@@ -787,20 +787,20 @@
                                     <div class="dropdown-options">
                                         <input type="text" class="search-box" placeholder="Tìm kiếm tỉnh thành" oninput="filterOptions(this)">
                                         @foreach (var province in new List<string>
-                                                                                                                                                                                                                                                                                                                                {
-                                                                                                                                                                                                                                                                                                                                                                "An Giang", "Bà Rịa-Vũng Tàu", "Bắc Giang", "Bắc Kạn", "Bạc Liêu", "Bắc Ninh", "Bến Tre", "Bình Định",
-                                                                                                                                                                                                                                                                                                                                                                "Bình Dương", "Bình Phước", "Bình Thuận", "Cà Mau", "Cao Bằng", "Đắk Lắk", "Đắk Nông", "Điện Biên",
-                                                                                                                                                                                                                                                                                                                                                                "Đồng Nai", "Đồng Tháp", "Gia Lai", "Hà Giang", "Hà Nam", "Hà Tĩnh", "Hải Dương", "Hậu Giang",
-                                                                                                                                                                                                                                                                                                                                                                "Hòa Bình", "Hưng Yên", "Khánh Hòa", "Kiên Giang", "Kon Tum", "Lai Châu", "Lâm Đồng", "Lạng Sơn",
-                                                                                                                                                                                                                                                                                                                                                                "Lào Cai", "Long An", "Nam Định", "Nghệ An", "Ninh Bình", "Ninh Thuận", "Phú Thọ", "Phú Yên",
-                                                                                                                                                                                                                                                                                                                                                                "Quảng Bình", "Quảng Nam", "Quảng Ngãi", "Quảng Ninh", "Quảng Trị", "Sóc Trăng", "Sơn La",
-                                                                                                                                                                                                                                                                                                                                                                "Tây Ninh", "Thái Bình", "Thái Nguyên", "Thanh Hóa", "Thừa Thiên Huế", "Tiền Giang", "Trà Vinh",
-                                                                                                                                                                                                                                                                                                                                                                "Tuyên Quang", "Vĩnh Long", "Vĩnh Phúc", "Yên Bái", "Hà Nội", "Hồ Chí Minh", "Đà Nẵng", "Hải Phòng", "Cần Thơ"
-                                                                                                                                                                                                                                                                                                                                })
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                "An Giang", "Bà Rịa-Vũng Tàu", "Bắc Giang", "Bắc Kạn", "Bạc Liêu", "Bắc Ninh", "Bến Tre", "Bình Định",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                "Bình Dương", "Bình Phước", "Bình Thuận", "Cà Mau", "Cao Bằng", "Đắk Lắk", "Đắk Nông", "Điện Biên",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                "Đồng Nai", "Đồng Tháp", "Gia Lai", "Hà Giang", "Hà Nam", "Hà Tĩnh", "Hải Dương", "Hậu Giang",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                "Hòa Bình", "Hưng Yên", "Khánh Hòa", "Kiên Giang", "Kon Tum", "Lai Châu", "Lâm Đồng", "Lạng Sơn",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                "Lào Cai", "Long An", "Nam Định", "Nghệ An", "Ninh Bình", "Ninh Thuận", "Phú Thọ", "Phú Yên",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                "Quảng Bình", "Quảng Nam", "Quảng Ngãi", "Quảng Ninh", "Quảng Trị", "Sóc Trăng", "Sơn La",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                "Tây Ninh", "Thái Bình", "Thái Nguyên", "Thanh Hóa", "Thừa Thiên Huế", "Tiền Giang", "Trà Vinh",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                "Tuyên Quang", "Vĩnh Long", "Vĩnh Phúc", "Yên Bái", "Hà Nội", "Hồ Chí Minh", "Đà Nẵng", "Hải Phòng", "Cần Thơ"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                })
                                         {
-                                                        <label>
-                                                            <input type="checkbox" name="MaTinh_Dieutra" value="@province" @(ViewBag.MaTinh_Dieutra?.Contains(province) == true ? "checked" : "") /> @province
-                                                        </label>
+                                                            <label>
+                                                                <input type="checkbox" name="MaTinh_Dieutra" value="@province" @(ViewBag.MaTinh_Dieutra?.Contains(province) == true ? "checked" : "") /> @province
+                                                            </label>
                                         }
                                     </div>
                     </div>
@@ -814,14 +814,14 @@
                                     <div class="dropdown-options">
                                         <input type="text" class="search-box" placeholder="Tìm kiếm loại hình" oninput="filterOptions(this)">
                                         @foreach (var type in new List<string>
-                                                                                                                                                                                                                                                                                                                                {
-                                                                                                                                                                                                                                                                                                                                                                "Công ty TNHH", "Công ty cổ phần", "Doanh nghiệp tư nhân", "Doanh nghiệp nhà nước",
-                                                                                                                                                                                                                                                                                                                                                                "Công ty hợp danh", "Hợp tác xã", "Liên doanh", "Chi nhánh công ty", "Văn phòng đại diện"
-                                                                                                                                                                                                                                                                                                                                })
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                "Công ty TNHH", "Công ty cổ phần", "Doanh nghiệp tư nhân", "Doanh nghiệp nhà nước",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                "Công ty hợp danh", "Hợp tác xã", "Liên doanh", "Chi nhánh công ty", "Văn phòng đại diện"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                })
                                         {
-                                                        <label>
-                                                            <input type="checkbox" name="Loaihinhkte" value="@type" @(ViewBag.Loaihinhkte?.Contains(type) == true ? "checked" : "") /> @type
-                                                        </label>
+                                                            <label>
+                                                                <input type="checkbox" name="Loaihinhkte" value="@type" @(ViewBag.Loaihinhkte?.Contains(type) == true ? "checked" : "") /> @type
+                                                            </label>
                                         }
                                     </div>
                     </div>
@@ -835,18 +835,18 @@
                                     <div class="dropdown-options">
                                         <input type="text" class="search-box" placeholder="Tìm kiếm vùng kinh tế" oninput="filterOptions(this)">
                                         @foreach (var vungkinhte in new List<string> {
-                                                                                                                                                                                                                                                                                                                                                                "Bắc Trung Bộ",
-                                                                                                                                                                                                                                                                                                                                                                "Duyên hải Nam Trung Bộ",
-                                                                                                                                                                                                                                                                                                                                                                "Đồng bằng Sông Cửu Long",
-                                                                                                                                                                                                                                                                                                                                                                "Đồng bằng Sông Hồng",
-                                                                                                                                                                                                                                                                                                                                                                "Đông Nam Bộ",
-                                                                                                                                                                                                                                                                                                                                                                "Tây Nguyên",
-                                                                                                                                                                                                                                                                                                                                                                "Trung du và Miền núi Bắc Bộ"
-                                                                                                                                                                                                                                                                                                                                })
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                "Bắc Trung Bộ",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                "Duyên hải Nam Trung Bộ",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                "Đồng bằng Sông Cửu Long",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                "Đồng bằng Sông Hồng",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                "Đông Nam Bộ",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                "Tây Nguyên",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                "Trung du và Miền núi Bắc Bộ"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                })
                                         {
-                                                        <label>
-                                                            <input type="checkbox" name="Vungkinhte" value="@vungkinhte" @(ViewBag.Vungkinhte?.Contains(vungkinhte) == true ? "checked" : "") /> @vungkinhte
-                                                        </label>
+                                                            <label>
+                                                                <input type="checkbox" name="Vungkinhte" value="@vungkinhte" @(ViewBag.Vungkinhte?.Contains(vungkinhte) == true ? "checked" : "") /> @vungkinhte
+                                                            </label>
                                         }
                     </div>
                 </div>
@@ -861,9 +861,9 @@
                                         <input type="text" class="search-box" placeholder="Tìm kiếm quy mô" oninput="filterOptions(this)">
                                         @foreach (var size in new List<string> { "Siêu nhỏ", "Nhỏ", "Vừa", "Lớn" })
                                         {
-                                                        <label>
-                                                            <input type="checkbox" name="QuyMo" value="@size" @(ViewBag.QuyMo?.Contains(size) == true ? "checked" : "") /> @size
-                                                        </label>
+                                                            <label>
+                                                                <input type="checkbox" name="QuyMo" value="@size" @(ViewBag.QuyMo?.Contains(size) == true ? "checked" : "") /> @size
+                                                            </label>
                                         }
                                     </div>
                                 </div>
@@ -1393,7 +1393,7 @@ function initVungKinhTeChart() {
     // ONLY USE REAL DATA FROM DATABASE - NO SAMPLE DATA
     if (!vungKinhTeData || vungKinhTeData.length === 0) {
         console.log('⚠️ No real data from database - chart will be empty');
-        console.log('⚠️ Expected database: Server=localhost;Database=sakila;User=root;Password=1234');
+        console.log('⚠️ Expected database: Server=localhost;Database=sakila;User=root;Password=1234;');
         console.log('⚠️ Expected data from Vungkinhte column');
         vungKinhTeData = [];
     }
@@ -1406,7 +1406,7 @@ function initVungKinhTeChart() {
     // NO DEFAULT SAMPLE DATA - Only show empty chart if no database data
     if (total === 0) {
         console.log('⚠️ No valid data from database - displaying empty chart');
-        console.log('⚠️ Database connection: Server=localhost;Database=sakila;User=root;Password=1234');
+        console.log('⚠️ Database connection: Server=localhost;Database=sakila;User=root;Password=1234;');
         console.log('⚠️ Check Vungkinhte column in dn_all table');
         labels = ['Không có dữ liệu'];
         data = [0];
@@ -1797,7 +1797,7 @@ function initQuyMoChart() {
     // ONLY USE REAL DATA FROM DATABASE - NO SAMPLE DATA
     if (!quyMoData || quyMoData.length === 0) {
         console.log('⚠️ No real company size data from database - chart will be empty');
-        console.log('⚠️ Expected database: Server=localhost;Database=sakila;User=root;Password=1234');
+        console.log('⚠️ Expected database: Server=localhost;Database=sakila;User=root;Password=1234;');
         console.log('⚠️ Expected data from SR_Doanhthu_Thuan_BH_CCDV column for revenue calculation');
         quyMoData = [];
     }
@@ -1817,7 +1817,7 @@ function initQuyMoChart() {
     // NO DEFAULT SAMPLE DATA - Only show empty chart if no database data
     if (total === 0) {
         console.log('⚠️ No valid company size data from database - displaying empty chart');
-        console.log('⚠️ Database connection: Server=localhost;Database=sakila;User=root;Password=1234');
+        console.log('⚠️ Database connection: Server=localhost;Database=sakila;User=root;Password=1234;');
         console.log('⚠️ Check SR_Doanhthu_Thuan_BH_CCDV column in dn_all table');
         labels = ['Không có dữ liệu quy mô'];
         data = [0];
@@ -2603,7 +2603,7 @@ function initIndustryChart() {
         console.log('🔍 INDUSTRY DATA DEBUG:');
         console.log('📊 Raw Industry data string:', rawDataString);
         console.log('📊 Data length:', rawDataString.length);
-        console.log('📊 Expected source: Server=localhost;Database=sakila;User=root;Password=1234 TEN_NGANH column');
+        console.log('📊 Expected source: Server=localhost;Database=sakila;User=root;Password=1234; TEN_NGANH column');
         
         if (rawDataString && rawDataString !== '[]') {
             industryData = rawDataString; // No need to parse since Html.Raw already converts it
@@ -2629,7 +2629,7 @@ function initIndustryChart() {
     // Check if we have real data from database
     if (!industryData || industryData.length === 0) {
         console.log('⚠️ No real industry data from database - this should not happen!');
-        console.log('📊 Database connection string should be: Server=localhost;Database=sakila;User=root;Password=1234');
+        console.log('📊 Database connection string should be: Server=localhost;Database=sakila;User=root;Password=1234;');
         console.log('📊 Expected data from TEN_NGANH column');
         
         // Only use sample data as absolute fallback
@@ -2668,7 +2668,7 @@ function initIndustryChart() {
     // Validate data quality - MUST have real data from database
     if (total === 0) {
         console.error('❌ CRITICAL: No valid industry data from database!');
-        console.error('❌ Database: Server=localhost;Database=sakila;User=root;Password=1234');
+        console.error('❌ Database: Server=localhost;Database=sakila;User=root;Password=1234;');
         console.error('❌ Expected TEN_NGANH column data not found');
         console.error('❌ Check database connection and data availability');
         
@@ -3072,7 +3072,7 @@ function initTrendChart() {
         console.log('🔍 DEBUG ViewBag.TrendData from backend:');
         console.log('   - Raw string length:', rawDataString.length);
         console.log('   - Raw string preview:', rawDataString.substring(0, 200));
-        console.log('   - Database should be: Server=localhost;Database=sakila;User=root;Password=1234');
+        console.log('   - Database should be: Server=localhost;Database=sakila;User=root;Password=1234;');
         console.log('   - Expected columns: Nam, SR_Doanhthu_Thuan_BH_CCDV, SR_Loinhuan_TruocThue');
         console.log('   - FULL RAW STRING:', rawDataString);
         
@@ -3177,7 +3177,7 @@ function initTrendChart() {
     
     if (!trendData || trendData.length === 0) {
         console.log('❌ No data from database - ViewBag.TrendData is empty');
-        console.log('❌ Expected data from: Server=localhost;Database=sakila;User=root;Password=1234');
+        console.log('❌ Expected data from: Server=localhost;Database=sakila;User=root;Password=1234;');
         console.log('❌ Columns: Nam, SR_Doanhthu_Thuan_BH_CCDV, SR_Loinhuan_TruocThue');
         
         // Use minimal fallback
@@ -3186,7 +3186,7 @@ function initTrendChart() {
         profitData = [0];
     } else {
         console.log('✅ Using REAL data from database sakila.dn_all');
-        console.log('✅ Database: Server=localhost;Database=sakila;User=root;Password=1234');
+        console.log('✅ Database: Server=localhost;Database=sakila;User=root;Password=1234;');
         console.log('✅ Revenue column: SR_Doanhthu_Thuan_BH_CCDV');
         console.log('✅ Profit column: SR_Loinhuan_TruocThue');
         console.log('📊 Raw data from ViewBag:', trendData);

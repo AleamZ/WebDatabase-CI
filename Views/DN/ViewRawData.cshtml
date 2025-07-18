@@ -194,10 +194,10 @@
                 transform: translateY(-1px);
             }
 
-                    /* Chevron animation */
-        #filterChevron {
-            transition: transform 0.3s ease;
-        }
+            /* Chevron animation */
+            #filterChevron {
+                transition: transform 0.3s ease;
+            }
 
         /* Export Options UI Styles */
         #exportOptionsUI {
@@ -249,7 +249,7 @@
             }
 
             /* Mobile responsiveness for navigation filter */
-                        @@media (max-width: 768px) {
+            @@media (max-width: 768px) {
                     .nav-filter-body .row .col-lg-2 {
                         margin-bottom: 0.5rem;
                     }
@@ -273,7 +273,7 @@
                     }
                 }
 
-                                @@media(max - width: 576px) {
+                @@media(max - width: 576px) {
                         .top-nav {
                             padding: 0.75rem 0;
                         }
@@ -858,12 +858,12 @@
                                                 {
                                                         "first" => "Đầu",
                                                         "last" => "Cuối",
-                                                        "random" => "Random",
+                                                    "random" => "Random",
                                                         "range" => "Khoảng",
                                                         "alternate" => "Xen kẻ",
                                                         _ => "Đầu"
                                                 };
-                                                                                        }
+                                            }
                                             @exportDisplayText
                                         </div>
                                         <div class="stat-label">Kiểu xuất</div>
@@ -875,19 +875,19 @@
                         <!-- Error Message -->
                         @if (!string.IsNullOrEmpty(ViewBag.Error?.ToString()))
                         {
-                                <div class="alert alert-danger">
-                                    <i class="fas fa-exclamation-triangle me-2"></i>
-                                    @ViewBag.Error
-                                </div>
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                @ViewBag.Error
+                            </div>
                         }
 
                         <!-- Success Message -->
                         @if (TempData["SuccessMessage"] != null)
                         {
-                                <div class="alert alert-success">
-                                    <i class="fas fa-check-circle me-2"></i>
-                                    @TempData["SuccessMessage"]
-                                </div>
+                            <div class="alert alert-success">
+                                <i class="fas fa-check-circle me-2"></i>
+                                @TempData["SuccessMessage"]
+                            </div>
                         }
 
                         <!-- Data Table -->
@@ -930,20 +930,20 @@
                                     <tbody>
                                         @foreach (var item in Model)
                                         {
-                                                <tr>
-                                                    <td>@item.STT</td>
-                                                    <td>@item.Nam</td>
-                                                    <td>@(item.Masothue ?? "N/A")</td>
-                                                    <td>@(item.TenDN ?? "N/A")</td>
-                                                    <td>@(item.Loaihinhkte ?? "N/A")</td>
-                                                    <td>@(item.MaTinh_Dieutra ?? "N/A")</td>
-                                                    <td>@(item.MaHuyen_Dieutra ?? "N/A")</td>
-                                                    <td>@(item.MaXa_Dieutra ?? "N/A")</td>
-                                                    <td>@(item.Diachi ?? "N/A")</td>
-                                                    <td>@(item.Dienthoai ?? "N/A")</td>
-                                                    <td>@(item.Email ?? "N/A")</td>
-                                                    <td>@(item.Region ?? "N/A")</td>
-                                                </tr>
+                                            <tr>
+                                                <td>@item.STT</td>
+                                                <td>@item.Nam</td>
+                                                <td>@(item.Masothue ?? "N/A")</td>
+                                                <td>@(item.TenDN ?? "N/A")</td>
+                                                <td>@(item.Loaihinhkte ?? "N/A")</td>
+                                                <td>@(item.MaTinh_Dieutra ?? "N/A")</td>
+                                                <td>@(item.MaHuyen_Dieutra ?? "N/A")</td>
+                                                <td>@(item.MaXa_Dieutra ?? "N/A")</td>
+                                                <td>@(item.Diachi ?? "N/A")</td>
+                                                <td>@(item.Dienthoai ?? "N/A")</td>
+                                                <td>@(item.Email ?? "N/A")</td>
+                                                <td>@(item.Region ?? "N/A")</td>
+                                            </tr>
                                         }
                                     </tbody>
                                 </table>
@@ -1377,7 +1377,7 @@
                         setTimeout(() => {
                             if (alertDiv.parentNode) {
                                 alertDiv.remove();
-                            }
+                        }
                         }, 5000);
                     }
 

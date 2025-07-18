@@ -9,7 +9,7 @@ namespace CIResearch.Controllers
 {
     public class AdminExportRequestController : Controller
     {
-        private readonly string _connectionString = "Server=localhost;Database=sakila;User=root;Password=1234";
+        private readonly string _connectionString = "Server=localhost;Database=sakila;User=root;Password=1234;";
 
         private bool IsAdmin()
         {
@@ -84,8 +84,8 @@ namespace CIResearch.Controllers
         // Hàm gửi mail (dùng lại logic cũ)
         private static void SendEmailWithAttachment_CIResearch(string toEmail, string subject, string body, byte[] attachmentData)
         {
-            const string fromEmail = "datnguyentien.work@gmail.com";
-            const string fromPassword = "ubux rmon zfka pvse";
+            const string fromEmail = "ciresearch.dn@gmail.com";
+            const string fromPassword = "mhip zhvj dhpd zrgo";
             using var message = new System.Net.Mail.MailMessage
             {
                 From = new System.Net.Mail.MailAddress(fromEmail),

@@ -7,7 +7,7 @@ namespace CIResearch.Controllers
 {
     public class ThemSuaXoaDuAn : Controller
     {
-        private string _connectionString = "Server=localhost;Database=sakila;User=root;Password=1234";
+        private string _connectionString = "Server=localhost;Database=sakila;User=root;Password=1234;";
         public IActionResult Index(string searchUser = "")
         {
             // Lấy danh sách các dự án từ CSDL

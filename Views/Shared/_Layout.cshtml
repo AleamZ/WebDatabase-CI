@@ -32,49 +32,27 @@
 		</div>
 
 		<ul class="side-menu top">
-
-
-
-
-
-
 			@if (Context.Session.GetString("Username") != null)
 			{
-				var userRole = Context.Session.GetString("Role"); // Lấy vai trò từ session
-
-
-
-
+				var userRole = Context.Session.GetString("Role");
 				<li class="dropdown">
-					<a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
-						data-tooltip="Dữ liệu công ty">
+					<a href="#" class="dropdown-toggle" data-tooltip="Dữ liệu công ty">
 						<i class='bx bxs-briefcase'></i>
 						<span class="text">Dữ liệu công ty</span>
 					</a>
 					<ul class="dropdown-menu">
-
-
 						<li>
 							<a href="@Url.Action("Index", "Bacsi")" data-tooltip="Bác sĩ">
 								<span class="text">Bác sĩ</span>
-
 							</a>
 						</li>
-
 						<li>
 							<a href="@Url.Action("Index", "Manhinhchinh")" data-tooltip="Consumer">
 								<span class="text">Consumer</span>
 							</a>
 						</li>
-
-
-
 					</ul>
 				</li>
-
-
-
-
 				<li>
 					<a href="@Url.Action("ViewProfile", "Profile")" data-tooltip="Hồ sơ của tôi">
 						<i class='bx bxs-user'></i>
@@ -87,107 +65,61 @@
 						<span class="text">Đổi mật khẩu</span>
 					</a>
 				</li>
-
-
 				@if (userRole == "Manager")
 				{
-
 					<li>
 						<a href="@Url.Action("Index", "Tracuulocxuat")" data-tooltip="Lịch sử lọc xuất">
 							<i class='bx bx-history'></i>
 							<span class="text">Lịch sử lọc xuất</span>
 						</a>
 					</li>
-
 				}
-
-
-
-
 				@if (userRole == "Admin")
 				{
-
-					@* 	<li class="dropdown">
-						<a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-							<i class='bx bxs-briefcase'></i>
-							<span class="text">Dự án đang chạy</span>
-						</a>
-						<ul class="dropdown-menu">
-
-
-							<li>
-								<a href="@Url.Action("Index", "FutusProject")">
-									<span class="text">Dự án Futus</span>
-								</a>
-							</li>
-
-							<li>
-								<a href="@Url.Action("Index", "Home")">
-									<span class="text">Dự án 2</span>
-								</a>
-							</li>
-
-							<li>
-								<a href="@Url.Action("Index", "Home")">
-									<span class="text">Dự án 3</span>
-								</a>
-							</li>
-
-						</ul>
-					</li> *@
-
 					<li class="dropdown">
-						<a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
-							data-tooltip="Thông tin doanh nghiệp">
+						<a href="#" class="dropdown-toggle" data-tooltip="Thông tin doanh nghiệp">
 							<i class='bx bxs-briefcase'></i>
 							<span class="text">Thông tin doanh nghiệp</span>
 						</a>
 						<ul class="dropdown-menu">
-
+							<li>
+								<a href="@Url.Action("Index", "DN")">
+									<span class="text">Trang doanh nghiệp</span>
+								</a>
+							</li>
 							<li>
 								<a href="@Url.Action("Index", "DNInsert")">
 									<span class="text">Thêm doanh nghiệp mới</span>
 								</a>
 							</li>
-
 							<li>
 								<a href="@Url.Action("Index", "DNImport")">
 									<span class="text">Import từ Excel</span>
 								</a>
 							</li>
-
 							<li>
 								<a href="@Url.Action("Index", "DN")">
 									<span class="text">Năm 2023</span>
-
 								</a>
 							</li>
-
 							<li>
 								<a href="@Url.Action("Index", "DN")">
 									<span class="text">Năm 2021</span>
 								</a>
 							</li>
-
 							<li>
 								<a href="@Url.Action("Index", "DN")">
 									<span class="text">Năm 2022</span>
 								</a>
 							</li>
-
 						</ul>
 					</li>
-
-
-
-
 					<li>
 						<a href="@Url.Action("Index", "Admin")" data-tooltip="Trang admin">
 							<i class='bx bxs-user-plus'></i>
 							<span class="text">Trang admin</span>
 						</a>
 					</li>
-
 					<li>
 						<a href="@Url.Action("Register", "LoginRegister")" data-tooltip="Đăng ký tài khoản">
 							<i class='bx bxs-user-plus'></i>
@@ -213,23 +145,10 @@
 						</a>
 					</li>
 				}
-
 				<li>
 					<a href="@Url.Action("Logout", "LoginRegister")" class="logout" data-tooltip="Đăng Xuất">
 						<i class='bx bxs-log-out-circle'></i>
 						<span class="text">Đăng Xuất</span>
-					</a>
-				</li>
-				<li>
-					<a href="@Url.Action("Login", "LoginRegister")" class="logout" data-tooltip="ĐĂNG NHẬP">
-						<i class='bx bxs-log-in-circle'></i>
-						<span class="text">ĐĂNG NHẬP</span>
-					</a>
-				</li>
-				<li>
-					<a href="#" class="menu-toggle" id="menu-toggle" data-tooltip="Thu gọn menu">
-						<i class='bx bx-chevron-left'></i>
-						<span class="text">Thu gọn menu</span>
 					</a>
 				</li>
 			}
@@ -241,13 +160,13 @@
 						<span class="text">ĐĂNG NHẬP</span>
 					</a>
 				</li>
-				<li>
-					<a href="#" class="menu-toggle" id="menu-toggle" data-tooltip="Thu gọn menu">
-						<i class='bx bx-chevron-left'></i>
-						<span class="text">Thu gọn menu</span>
-					</a>
-				</li>
 			}
+			<li>
+				<a href="#" class="menu-toggle" id="menu-toggle" data-tooltip="Thu gọn menu">
+					<i class='bx bx-chevron-left'></i>
+					<span class="text">Thu gọn menu</span>
+				</a>
+			</li>
 		</ul>
 	</section>
 	<!-- SIDEBAR -->

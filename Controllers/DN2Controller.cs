@@ -31,7 +31,7 @@ namespace CIResearch.Controllers
     public class DN2Controller : Controller
     {
         private readonly IMemoryCache _cache;
-        private string _connectionString = "Server=127.0.0.1;Database=sakila;User=admin_dbciresearch;Password=9t52$7sBx;";
+        private string _connectionString = "Server=localhost;Database=sakila;User=root;Password=1234;";
 
         // Multi-level cache keys for comprehensive caching
         private const string DATA_CACHE_KEY = "dn_all2";
@@ -2324,8 +2324,8 @@ namespace CIResearch.Controllers
         {
             try
             {
-                const string fromEmail = "huan220vn@gmail.com";
-                const string fromPassword = "tctn ztgb yqfd ynmp";
+                const string fromEmail = "ciresearch.dn@gmail.com";
+                const string fromPassword = "mhip zhvj dhpd zrgo";
 
                 using var message = new MailMessage
                 {
@@ -2800,7 +2800,7 @@ namespace CIResearch.Controllers
                         .OrderByDescending(x => x.Count)
                         .ToList(),
                     BusinessTypes = stats.BusinessTypeData,
-                    ConnectionString = "Server=127.0.0.1;Database=sakila;User=admin_dbciresearch;Password=9t52$7sBx;",
+                    ConnectionString = "Server=localhost;Database=sakila;User=root;Password=1234;",
                     DatabaseTable = "dn_all2"
                 };
 
@@ -2836,7 +2836,7 @@ namespace CIResearch.Controllers
 
                 var result = new
                 {
-                    DatabaseConnection = "✅ Connected to Server=127.0.0.1;Database=sakila;User=admin_dbciresearch;Password=9t52$7sBx;",
+                    DatabaseConnection = "✅ Connected to Server=localhost;Database=sakila;User=root;Password=1234;",
                     TableUsed = "dn_all2",
                     ColumnUsed = "Vungkinhte",
                     TotalRecords = allData.Count,
@@ -2853,7 +2853,7 @@ namespace CIResearch.Controllers
                 {
                     Error = ex.Message,
                     StackTrace = ex.StackTrace,
-                    DatabaseConnection = "❌ Failed to connect to Server=127.0.0.1;Database=sakila;User=admin_dbciresearch;Password=9t52$7sBx;"
+                    DatabaseConnection = "❌ Failed to connect to Server=localhost;Database=sakila;User=root;Password=1234;"
                 });
             }
         }
@@ -2983,7 +2983,7 @@ namespace CIResearch.Controllers
                     companySizeDistribution = companySizeData,
                     databaseInfo = new
                     {
-                        connectionString = "Server=127.0.0.1;Database=sakila;User=admin_dbciresearch;Password=9t52$7sBx;",
+                        connectionString = "Server=localhost;Database=sakila;User=root;Password=1234;",
                         table = "dn_all2",
                         revenueColumn = "SR_Doanhthu_Thuan_BH_CCDV",
                         unit = "triệu VND"
@@ -3150,7 +3150,7 @@ namespace CIResearch.Controllers
 
                     database = "sakila",
                     table = "dn_all2",
-                    connectionString = "Server=127.0.0.1;Database=sakila;User=admin_dbciresearch;Password=9t52$7sBx;",
+                    connectionString = "Server=localhost;Database=sakila;User=root;Password=1234;",
 
                     rawDataSample = rawData,
                     databaseStatistics = dbStats,
@@ -3278,7 +3278,7 @@ namespace CIResearch.Controllers
                 {
                     success = false,
                     message = $"❌ Trend Data Test FAILED: {ex.Message}",
-                    connectionString = "Server=127.0.0.1;Database=sakila;User=admin_dbciresearch;Password=9t52$7sBx;",
+                    connectionString = "Server=localhost;Database=sakila;User=root;Password=1234;",
                     timestamp = DateTime.Now
                 });
             }
@@ -3682,7 +3682,7 @@ namespace CIResearch.Controllers
                         years = stats.Years.Count,
                         message = "✅ Real data from database in Chart.js format",
                         timestamp = DateTime.Now,
-                        dataSource = "Real database: Server=127.0.0.1;Database=sakila;User=admin_dbciresearch;Password=9t52$7sBx;"
+                        dataSource = "Real database: Server=localhost;Database=sakila;User=root;Password=1234;"
                     }
                 };
 

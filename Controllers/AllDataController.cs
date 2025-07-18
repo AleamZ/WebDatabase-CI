@@ -10,7 +10,7 @@ namespace CIResearch.Controllers
 {
     public class AllDataController : Controller
     {
-        private readonly string _connectionString = "Server=localhost;Database=sakila;User=root;Password=1234";
+        private readonly string _connectionString = "Server=localhost;Database=sakila;User=root;Password=1234;";
 
 
 

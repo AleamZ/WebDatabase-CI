@@ -15,7 +15,7 @@ namespace CIResearch.Services
     public class OptimizedDataService
     {
         private readonly ILogger<OptimizedDataService> _logger;
-        private readonly string _connectionString = "Server=localhost;Database=sakila;User=root;Password=1234";
+        private readonly string _connectionString = "Server=localhost;Database=sakila;User=root;Password=1234;";
         private const int BATCH_SIZE = 50000; // Process in 50K batches
         private const int MAX_CONCURRENT_OPERATIONS = 3; // Limit concurrent operations
 
