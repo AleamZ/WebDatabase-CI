@@ -11,7 +11,7 @@ namespace CIResearch.Controllers
 
         public BaseController(IConfiguration configuration, ILogger<BaseController>? logger = null)
         {
-            _connectionString = "Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;CharSet=utf8mb4;SslMode=none;";
+            _connectionString = "Server=localhost;Database=sakila;User=root;Password=1234CharSet=utf8mb4;SslMode=none;";
             _logger = logger ?? new NullLogger<BaseController>();
         }
 

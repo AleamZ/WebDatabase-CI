@@ -238,10 +238,11 @@ namespace CIResearch.Controllers
             }
         };
 
-        private string _connectionString = "Server=localhost;Database=sakila;User=root;Password=1234CharSet=utf8mb4;SslMode=none;";
+        private readonly string _connectionString;
 
-        public DN2ImportController()
+        public DN2ImportController(IConfiguration configuration)
         {
+            _connectionString = configuration.GetConnectionString("DefaultConnection");
         }
 
         [HttpGet]

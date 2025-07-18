@@ -15,6 +15,8 @@ using System.Net;
 using Microsoft.Extensions.Caching.Memory;
 using System.Threading.Tasks;
 using System.Text.Json.Serialization;
+using CIResearch.Middleware;
+using CIResearch.Services;
 
 namespace CIResearch.Controllers
 {
@@ -52,9 +54,12 @@ namespace CIResearch.Controllers
         private static readonly ConcurrentDictionary<string, DateTime> _methodCacheTimestamps = new();
         private static readonly TimeSpan _methodCacheTimeout = TimeSpan.FromMinutes(METHOD_CACHE_MINUTES);
 
-        public DN2Controller(IMemoryCache cache)
+        private readonly ExportLimitService _exportLimitService;
+
+        public DN2Controller(IMemoryCache cache, ExportLimitService exportLimitService)
         {
             _cache = cache;
+            _exportLimitService = exportLimitService;
         }
 
         /// <summary>
@@ -150,6 +155,7 @@ namespace CIResearch.Controllers
             }
         }
 
+        [RequireAuthentication]
         public async Task<IActionResult> ViewRawData(string stt = "",
             List<string>? Nam = null,
             List<string>? MaTinh_Dieutra = null,
@@ -2131,7 +2137,21 @@ namespace CIResearch.Controllers
         {
             try
             {
-                Console.WriteLine($"🔍 ExportToExcel called with filters:");
+                // Kiểm tra authentication
+                var username = HttpContext.Session.GetString("Username");
+                var role = HttpContext.Session.GetString("Role");
+
+                if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(role))
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        error = "Unauthorized",
+                        message = "❌ Vui lòng đăng nhập để export dữ liệu"
+                    });
+                }
+
+                Console.WriteLine($"🔍 ExportToExcel called by {username} (Role: {role}) with filters:");
                 Console.WriteLine($"   - STT: {stt}");
                 Console.WriteLine($"   - Nam: [{string.Join(", ", Nam ?? new List<string>())}]");
                 Console.WriteLine($"   - MaTinh_Dieutra: [{string.Join(", ", MaTinh_Dieutra ?? new List<string>())}]");
@@ -2149,6 +2169,23 @@ namespace CIResearch.Controllers
                 var limitedData = ApplyDataLimiting(filteredData, limitType, customStart, customEnd, customFilter, evenStart, evenEnd, oddStart, oddEnd);
 
                 Console.WriteLine($"📊 Data for Excel export: {limitedData.Count} records");
+
+                // Kiểm tra quyền export
+                var validationResult = _exportLimitService.ValidateExport(username, role, limitedData.Count);
+
+                if (!validationResult.IsAllowed)
+                {
+                    Console.WriteLine($"❌ Export denied: {validationResult.Message}");
+                    return Json(new
+                    {
+                        success = false,
+                        error = "ExportLimitExceeded",
+                        message = validationResult.Message
+                    });
+                }
+
+                Console.WriteLine($"✅ Export allowed: {validationResult.Message}");
+                Console.WriteLine($"📊 User stats: {validationResult.CurrentStats?.ExportCount ?? 0} exports today, {validationResult.CurrentStats?.TotalRecordsExported ?? 0} records exported");
 
                 using var package = new ExcelPackage();
                 var worksheet = package.Workbook.Worksheets.Add("DuLieu_DN");
@@ -2260,6 +2297,10 @@ namespace CIResearch.Controllers
                 var fileName = $"DuLieu_DN_{filterInfo}_{limitType}_{timestamp}.xlsx";
 
                 Console.WriteLine($"📊 Generated Excel file: {fileName} with {limitedData.Count} records and 25 columns");
+
+                // Ghi nhận export thành công
+                _exportLimitService.RecordExport(username, limitedData.Count);
+                Console.WriteLine($"✅ Export recorded for user {username}: {limitedData.Count} records");
 
                 // Return file for direct download
                 var fileBytes = package.GetAsByteArray();

@@ -98,6 +98,7 @@ builder.Services.AddControllersWithViews(options =>
 // 🚀 OPTIMIZED SERVICES REGISTRATION
 builder.Services.AddSingleton<IGlobalCacheService, GlobalCacheService>();
 builder.Services.AddScoped<IOptimizedDatabaseService, OptimizedDatabaseService>();
+builder.Services.AddSingleton<ExportLimitService>();
 
 // 🚀 SECURITY ENHANCEMENTS
 builder.Services.AddAntiforgery(options =>

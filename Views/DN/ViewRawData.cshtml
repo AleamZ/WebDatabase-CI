@@ -1295,41 +1295,140 @@
                         event.target.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Đang xuất...';
                         event.target.disabled = true;
 
-                        // Create a temporary link to trigger download
-                        const link = document.createElement('a');
-                        link.href = exportUrl;
-                        link.style.display = 'none';
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
+                        // Use fetch to check for errors before downloading
+                        fetch(exportUrl)
+                            .then(response => {
+                                // Check if response is JSON (error response)
+                                const contentType = response.headers.get('content-type');
+                                if (contentType && contentType.includes('application/json')) {
+                                    // This is an error response, parse it
+                                    return response.json().then(errorData => {
+                                        throw new Error(errorData.message || 'Lỗi khi export dữ liệu');
+                                    });
+                                }
+                                
+                                // Check if response is OK for file download
+                                if (response.ok) {
+                                    // If response is OK, trigger download
+                                    const link = document.createElement('a');
+                                    link.href = exportUrl;
+                                    link.style.display = 'none';
+                                    document.body.appendChild(link);
+                                    link.click();
+                                    document.body.removeChild(link);
 
-                        // Reset button after a short delay
-                        setTimeout(() => {
-                            event.target.innerHTML = originalText;
-                            event.target.disabled = false;
+                                    // Show success message
+                                    const alertDiv = document.createElement('div');
+                                    alertDiv.className = 'alert alert-success alert-dismissible fade show mt-3';
+                                    alertDiv.innerHTML = `
+                                        <i class="fas fa-check-circle me-2"></i>
+                                        <strong>Thành công!</strong> File Excel đang được tải về.
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                    `;
 
-                            // Show success message
-                            const alertDiv = document.createElement('div');
-                            alertDiv.className = 'alert alert-success alert-dismissible fade show mt-3';
-                            alertDiv.innerHTML = `
-                                <i class="fas fa-check-circle me-2"></i>
-                                <strong>Thành công!</strong> File Excel đang được tải về.
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                            `;
+                                    // Insert alert before table container
+                                    const tableContainer = document.querySelector('.table-container');
+                                    if (tableContainer) {
+                                        tableContainer.parentNode.insertBefore(alertDiv, tableContainer);
 
-                            // Insert alert before table container
-                            const tableContainer = document.querySelector('.table-container');
-                            if (tableContainer) {
-                                tableContainer.parentNode.insertBefore(alertDiv, tableContainer);
-
-                                // Auto remove alert after 5 seconds
-                                setTimeout(() => {
-                                    if (alertDiv.parentNode) {
-                                        alertDiv.remove();
+                                        // Auto remove alert after 5 seconds
+                                        setTimeout(() => {
+                                            if (alertDiv.parentNode) {
+                                                alertDiv.remove();
+                                            }
+                                        }, 5000);
                                     }
-                                }, 5000);
-                            }
-                        }, 1000);
+                                } else {
+                                    // Other HTTP errors
+                                    throw new Error(`Lỗi HTTP: ${response.status} - ${response.statusText}`);
+                                }
+                            })
+                            .catch(error => {
+                                console.error('❌ Export error:', error);
+                                
+                                // Show error message with better formatting
+                                const alertDiv = document.createElement('div');
+                                alertDiv.className = 'alert alert-danger alert-dismissible fade show mt-3';
+                                
+                                // Determine specific error type and message
+                                let errorTitle = '⚠️ Không thể xuất Excel!';
+                                let errorMessage = '';
+                                let errorIcon = 'fas fa-exclamation-triangle';
+                                
+                                if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+                                    // Network error
+                                    errorTitle = '🌐 Lỗi kết nối mạng!';
+                                    errorMessage = 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối internet và thử lại.';
+                                    errorIcon = 'fas fa-wifi';
+                                } else if (error.message.includes('ExportLimitExceeded')) {
+                                    // Export limit exceeded
+                                    errorTitle = '📊 Vượt quá giới hạn export!';
+                                    errorMessage = error.message.replace('ExportLimitExceeded', '');
+                                    errorIcon = 'fas fa-chart-line';
+                                } else if (error.message.includes('Unauthorized')) {
+                                    // Authentication error
+                                    errorTitle = '🔐 Lỗi xác thực!';
+                                    errorMessage = 'Vui lòng đăng nhập lại để export dữ liệu.';
+                                    errorIcon = 'fas fa-user-lock';
+                                } else if (error.message.includes('Lỗi HTTP: 500')) {
+                                    // Server error
+                                    errorTitle = '⚡ Lỗi máy chủ!';
+                                    errorMessage = 'Máy chủ đang gặp sự cố. Vui lòng thử lại sau vài phút.';
+                                    errorIcon = 'fas fa-server';
+                                } else if (error.message.includes('Lỗi HTTP: 404')) {
+                                    // Not found error
+                                    errorTitle = '🔍 Không tìm thấy trang!';
+                                    errorMessage = 'Trang export không tồn tại. Vui lòng liên hệ quản trị viên.';
+                                    errorIcon = 'fas fa-search';
+                                } else if (error.message.includes('Lỗi HTTP: 403')) {
+                                    // Forbidden error
+                                    errorTitle = '🚫 Không có quyền truy cập!';
+                                    errorMessage = 'Bạn không có quyền export dữ liệu này.';
+                                    errorIcon = 'fas fa-ban';
+                                } else {
+                                    // Generic error
+                                    errorMessage = error.message;
+                                }
+                                
+                                // Format specific error messages
+                                if (errorMessage.includes('Tổng records export hôm nay')) {
+                                    errorMessage = errorMessage.replace('Tổng records export hôm nay', '📊 Tổng records export hôm nay');
+                                }
+                                if (errorMessage.includes('vượt quá giới hạn cho role')) {
+                                    errorMessage = errorMessage.replace('vượt quá giới hạn cho role', '❌ Vượt quá giới hạn cho role');
+                                }
+                                if (errorMessage.includes('số lần export')) {
+                                    errorMessage = errorMessage.replace('số lần export', '🔄 Số lần export');
+                                }
+                                if (errorMessage.includes('records/ngày')) {
+                                    errorMessage = errorMessage.replace('records/ngày', '📈 records/ngày');
+                                }
+                                
+                                alertDiv.innerHTML = `
+                                    <i class="${errorIcon} me-2"></i>
+                                    <strong>${errorTitle}</strong><br>
+                                    <span style="font-size: 0.9em; line-height: 1.4;">${errorMessage}</span>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                `;
+
+                                // Insert alert before table container
+                                const tableContainer = document.querySelector('.table-container');
+                                if (tableContainer) {
+                                    tableContainer.parentNode.insertBefore(alertDiv, tableContainer);
+
+                                    // Auto remove alert after 15 seconds
+                                    setTimeout(() => {
+                                        if (alertDiv.parentNode) {
+                                            alertDiv.remove();
+                                        }
+                                    }, 15000);
+                                }
+                            })
+                            .finally(() => {
+                                // Reset button
+                                event.target.innerHTML = originalText;
+                                event.target.disabled = false;
+                            });
                     }
 
                     // Refresh table function

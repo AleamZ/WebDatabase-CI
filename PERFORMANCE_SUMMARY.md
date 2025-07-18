@@ -63,7 +63,7 @@ User clicks page → Load summary from cache → Show page instantly → Load da
 ### Step 1: Database Optimization
 ```sql
 -- Run this script
-mysql -u admin_dbciresearch -p admin_ciresearch < Scripts/migrate_to_optimized.sql
+mysql -u admin_dbciresearch -p sakila < Scripts/migrate_to_optimized.sql
 ```
 
 ### Step 2: Replace Controller

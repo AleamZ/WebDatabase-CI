@@ -24,7 +24,7 @@ namespace CIResearch.Controllers
     public class OptimizedDNController : Controller
     {
         private readonly IMemoryCache _cache;
-        private string _connectionString = "Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;";
+        private string _connectionString = "Server=localhost;Database=sakila;User=root;Password=1234";
 
         // Cache keys for lightweight summary data only
         private const string SUMMARY_CACHE_KEY = "dn_summary_optimized";
@@ -600,7 +600,7 @@ namespace CIResearch.Controllers
                 var recordCount = Convert.ToInt64(result);
 
                 return (true, "✅ Kết nối cơ sở dữ liệu thành công!",
-                       $"Server: 127.0.0.1 | Database: admin_ciresearch | Records: {recordCount:N0}");
+                       $"Server: 127.0.0.1 | Database: sakila | Records: {recordCount:N0}");
             }
             catch (Exception ex)
             {

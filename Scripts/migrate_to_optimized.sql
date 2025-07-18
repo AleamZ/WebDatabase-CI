@@ -4,7 +4,7 @@
 -- Purpose: Set up indexes and configurations for optimal performance
 -- =====================================================
 
-USE admin_ciresearch;
+USE sakila;
 
 -- =====================================================
 -- 1. BACKUP EXISTING INDEXES (Optional - for safety)
@@ -148,7 +148,7 @@ SELECT
     COLUMN_NAME,
     CARDINALITY
 FROM INFORMATION_SCHEMA.STATISTICS 
-WHERE TABLE_SCHEMA = 'admin_ciresearch' 
+WHERE TABLE_SCHEMA = 'sakila' 
   AND TABLE_NAME = 'dn_all'
   AND INDEX_NAME LIKE 'idx_%'
 ORDER BY INDEX_NAME, SEQ_IN_INDEX;
@@ -164,7 +164,7 @@ SELECT
     ROUND((INDEX_LENGTH / 1024 / 1024), 2) AS 'IndexSizeMB',
     TABLE_ROWS
 FROM INFORMATION_SCHEMA.TABLES 
-WHERE TABLE_SCHEMA = 'admin_ciresearch' 
+WHERE TABLE_SCHEMA = 'sakila' 
   AND TABLE_NAME = 'dn_all';
 
 -- Check for slow queries (enable slow query log first)
@@ -226,3 +226,16 @@ SHOW STATUS LIKE 'Innodb_buffer_pool%';
 SELECT 
     '✅ Database optimized for 3-4 million records!' AS Message,
     'Next step: Deploy OptimizedDNController.cs' AS NextAction; 
+
+CREATE TABLE IF NOT EXISTS ExportRequests (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(100) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    request_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    status ENUM('pending', 'approved', 'rejected') NOT NULL DEFAULT 'pending',
+    filter_params TEXT NOT NULL,
+    file_data LONGBLOB NULL,
+    reject_reason TEXT NULL,
+    approved_time DATETIME NULL,
+    admin_approved_by VARCHAR(100) NULL
+); 

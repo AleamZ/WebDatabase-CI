@@ -15,6 +15,8 @@ using System.Net;
 using Microsoft.Extensions.Caching.Memory;
 using System.Threading.Tasks;
 using System.Text.Json.Serialization;
+using CIResearch.Middleware;
+using CIResearch.Services;
 
 namespace CIResearch.Controllers
 {
@@ -52,9 +54,12 @@ namespace CIResearch.Controllers
         private static readonly ConcurrentDictionary<string, DateTime> _methodCacheTimestamps = new();
         private static readonly TimeSpan _methodCacheTimeout = TimeSpan.FromMinutes(METHOD_CACHE_MINUTES);
 
-        public DNController(IMemoryCache cache)
+        private readonly ExportLimitService _exportLimitService;
+
+        public DNController(IMemoryCache cache, ExportLimitService exportLimitService)
         {
             _cache = cache;
+            _exportLimitService = exportLimitService;
         }
 
         /// <summary>
@@ -150,6 +155,7 @@ namespace CIResearch.Controllers
             }
         }
 
+        [RequireAuthentication]
         public async Task<IActionResult> ViewRawData(string stt = "",
             List<string>? Nam = null,
             List<string>? MaTinh_Dieutra = null,
@@ -2131,7 +2137,48 @@ namespace CIResearch.Controllers
         {
             try
             {
-                Console.WriteLine($"🔍 ExportToExcel called with filters:");
+                // Kiểm tra authentication
+                var username = HttpContext.Session.GetString("Username");
+                var role = HttpContext.Session.GetString("Role");
+
+                if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(role))
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        error = "Unauthorized",
+                        message = "❌ Vui lòng đăng nhập để export dữ liệu"
+                    });
+                }
+
+                // Lấy email user từ database
+                string userEmail = null;
+                using (var connection = new MySql.Data.MySqlClient.MySqlConnection(_connectionString))
+                {
+                    await connection.OpenAsync();
+                    var cmd = new MySql.Data.MySqlClient.MySqlCommand("SELECT email FROM users WHERE username = @username", connection);
+                    cmd.Parameters.AddWithValue("@username", username);
+                    using (var reader = await cmd.ExecuteReaderAsync())
+                    {
+                        if (await reader.ReadAsync())
+                        {
+                            userEmail = reader.IsDBNull(0) ? null : reader.GetString(0);
+                        }
+                    }
+                }
+
+                if (string.IsNullOrEmpty(userEmail))
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        error = "NoEmail",
+                        message = "❌ Không tìm thấy email của bạn trong hệ thống. Vui lòng cập nhật email trong hồ sơ cá nhân."
+                    });
+                }
+
+                Console.WriteLine($"🔍 ExportToExcel called by {username} (Role: {role}) with filters:");
+                Console.WriteLine($"   - Email: {userEmail}");
                 Console.WriteLine($"   - STT: {stt}");
                 Console.WriteLine($"   - Nam: [{string.Join(", ", Nam ?? new List<string>())}]");
                 Console.WriteLine($"   - MaTinh_Dieutra: [{string.Join(", ", MaTinh_Dieutra ?? new List<string>())}]");
@@ -2150,6 +2197,21 @@ namespace CIResearch.Controllers
 
                 Console.WriteLine($"📊 Data for Excel export: {limitedData.Count} records");
 
+                // Kiểm tra quyền export theo role
+                var (isAllowed, errorMessage) = ValidateExportByRole(role, limitedData.Count, username);
+                if (!isAllowed)
+                {
+                    Console.WriteLine($"❌ Export denied: {errorMessage}");
+                    return Json(new
+                    {
+                        success = false,
+                        error = "ExportLimitExceeded",
+                        message = errorMessage
+                    });
+                }
+
+                Console.WriteLine($"✅ Export allowed for role {role}: {limitedData.Count} records");
+
                 using var package = new ExcelPackage();
                 var worksheet = package.Workbook.Worksheets.Add("DuLieu_DN");
 
@@ -2161,8 +2223,6 @@ namespace CIResearch.Controllers
                     "Mã ngành C5 chính", "Tên ngành", "SR Doanh thu thuần BH CCDV", "SR Lợi nhuận trước thuế",
                     "Số lao động đầu năm", "Số lao động cuối năm", "Tài sản tổng CK", "Tài sản tổng DK"
                 };
-
-                Console.WriteLine($"📊 Export columns: {headers.Length} total - {string.Join(", ", headers.Take(5))}... (+{headers.Length - 5} more)");
 
                 // Style headers
                 for (int i = 0; i < headers.Length; i++)
@@ -2179,7 +2239,6 @@ namespace CIResearch.Controllers
                     var row = i + 2;
                     var item = limitedData[i];
 
-                    // Column 1-25 mapping to database fields
                     worksheet.Cells[row, 1].Value = item.STT;
                     worksheet.Cells[row, 2].Value = item.TenDN ?? "N/A";
                     worksheet.Cells[row, 3].Value = item.Diachi ?? "N/A";
@@ -2207,35 +2266,26 @@ namespace CIResearch.Controllers
                     worksheet.Cells[row, 25].Value = item.Taisan_Tong_DK ?? (decimal?)null;
                 }
 
-                // Auto fit columns
                 worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();
 
-                // Format financial columns (20, 21, 24, 25) as currency
                 if (limitedData.Count > 0)
                 {
-                    var dataRange = worksheet.Cells[2, 20, limitedData.Count + 1, 20]; // SR_Doanhthu_Thuan_BH_CCDV
+                    var dataRange = worksheet.Cells[2, 20, limitedData.Count + 1, 20];
                     dataRange.Style.Numberformat.Format = "#,##0.00";
-
-                    dataRange = worksheet.Cells[2, 21, limitedData.Count + 1, 21]; // SR_Loinhuan_TruocThue
+                    dataRange = worksheet.Cells[2, 21, limitedData.Count + 1, 21];
                     dataRange.Style.Numberformat.Format = "#,##0.00";
-
-                    dataRange = worksheet.Cells[2, 24, limitedData.Count + 1, 24]; // Taisan_Tong_CK
+                    dataRange = worksheet.Cells[2, 24, limitedData.Count + 1, 24];
                     dataRange.Style.Numberformat.Format = "#,##0.00";
-
-                    dataRange = worksheet.Cells[2, 25, limitedData.Count + 1, 25]; // Taisan_Tong_DK
+                    dataRange = worksheet.Cells[2, 25, limitedData.Count + 1, 25];
                     dataRange.Style.Numberformat.Format = "#,##0.00";
-
-                    // Format labor count columns (22, 23) as numbers
                     dataRange = worksheet.Cells[2, 22, limitedData.Count + 1, 23];
                     dataRange.Style.Numberformat.Format = "#,##0";
                 }
 
-                // Add summary information at the bottom
                 var summaryRow = limitedData.Count + 3;
                 worksheet.Cells[summaryRow, 1].Value = "Tổng số bản ghi:";
                 worksheet.Cells[summaryRow, 2].Value = limitedData.Count;
                 worksheet.Cells[summaryRow, 1].Style.Font.Bold = true;
-
                 worksheet.Cells[summaryRow + 1, 1].Value = "Loại giới hạn:";
                 worksheet.Cells[summaryRow + 1, 2].Value = limitType switch
                 {
@@ -2249,23 +2299,59 @@ namespace CIResearch.Controllers
                     _ => limitType
                 };
                 worksheet.Cells[summaryRow + 1, 1].Style.Font.Bold = true;
-
                 worksheet.Cells[summaryRow + 2, 1].Value = "Xuất lúc:";
                 worksheet.Cells[summaryRow + 2, 2].Value = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
                 worksheet.Cells[summaryRow + 2, 1].Style.Font.Bold = true;
 
-                // Generate filename with timestamp and filter info
                 var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
                 var filterInfo = string.IsNullOrEmpty(stt) && (Nam?.Count ?? 0) == 0 ? "TatCa" : "DaLoc";
                 var fileName = $"DuLieu_DN_{filterInfo}_{limitType}_{timestamp}.xlsx";
 
-                Console.WriteLine($"📊 Generated Excel file: {fileName} with {limitedData.Count} records and 25 columns");
+                // Serialize filter params để lưu vào bảng
+                var filterParams = new
+                {
+                    stt,
+                    Nam,
+                    MaTinh_Dieutra,
+                    Masothue,
+                    Loaihinhkte,
+                    Vungkinhte,
+                    limitType,
+                    customStart,
+                    customEnd,
+                    customFilter,
+                    evenStart,
+                    evenEnd,
+                    oddStart,
+                    oddEnd
+                };
+                string filterParamsJson = Newtonsoft.Json.JsonConvert.SerializeObject(filterParams);
 
-                // Return file for direct download
-                var fileBytes = package.GetAsByteArray();
-                return File(fileBytes,
-                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                    fileName);
+                // Ghi nhận export thành công (cho việc tracking giới hạn)
+                _exportLimitService.RecordExport(username, limitedData.Count);
+
+                // Lưu request vào bảng ExportRequests
+                var repo = new CIResearch.Services.ExportRequestRepository(_connectionString);
+                var exportRequest = new CIResearch.Models.ExportRequest
+                {
+                    Username = username,
+                    Email = userEmail,
+                    RequestTime = DateTime.Now,
+                    Status = "pending",
+                    FilterParams = filterParamsJson,
+                    FileData = package.GetAsByteArray(),
+                    RejectReason = null,
+                    ApprovedTime = null,
+                    AdminApprovedBy = null
+                };
+                await repo.AddRequestAsync(exportRequest);
+
+                return Json(new
+                {
+                    success = true,
+                    message = "✅ Yêu cầu export đã được gửi và đang chờ admin duyệt. Bạn sẽ nhận được email khi được phê duyệt.",
+                    email = userEmail
+                });
             }
             catch (Exception ex)
             {
@@ -2279,12 +2365,81 @@ namespace CIResearch.Controllers
             }
         }
 
+        // Hàm kiểm tra quyền export theo role
+        private (bool isAllowed, string errorMessage) ValidateExportByRole(string role, int recordCount, string username)
+        {
+            switch (role?.ToLower())
+            {
+                case "admin":
+                    return (true, ""); // Admin: Full quyền
+
+                case "manager":
+                    // Manager: 5000 data/ngày
+                    var managerStats = _exportLimitService.GetUserStats(username);
+                    if (managerStats.TotalRecordsExported + recordCount > 5000)
+                    {
+                        return (false, $"❌ Manager chỉ được export tối đa 5000 records/ngày. Đã export: {managerStats.TotalRecordsExported}, còn lại: {5000 - managerStats.TotalRecordsExported}");
+                    }
+                    return (true, "");
+
+                case "execute":
+                    // Execute: 1000 records/lần/ngày
+                    if (recordCount > 1000)
+                    {
+                        return (false, "❌ Execute chỉ được export tối đa 1000 records/lần");
+                    }
+                    var executeStats = _exportLimitService.GetUserStats(username);
+                    if (executeStats.ExportCount >= 1)
+                    {
+                        return (false, "❌ Execute chỉ được export 1 lần/ngày");
+                    }
+                    return (true, "");
+
+                default:
+                    return (false, "❌ Role của bạn không có quyền export dữ liệu");
+            }
+        }
+
+        // Hàm gửi mail từ CIResearch.dn@gmail.com
+        private static void SendEmailWithAttachment_CIResearch(string toEmail, string subject, string body, byte[] attachmentData)
+        {
+            try
+            {
+                const string fromEmail = "datnguyentien.work@gmail.com";
+                const string fromPassword = "ubux rmon zfka pvse"; // App password (không phải mật khẩu tài khoản)
+
+                using var message = new System.Net.Mail.MailMessage
+                {
+                    From = new System.Net.Mail.MailAddress(fromEmail),
+                    Subject = subject,
+                    Body = body
+                };
+
+                message.To.Add(new System.Net.Mail.MailAddress(toEmail));
+                message.Attachments.Add(new System.Net.Mail.Attachment(new System.IO.MemoryStream(attachmentData),
+                    "Data_Ciresearch.xlsx",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+
+                using var client = new System.Net.Mail.SmtpClient("smtp.gmail.com", 587)
+                {
+                    Credentials = new System.Net.NetworkCredential(fromEmail, fromPassword),
+                    EnableSsl = true
+                };
+
+                client.Send(message);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Email Error: {ex.Message}");
+            }
+        }
+
         private static void SendEmailWithAttachment(string toEmail, string subject, string body, byte[] attachmentData)
         {
             try
             {
-                const string fromEmail = "huan220vn@gmail.com";
-                const string fromPassword = "tctn ztgb yqfd ynmp";
+                const string fromEmail = "datnguyentien.work@gmail.com";
+                const string fromPassword = "ubux rmon zfka pvse";
 
                 using var message = new MailMessage
                 {
@@ -2308,7 +2463,7 @@ namespace CIResearch.Controllers
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Email Error: {ex.Message}");
+                Console.WriteLine($"Email Error: {ex.Message}");
             }
         }
 

@@ -1,0 +1,61 @@
+@model CIResearch.Models.ExportRequest
+@{
+    ViewBag.Title = "Chi tiết yêu cầu export";
+}
+<h2>Chi tiết yêu cầu export</h2>
+<table class="table table-bordered">
+    <tr>
+        <th>Id</th>
+        <td>@Model.Id</td>
+    </tr>
+    <tr>
+        <th>User</th>
+        <td>@Model.Username</td>
+    </tr>
+    <tr>
+        <th>Email</th>
+        <td>@Model.Email</td>
+    </tr>
+    <tr>
+        <th>Thời gian request</th>
+        <td>@Model.RequestTime.ToString("dd/MM/yyyy HH:mm:ss")</td>
+    </tr>
+    <tr>
+        <th>Trạng thái</th>
+        <td>@Model.Status</td>
+    </tr>
+    <tr>
+        <th>Filter Params</th>
+        <td>
+            <pre>@Model.FilterParams</pre>
+        </td>
+    </tr>
+    <tr>
+        <th>Lý do từ chối</th>
+        <td>@Model.RejectReason</td>
+    </tr>
+    <tr>
+        <th>Thời gian duyệt</th>
+        <td>@Model.ApprovedTime?.ToString("dd/MM/yyyy HH:mm:ss")</td>
+    </tr>
+    <tr>
+        <th>Admin duyệt</th>
+        <td>@Model.AdminApprovedBy</td>
+    </tr>
+    <tr>
+        <th>File Excel</th>
+        <td>
+            @if (Model.FileData != null)
+            {
+                <form method="post" asp-action="DownloadFile" asp-controller="AdminExportRequest" asp-route-id="@Model.Id">
+                    <button type="submit" class="btn btn-primary btn-sm">Tải file Excel</button>
+                </form>
+            }
+            else
+            {
+                <span>Không có file</span>
+            }
+        </td>
+    </tr>
+</table>
+<p><a href="@Url.Action("Index")">Quay lại danh sách</a></p>

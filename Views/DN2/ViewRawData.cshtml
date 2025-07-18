@@ -1,0 +1,1027 @@
+@model List<CIResearch.Models.QLKH>
+
+@{
+    ViewData["Title"] = "Dữ liệu thô DN2 - CI Research";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- DataTables CSS -->
+    <link href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css" rel="stylesheet">
+
+    <style>
+        /* Reset và Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-image: url('/IMG(4UU)/STOREAUDIT.jpg');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        /* Header Navigation */
+        .top-nav {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        /* Navigation Filter Styles */
+        .filter-toggle-btn {
+            border-color: rgba(255, 255, 255, 0.5) !important;
+            color: white !important;
+            transition: all 0.3s ease;
+            font-size: 0.875rem;
+            padding: 0.375rem 0.75rem;
+        }
+
+        .filter-toggle-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1) !important;
+            border-color: white !important;
+            color: white !important;
+            transform: translateY(-1px);
+        }
+
+        .filter-toggle-btn:focus {
+            box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25) !important;
+            color: white !important;
+        }
+
+        #navigationFilterSection {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 0 0 15px 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @@keyframes slideDown
+        {
+                from {
+                    opacity: 0;
+                    transform: translateY(-20px);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .nav-filter-container {
+                padding: 1rem;
+                border-radius: 10px;
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .nav-filter-header {
+                margin-bottom: 1rem;
+                padding-bottom: 0.5rem;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            }
+
+            .nav-filter-body .custom-multi-select {
+                width: 100%;
+                margin: 0;
+            }
+
+            .nav-filter-body .select-box {
+                background-color: rgba(255, 255, 255, 0.9);
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                border-radius: 6px;
+                color: #333;
+                font-size: 0.875rem;
+                padding: 0.5rem;
+            }
+
+            .nav-filter-body .select-box:hover {
+                background-color: white;
+                border-color: #007bff;
+            }
+
+            .nav-filter-body .dropdown-options {
+                background-color: white;
+                border: 1px solid rgba(0, 0, 0, 0.1);
+                border-radius: 6px;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+                z-index: 10000;
+            }
+
+            .nav-filter-body .btn {
+                font-size: 0.875rem;
+                padding: 0.4rem 0.8rem;
+                border-radius: 6px;
+                transition: all 0.2s ease;
+            }
+
+            .nav-filter-body .btn-outline-light {
+                border-color: rgba(255, 255, 255, 0.5);
+                color: white;
+            }
+
+            .nav-filter-body .btn-outline-light:hover {
+                background-color: white;
+                color: #333;
+                border-color: white;
+            }
+
+            .nav-filter-body .btn-light {
+                background-color: white;
+                color: #333;
+                border-color: white;
+            }
+
+            .nav-filter-body .btn-light:hover {
+                background-color: #f8f9fa;
+                transform: translateY(-1px);
+            }
+
+            .nav-filter-body .btn-success {
+                background-color: #28a745;
+                border-color: #28a745;
+            }
+
+            .nav-filter-body .btn-success:hover {
+                background-color: #218838;
+                transform: translateY(-1px);
+            }
+
+            .nav-filter-body .btn-info {
+                background-color: #17a2b8;
+                border-color: #17a2b8;
+            }
+
+            .nav-filter-body .btn-info:hover {
+                background-color: #138496;
+                transform: translateY(-1px);
+            }
+
+            .nav-filter-body .btn-warning {
+                background-color: #ffc107;
+                border-color: #ffc107;
+                color: #333;
+            }
+
+            .nav-filter-body .btn-warning:hover {
+                background-color: #e0a800;
+                transform: translateY(-1px);
+            }
+
+            /* Chevron animation */
+            #filterChevron {
+                transition: transform 0.3s ease;
+            }
+
+            #filterChevron.rotated {
+                transform: rotate(180deg);
+            }
+
+            /* Main Container */
+            .main-container {
+                padding: 2rem 0;
+            }
+
+            .content-wrapper {
+                max-width: 1400px;
+                margin: 0 auto;
+                padding: 0 1rem;
+            }
+
+            /* Card Styles */
+            .card {
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                border-radius: 15px;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+                transition: all 0.3s ease;
+            }
+
+            .card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+            }
+
+            .card-header {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border-radius: 15px 15px 0 0 !important;
+                border: none;
+                padding: 1.5rem;
+            }
+
+            /* Table Styles */
+            .table-container {
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(10px);
+                border-radius: 15px;
+                padding: 1.5rem;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+                margin-top: 2rem;
+            }
+
+            .table {
+                background: white;
+                border-radius: 10px;
+                overflow: hidden;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            }
+
+            .table thead th {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border: none;
+                font-weight: 600;
+                padding: 1rem 0.75rem;
+                font-size: 0.9rem;
+            }
+
+            .table tbody tr {
+                transition: all 0.2s ease;
+            }
+
+            .table tbody tr:hover {
+                background-color: rgba(102, 126, 234, 0.1);
+                transform: scale(1.01);
+            }
+
+            .table tbody td {
+                padding: 0.75rem;
+                border-color: rgba(0, 0, 0, 0.05);
+                font-size: 0.875rem;
+            }
+
+            /* Custom Multi-Select Styles */
+            .custom-multi-select {
+                position: relative;
+                width: 100%;
+            }
+
+            .select-box {
+                width: 100%;
+                padding: 0.5rem;
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                background-color: white;
+                cursor: pointer;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                font-size: 0.875rem;
+            }
+
+            .select-box:hover {
+                border-color: #007bff;
+            }
+
+            .dropdown-options {
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: white;
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+                z-index: 1000;
+                max-height: 200px;
+                overflow-y: auto;
+                display: none;
+            }
+
+            .dropdown-options.show {
+                display: block;
+            }
+
+            .option {
+                padding: 0.5rem;
+                cursor: pointer;
+                border-bottom: 1px solid #f0f0f0;
+                font-size: 0.875rem;
+            }
+
+            .option:hover {
+                background-color: #f8f9fa;
+            }
+
+            .option.selected {
+                background-color: #007bff;
+                color: white;
+            }
+
+            /* Button Styles */
+            .btn {
+                border-radius: 8px;
+                font-weight: 500;
+                transition: all 0.3s ease;
+                font-size: 0.875rem;
+            }
+
+            .btn:hover {
+                transform: translateY(-1px);
+            }
+
+            /* Alert Styles */
+            .alert {
+                border-radius: 10px;
+                border: none;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            }
+
+            /* Responsive */
+            @@media (max-width: 768px) {
+                    .content-wrapper {
+                        padding: 0 0.5rem;
+                    }
+
+                    .card-header {
+                        padding: 1rem;
+                    }
+
+                    .table-container {
+                        padding: 1rem;
+                        margin-top: 1rem;
+                    }
+
+                    .table thead th,
+                    .table tbody td {
+                        padding: 0.5rem 0.25rem;
+                        font-size: 0.8rem;
+                    }
+                }
+
+                /* Loading Spinner */
+                .loading-spinner {
+                    display: inline-block;
+                    width: 20px;
+                    height: 20px;
+                    border: 3px solid rgba(255, 255, 255, 0.3);
+                    border-radius: 50%;
+                    border-top-color: #fff;
+                    animation: spin 1s ease-in-out infinite;
+                }
+
+                @@keyframes spin {
+                        to {
+                            transform: rotate(360deg);
+                        }
+                    }
+
+                    /* Auto-update indicator */
+                    .auto-update-indicator {
+                        position: absolute;
+                        top: 10px;
+                        right: 10px;
+                        color: rgba(255, 255, 255, 0.7);
+                        font-size: 0.8rem;
+                        animation: pulse 2s infinite;
+                    }
+
+                    @@keyframes pulse {
+                            0% {
+                                opacity: 0.7;
+                            }
+
+                            50% {
+                                opacity: 1;
+                            }
+
+                            100% {
+                                opacity: 0.7;
+                            }
+                        }
+                    </style>
+                </head>
+
+                <body>
+                    <!-- Navigation -->
+                    <nav class="top-nav">
+                        <div class="container-fluid">
+                            <div class="row align-items-center">
+                                <div class="col-md-6">
+                                    <h4 class="text-white mb-0">
+                                        <i class="fas fa-database me-2"></i>
+                                        Dữ liệu thô DN2 - CI Research
+                                    </h4>
+                                </div>
+                                <div class="col-md-6 text-end">
+                                    <button class="btn filter-toggle-btn" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#navigationFilterSection" aria-expanded="false"
+                                        aria-controls="navigationFilterSection">
+                                        <i class="fas fa-filter me-1"></i>
+                                        Bộ lọc
+                                        <i class="fas fa-chevron-down ms-1" id="filterChevron"></i>
+                                    </button>
+                                    <a href="/DN2" class="btn btn-outline-light btn-sm ms-2">
+                                        <i class="fas fa-arrow-left me-1"></i>
+                                        Quay lại
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Filter Section -->
+                            <div class="collapse" id="navigationFilterSection">
+                                <div class="nav-filter-container">
+                                    <div class="nav-filter-header">
+                                        <h6 class="text-white mb-0">
+                                            <i class="fas fa-sliders-h me-2"></i>
+                                            Bộ lọc dữ liệu
+                                        </h6>
+                                    </div>
+                                    <div class="nav-filter-body">
+                                        <form class="filter-form" method="get">
+                                            <div class="row g-3">
+                                                <!-- Năm -->
+                                                <div class="col-md-3">
+                                                    <label class="form-label text-white">Năm:</label>
+                                                    <div class="custom-multi-select">
+                                                        <div class="select-box" onclick="toggleDropdown(this)">
+                                                            <span class="selected-text">Chọn năm</span>
+                                                            <i class="fas fa-chevron-down"></i>
+                                                        </div>
+                                                        <div class="dropdown-options">
+                                                            @if (ViewBag.Years != null)
+                                                            {
+                                                                foreach (var year in ViewBag.Years)
+                                                                {
+                                                                    <div class="option" data-value="@year">@year</div>
+                                                                }
+                                                            }
+                                                        </div>
+                                                        <input type="hidden" name="Nam" id="selectedYears">
+                                                    </div>
+                                                </div>
+
+                                                <!-- Tỉnh/Thành phố -->
+                                                <div class="col-md-3">
+                                                    <label class="form-label text-white">Tỉnh/Thành phố:</label>
+                                                    <div class="custom-multi-select">
+                                                        <div class="select-box" onclick="toggleDropdown(this)">
+                                                            <span class="selected-text">Chọn tỉnh</span>
+                                                            <i class="fas fa-chevron-down"></i>
+                                                        </div>
+                                                        <div class="dropdown-options">
+                                                            @if (ViewBag.Provinces != null)
+                                                            {
+                                                                foreach (var province in ViewBag.Provinces)
+                                                                {
+                                                                    <div class="option" data-value="@province">@province</div>
+                                                                }
+                                                            }
+                                                        </div>
+                                                        <input type="hidden" name="MaTinh_Dieutra" id="selectedProvinces">
+                                                    </div>
+                                                </div>
+
+                                                <!-- Loại hình KTE -->
+                                                <div class="col-md-3">
+                                                    <label class="form-label text-white">Loại hình KTE:</label>
+                                                    <div class="custom-multi-select">
+                                                        <div class="select-box" onclick="toggleDropdown(this)">
+                                                            <span class="selected-text">Chọn loại hình</span>
+                                                            <i class="fas fa-chevron-down"></i>
+                                                        </div>
+                                                        <div class="dropdown-options">
+                                                            @if (ViewBag.BusinessTypes != null)
+                                                            {
+                                                                foreach (var businessType in ViewBag.BusinessTypes)
+                                                                {
+                                                                    <div class="option" data-value="@businessType">@businessType</div>
+                                                                }
+                                                            }
+                                                        </div>
+                                                        <input type="hidden" name="Loaihinhkte" id="selectedBusinessTypes">
+                                                    </div>
+                                                </div>
+
+                                                <!-- Vùng kinh tế -->
+                                                <div class="col-md-3">
+                                                    <label class="form-label text-white">Vùng kinh tế:</label>
+                                                    <div class="custom-multi-select">
+                                                        <div class="select-box" onclick="toggleDropdown(this)">
+                                                            <span class="selected-text">Chọn vùng</span>
+                                                            <i class="fas fa-chevron-down"></i>
+                                                        </div>
+                                                        <div class="dropdown-options">
+                                                            @if (ViewBag.EconomicZones != null)
+                                                            {
+                                                                foreach (var zone in ViewBag.EconomicZones)
+                                                                {
+                                                                    <div class="option" data-value="@zone">@zone</div>
+                                                                }
+                                                            }
+                                                        </div>
+                                                        <input type="hidden" name="Vungkinhte" id="selectedZones">
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Giới hạn dữ liệu -->
+                                            <div class="row mt-3">
+                                                <div class="col-12">
+                                                    <label class="form-label text-white">Giới hạn dữ liệu:</label>
+                                                    <div class="d-flex flex-wrap gap-2">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio" name="limitType" id="first1000"
+                                                                value="first1000" checked>
+                                                            <label class="form-check-label text-white" for="first1000">
+                                                                1000 đầu
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio" name="limitType" id="last1000"
+                                                                value="last1000">
+                                                            <label class="form-check-label text-white" for="last1000">
+                                                                1000 cuối
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio" name="limitType" id="even"
+                                                                value="even">
+                                                            <label class="form-check-label text-white" for="even">
+                                                                STT chẵn
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio" name="limitType" id="odd"
+                                                                value="odd">
+                                                            <label class="form-check-label text-white" for="odd">
+                                                                STT lẻ
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio" name="limitType" id="all"
+                                                                value="all">
+                                                            <label class="form-check-label text-white" for="all">
+                                                                Tất cả
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Action Buttons -->
+                                            <div class="row mt-3">
+                                                <div class="col-12">
+                                                    <div class="d-flex flex-wrap gap-2">
+                                                        <button type="submit" class="btn btn-light btn-sm">
+                                                            <i class="fas fa-search me-1"></i>
+                                                            Áp dụng bộ lọc
+                                                        </button>
+                                                        <button type="button" class="btn btn-info btn-sm" onclick="exportToExcel()">
+                                                            <i class="fas fa-file-excel me-1"></i>
+                                                            Export Excel
+                                                        </button>
+                                                        <button type="button" class="btn btn-warning btn-sm"
+                                                            onclick="showFilterGuide()">
+                                                            <i class="fas fa-question-circle me-1"></i>
+                                                            Hướng dẫn
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </nav>
+
+                    <!-- Main Container -->
+                    <div class="main-container">
+                        <div class="content-wrapper">
+                            <!-- Data Summary Card -->
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-8">
+                                            <h5 class="mb-0">
+                                                <i class="fas fa-table me-2"></i>
+                                                Dữ liệu thô DN2
+                                            </h5>
+                                            <small class="opacity-75">
+                                                Hiển thị @Model.Count records
+                                                @if (!string.IsNullOrEmpty(Context.Request.QueryString.Value))
+                                                {
+                                                    <span>với bộ lọc đã áp dụng</span>
+                                                }
+                                            </small>
+                                        </div>
+                                        <div class="col-md-4 text-end">
+                                            <button type="button" class="btn btn-outline-success btn-sm" onclick="exportToExcel()"
+                                                title="Tải về file Excel với dữ liệu hiện tại">
+                                                <i class="fas fa-file-excel me-1"></i>
+                                                Export Excel
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Data Table -->
+                            <div class="table-container">
+                                <table id="dataTable" class="table table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>STT</th>
+                                            <th>Tên DN</th>
+                                            <th>Địa chỉ</th>
+                                            <th>Mã tỉnh</th>
+                                            <th>Loại hình KTE</th>
+                                            <th>Email</th>
+                                            <th>Điện thoại</th>
+                                            <th>Năm</th>
+                                            <th>Mã số thuế</th>
+                                            <th>Vùng kinh tế</th>
+                                            <th>Quy mô</th>
+                                            <th>Mã ngành</th>
+                                            <th>Tên ngành</th>
+                                            <th>Doanh thu</th>
+                                            <th>Lợi nhuận</th>
+                                            <th>LĐ đầu năm</th>
+                                            <th>LĐ cuối năm</th>
+                                            <th>Tài sản CK</th>
+                                            <th>Tài sản DK</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model)
+                                        {
+                                            <tr>
+                                                <td>@item.STT</td>
+                                                <td>@(item.TenDN ?? "N/A")</td>
+                                                <td>@(item.Diachi ?? "N/A")</td>
+                                                <td>@(item.MaTinh_Dieutra ?? "N/A")</td>
+                                                <td>@(item.Loaihinhkte ?? "N/A")</td>
+                                                <td>@(item.Email ?? "N/A")</td>
+                                                <td>@(item.Dienthoai ?? "N/A")</td>
+                                                <td>@item.Nam</td>
+                                                <td>@(item.Masothue ?? "N/A")</td>
+                                                <td>@(item.Vungkinhte ?? "N/A")</td>
+                                                <td>@(item.QUY_MO ?? "N/A")</td>
+                                                <td>@(item.MaNganhC5_Chinh ?? "N/A")</td>
+                                                <td>@(item.TEN_NGANH ?? "N/A")</td>
+                                                <td>@(item.SR_Doanhthu_Thuan_BH_CCDV?.ToString("N0") ?? "N/A")</td>
+                                                <td>@(item.SR_Loinhuan_TruocThue?.ToString("N0") ?? "N/A")</td>
+                                                <td>@(item.SoLaodong_DauNam?.ToString("N0") ?? "N/A")</td>
+                                                <td>@(item.SoLaodong_CuoiNam?.ToString("N0") ?? "N/A")</td>
+                                                <td>@(item.Taisan_Tong_CK?.ToString("N0") ?? "N/A")</td>
+                                                <td>@(item.Taisan_Tong_DK?.ToString("N0") ?? "N/A")</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Scripts -->
+                    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+                    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+                    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+                    <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+                    <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+                    <script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
+
+                    <script>
+                        // Initialize DataTable
+                        $(document).ready(function () {
+                            $('#dataTable').DataTable({
+                                responsive: true,
+                                pageLength: 25,
+                                language: {
+                                    url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/vi.json'
+                                },
+                                order: [[0, 'asc']],
+                                columnDefs: [
+                                    {
+                                        targets: [3, 4, 5, 6, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
+                                        orderable: true
+                                    }
+                                ]
+                            });
+
+                            // Filter chevron animation
+                            $('#navigationFilterSection').on('show.bs.collapse', function () {
+                                $('#filterChevron').addClass('rotated');
+                            });
+
+                            $('#navigationFilterSection').on('hide.bs.collapse', function () {
+                                $('#filterChevron').removeClass('rotated');
+                            });
+                        });
+
+                        // Multi-select dropdown functionality
+                        function toggleDropdown(element) {
+                            const dropdown = element.nextElementSibling;
+                            const allDropdowns = document.querySelectorAll('.dropdown-options');
+
+                            // Close other dropdowns
+                            allDropdowns.forEach(dd => {
+                                if (dd !== dropdown) {
+                                    dd.classList.remove('show');
+                                }
+                            });
+
+                            dropdown.classList.toggle('show');
+                        }
+
+                        // Close dropdowns when clicking outside
+                        document.addEventListener('click', function (event) {
+                            if (!event.target.closest('.custom-multi-select')) {
+                                document.querySelectorAll('.dropdown-options').forEach(dropdown => {
+                                    dropdown.classList.remove('show');
+                                });
+                            }
+                        });
+
+                        // Option selection
+                        document.addEventListener('click', function (event) {
+                            if (event.target.classList.contains('option')) {
+                                const option = event.target;
+                                const dropdown = option.closest('.custom-multi-select');
+                                const selectBox = dropdown.querySelector('.select-box');
+                                const hiddenInput = dropdown.querySelector('input[type="hidden"]');
+                                const selectedText = dropdown.querySelector('.selected-text');
+
+                                // Toggle selection
+                                option.classList.toggle('selected');
+
+                                // Update hidden input and display text
+                                const selectedOptions = dropdown.querySelectorAll('.option.selected');
+                                const values = Array.from(selectedOptions).map(opt => opt.dataset.value);
+                                const texts = Array.from(selectedOptions).map(opt => opt.textContent);
+
+                                hiddenInput.value = values.join(',');
+                                selectedText.textContent = texts.length > 0 ? texts.join(', ') : 'Chọn...';
+
+                                // Prevent dropdown from closing
+                                event.stopPropagation();
+                            }
+                        });
+
+                        // Export to Excel function
+                        function exportToExcel() {
+                            console.log('📊 Exporting to Excel...');
+
+                            const form = document.querySelector('.filter-form');
+
+                            if (!form) {
+                                alert('❌ Không tìm thấy form filters. Vui lòng thử lại.');
+                                return;
+                            }
+
+                            const formData = new FormData(form);
+
+                            // Convert to URL parameters
+                            const params = new URLSearchParams();
+
+                            // Add all form data
+                            for (let [key, value] of formData.entries()) {
+                                params.append(key, value);
+                            }
+
+                            // Add hidden input values for limit options
+                            const hiddenInputs = document.querySelectorAll('input[type="hidden"]');
+                            hiddenInputs.forEach(input => {
+                                if (input.value && input.name) {
+                                    params.append(input.name, input.value);
+                                }
+                            });
+
+                            // Collect checkbox values (for multiple selections)
+                            const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+                            checkboxes.forEach(checkbox => {
+                                if (checkbox.name && checkbox.value) {
+                                    params.append(checkbox.name, checkbox.value);
+                                }
+                            });
+
+                            // Collect radio button values
+                            const radios = document.querySelectorAll('input[type="radio"]:checked');
+                            radios.forEach(radio => {
+                                if (radio.name && radio.value) {
+                                    params.append(radio.name, radio.value);
+                                }
+                            });
+
+                            console.log('📊 Export parameters:', params.toString());
+
+                            // Create download link
+                            const exportUrl = '/DN2/ExportToExcel?' + params.toString();
+
+                            // Show loading message
+                            const originalText = event.target.innerHTML;
+                            event.target.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Đang xuất...';
+                            event.target.disabled = true;
+
+                            // Use fetch to check for errors before downloading
+                            fetch(exportUrl)
+                                .then(response => {
+                                    // Check if response is JSON (error response)
+                                    const contentType = response.headers.get('content-type');
+                                    if (contentType && contentType.includes('application/json')) {
+                                        // This is an error response, parse it
+                                        return response.json().then(errorData => {
+                                            throw new Error(errorData.message || 'Lỗi khi export dữ liệu');
+                                        });
+                                    }
+
+                                    // Check if response is OK for file download
+                                    if (response.ok) {
+                                        // If response is OK, trigger download
+                                        const link = document.createElement('a');
+                                        link.href = exportUrl;
+                                        link.style.display = 'none';
+                                        document.body.appendChild(link);
+                                        link.click();
+                                        document.body.removeChild(link);
+
+                                        // Show success message
+                                        const alertDiv = document.createElement('div');
+                                        alertDiv.className = 'alert alert-success alert-dismissible fade show mt-3';
+                                        alertDiv.innerHTML = `
+                                                                                    <i class="fas fa-check-circle me-2"></i>
+                                                                                    <strong>Thành công!</strong> File Excel đang được tải về.
+                                                                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                                                                `;
+
+                                        // Insert alert before table container
+                                        const tableContainer = document.querySelector('.table-container');
+                                        if (tableContainer) {
+                                            tableContainer.parentNode.insertBefore(alertDiv, tableContainer);
+
+                                            // Auto remove alert after 5 seconds
+                                            setTimeout(() => {
+                                                if (alertDiv.parentNode) {
+                                                    alertDiv.remove();
+                                                }
+                                            }, 5000);
+                                        }
+                                    } else {
+                                        // Other HTTP errors
+                                        throw new Error(`Lỗi HTTP: ${response.status} - ${response.statusText}`);
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('❌ Export error:', error);
+
+                                    // Show error message with better formatting
+                                    const alertDiv = document.createElement('div');
+                                    alertDiv.className = 'alert alert-danger alert-dismissible fade show mt-3';
+
+                                    // Determine specific error type and message
+                                    let errorTitle = '⚠️ Không thể xuất Excel!';
+                                    let errorMessage = '';
+                                    let errorIcon = 'fas fa-exclamation-triangle';
+
+                                    if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+                                        // Network error
+                                        errorTitle = '🌐 Lỗi kết nối mạng!';
+                                        errorMessage = 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối internet và thử lại.';
+                                        errorIcon = 'fas fa-wifi';
+                                    } else if (error.message.includes('ExportLimitExceeded')) {
+                                        // Export limit exceeded
+                                        errorTitle = '📊 Vượt quá giới hạn export!';
+                                        errorMessage = error.message.replace('ExportLimitExceeded', '');
+                                        errorIcon = 'fas fa-chart-line';
+                                    } else if (error.message.includes('Unauthorized')) {
+                                        // Authentication error
+                                        errorTitle = '🔐 Lỗi xác thực!';
+                                        errorMessage = 'Vui lòng đăng nhập lại để export dữ liệu.';
+                                        errorIcon = 'fas fa-user-lock';
+                                    } else if (error.message.includes('Lỗi HTTP: 500')) {
+                                        // Server error
+                                        errorTitle = '⚡ Lỗi máy chủ!';
+                                        errorMessage = 'Máy chủ đang gặp sự cố. Vui lòng thử lại sau vài phút.';
+                                        errorIcon = 'fas fa-server';
+                                    } else if (error.message.includes('Lỗi HTTP: 404')) {
+                                        // Not found error
+                                        errorTitle = '🔍 Không tìm thấy trang!';
+                                        errorMessage = 'Trang export không tồn tại. Vui lòng liên hệ quản trị viên.';
+                                        errorIcon = 'fas fa-search';
+                                    } else if (error.message.includes('Lỗi HTTP: 403')) {
+                                        // Forbidden error
+                                        errorTitle = '🚫 Không có quyền truy cập!';
+                                        errorMessage = 'Bạn không có quyền export dữ liệu này.';
+                                        errorIcon = 'fas fa-ban';
+                                    } else {
+                                        // Generic error
+                                        errorMessage = error.message;
+                                    }
+
+                                    // Format specific error messages
+                                    if (errorMessage.includes('Tổng records export hôm nay')) {
+                                        errorMessage = errorMessage.replace('Tổng records export hôm nay', '📊 Tổng records export hôm nay');
+                                    }
+                                    if (errorMessage.includes('vượt quá giới hạn cho role')) {
+                                        errorMessage = errorMessage.replace('vượt quá giới hạn cho role', '❌ Vượt quá giới hạn cho role');
+                                    }
+                                    if (errorMessage.includes('số lần export')) {
+                                        errorMessage = errorMessage.replace('số lần export', '🔄 Số lần export');
+                                    }
+                                    if (errorMessage.includes('records/ngày')) {
+                                        errorMessage = errorMessage.replace('records/ngày', '📈 records/ngày');
+                                    }
+
+                                    alertDiv.innerHTML = `
+                                        <i class="${errorIcon} me-2"></i>
+                                        <strong>${errorTitle}</strong><br>
+                                        <span style="font-size: 0.9em; line-height: 1.4;">${errorMessage}</span>
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                    `;
+
+                                    // Insert alert before table container
+                                    const tableContainer = document.querySelector('.table-container');
+                                    if (tableContainer) {
+                                        tableContainer.parentNode.insertBefore(alertDiv, tableContainer);
+
+                                        // Auto remove alert after 15 seconds
+                                        setTimeout(() => {
+                                            if (alertDiv.parentNode) {
+                                                alertDiv.remove();
+                                            }
+                                        }, 15000);
+                                    }
+                                })
+                                .finally(() => {
+                                    // Reset button
+                                    event.target.innerHTML = originalText;
+                                    event.target.disabled = false;
+                                });
+                        }
+
+                        // Show filter guide
+                        function showFilterGuide() {
+                            const guide = `🎯 HƯỚNG DẪN SỬ DỤNG BỘ LỌC VIEWRAWDATA DN2
+
+                                                        📋 BỘ LỌC NAVIGATION:
+                                                           • Click nút "Bộ lọc" để mở/đóng
+                                                           • Multi-select: Giữ Ctrl + Click để chọn nhiều
+                                                           • Search: Gõ để tìm kiếm trong dropdown
+                                                           • Tự động lưu trạng thái mở/đóng
+
+                                                        🔍 CÁC BỘ LỌC:
+                                                           • Năm: Chọn năm dữ liệu
+                                                           • Tỉnh/Thành phố: Lọc theo địa phương  
+                                                           • Loại hình KT: Lọc theo loại hình kinh tế
+                                                           • Vùng KT: Lọc theo vùng kinh tế
+                                                           • Giới hạn: Chọn cách hiển thị dữ liệu
+
+                                                        📊 GIỚI HẠN DỮ LIỆU:
+                                                           • 1000 đầu: Hiển thị 1000 records đầu tiên
+                                                           • 1000 cuối: Hiển thị 1000 records cuối cùng
+                                                           • STT chẵn/lẻ: Lọc theo số thứ tự
+                                                           • Tự chọn: Nhập khoảng STT tùy ý
+                                                           • Tất cả: Hiển thị tối đa 5000 records
+
+                                                        ⚡ TÍNH NĂNG:
+                                                           • Export Excel: Xuất dữ liệu đã lọc
+                                                           • Debug: Kiểm tra bộ lọc
+                                                           • DataTable: Tìm kiếm, sắp xếp, phân trang
+                                                           • Responsive: Tự động điều chỉnh trên mobile
+
+                                                        💡 MẸO:
+                                                           • Dùng tìm kiếm trong dropdown để tìm nhanh
+                                                           • Có thể chọn nhiều mục trong cùng bộ lọc
+                                                           • Bộ lọc sẽ nhớ trạng thái khi điều hướng
+
+                                                        📥 EXPORT EXCEL:
+                                                           • Click nút "Export Excel" để tải file
+                                                           • File sẽ chứa đúng dữ liệu đang hiển thị
+                                                           • Bao gồm tất cả cột và thông tin filter
+                                                           • Tên file có timestamp và thông tin bộ lọc`;
+
+                            alert(guide);
+                        }
+                    </script>
+                </body>
+
+                </html>

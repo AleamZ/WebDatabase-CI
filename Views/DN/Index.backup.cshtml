@@ -1393,7 +1393,7 @@ function initVungKinhTeChart() {
     // ONLY USE REAL DATA FROM DATABASE - NO SAMPLE DATA
     if (!vungKinhTeData || vungKinhTeData.length === 0) {
         console.log('⚠️ No real data from database - chart will be empty');
-        console.log('⚠️ Expected database: Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;');
+        console.log('⚠️ Expected database: Server=localhost;Database=sakila;User=root;Password=1234');
         console.log('⚠️ Expected data from Vungkinhte column');
         vungKinhTeData = [];
     }
@@ -1406,7 +1406,7 @@ function initVungKinhTeChart() {
     // NO DEFAULT SAMPLE DATA - Only show empty chart if no database data
     if (total === 0) {
         console.log('⚠️ No valid data from database - displaying empty chart');
-        console.log('⚠️ Database connection: Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;');
+        console.log('⚠️ Database connection: Server=localhost;Database=sakila;User=root;Password=1234');
         console.log('⚠️ Check Vungkinhte column in dn_all table');
         labels = ['Không có dữ liệu'];
         data = [0];
@@ -1797,7 +1797,7 @@ function initQuyMoChart() {
     // ONLY USE REAL DATA FROM DATABASE - NO SAMPLE DATA
     if (!quyMoData || quyMoData.length === 0) {
         console.log('⚠️ No real company size data from database - chart will be empty');
-        console.log('⚠️ Expected database: Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;');
+        console.log('⚠️ Expected database: Server=localhost;Database=sakila;User=root;Password=1234');
         console.log('⚠️ Expected data from SR_Doanhthu_Thuan_BH_CCDV column for revenue calculation');
         quyMoData = [];
     }
@@ -1817,7 +1817,7 @@ function initQuyMoChart() {
     // NO DEFAULT SAMPLE DATA - Only show empty chart if no database data
     if (total === 0) {
         console.log('⚠️ No valid company size data from database - displaying empty chart');
-        console.log('⚠️ Database connection: Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;');
+        console.log('⚠️ Database connection: Server=localhost;Database=sakila;User=root;Password=1234');
         console.log('⚠️ Check SR_Doanhthu_Thuan_BH_CCDV column in dn_all table');
         labels = ['Không có dữ liệu quy mô'];
         data = [0];
@@ -2603,7 +2603,7 @@ function initIndustryChart() {
         console.log('🔍 INDUSTRY DATA DEBUG:');
         console.log('📊 Raw Industry data string:', rawDataString);
         console.log('📊 Data length:', rawDataString.length);
-        console.log('📊 Expected source: Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx; TEN_NGANH column');
+        console.log('📊 Expected source: Server=localhost;Database=sakila;User=root;Password=1234 TEN_NGANH column');
         
         if (rawDataString && rawDataString !== '[]') {
             industryData = rawDataString; // No need to parse since Html.Raw already converts it
@@ -2629,7 +2629,7 @@ function initIndustryChart() {
     // Check if we have real data from database
     if (!industryData || industryData.length === 0) {
         console.log('⚠️ No real industry data from database - this should not happen!');
-        console.log('📊 Database connection string should be: Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;');
+        console.log('📊 Database connection string should be: Server=localhost;Database=sakila;User=root;Password=1234');
         console.log('📊 Expected data from TEN_NGANH column');
         
         // Only use sample data as absolute fallback
@@ -2668,7 +2668,7 @@ function initIndustryChart() {
     // Validate data quality - MUST have real data from database
     if (total === 0) {
         console.error('❌ CRITICAL: No valid industry data from database!');
-        console.error('❌ Database: Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;');
+        console.error('❌ Database: Server=localhost;Database=sakila;User=root;Password=1234');
         console.error('❌ Expected TEN_NGANH column data not found');
         console.error('❌ Check database connection and data availability');
         
@@ -3072,7 +3072,7 @@ function initTrendChart() {
         console.log('🔍 DEBUG ViewBag.TrendData from backend:');
         console.log('   - Raw string length:', rawDataString.length);
         console.log('   - Raw string preview:', rawDataString.substring(0, 200));
-        console.log('   - Database should be: Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;');
+        console.log('   - Database should be: Server=localhost;Database=sakila;User=root;Password=1234');
         console.log('   - Expected columns: Nam, SR_Doanhthu_Thuan_BH_CCDV, SR_Loinhuan_TruocThue');
         console.log('   - FULL RAW STRING:', rawDataString);
         
@@ -3177,7 +3177,7 @@ function initTrendChart() {
     
     if (!trendData || trendData.length === 0) {
         console.log('❌ No data from database - ViewBag.TrendData is empty');
-        console.log('❌ Expected data from: Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;');
+        console.log('❌ Expected data from: Server=localhost;Database=sakila;User=root;Password=1234');
         console.log('❌ Columns: Nam, SR_Doanhthu_Thuan_BH_CCDV, SR_Loinhuan_TruocThue');
         
         // Use minimal fallback
@@ -3186,7 +3186,7 @@ function initTrendChart() {
         profitData = [0];
     } else {
         console.log('✅ Using REAL data from database sakila.dn_all');
-        console.log('✅ Database: Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;');
+        console.log('✅ Database: Server=localhost;Database=sakila;User=root;Password=1234');
         console.log('✅ Revenue column: SR_Doanhthu_Thuan_BH_CCDV');
         console.log('✅ Profit column: SR_Loinhuan_TruocThue');
         console.log('📊 Raw data from ViewBag:', trendData);

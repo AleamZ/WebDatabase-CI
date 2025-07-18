@@ -30,7 +30,7 @@ namespace CIResearch.Controllers
 {
     public class DansoController : Controller
     {
-        private string _connectionString = "Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;";
+        private string _connectionString = "Server=localhost;Database=sakila;User=root;Password=1234";
 
 
         public ActionResult Index(string stt = "", List<string> code = null, List<string> projectName = null, List<string> year = null,

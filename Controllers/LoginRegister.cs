@@ -10,13 +10,14 @@ namespace CIResearch.Controllers
         private readonly string _connectionString = "Server=localhost;Database=sakila;User=root;Password=1234";
 
         [HttpGet]
-        public IActionResult Login()
+        public IActionResult Login(string returnUrl = null)
         {
+            ViewBag.ReturnUrl = returnUrl;
             return View();
         }
 
         [HttpPost]
-        public IActionResult Login(string username, string password)
+        public IActionResult Login(string username, string password, string returnUrl = null)
         {
             User user = null;
 
@@ -49,14 +50,29 @@ namespace CIResearch.Controllers
                 HttpContext.Session.SetString("Role", user.Role); // Lưu vai trò vào session
 
 
-                // Chuyển hướng dựa trên vai trò
-                if (user.Role == "Manager" || user.Role == "Execute" || user.Role == "Assistant")
+                // Log để debug
+                Console.WriteLine($"🔍 Login: User {user.Username} (Role: {user.Role}) logged in");
+                Console.WriteLine($"🔍 Login: returnUrl = '{returnUrl}'");
+                Console.WriteLine($"🔍 Login: IsLocalUrl = {Url.IsLocalUrl(returnUrl)}");
+
+                // Nếu có returnUrl, chuyển hướng về đó, nếu không thì chuyển hướng dựa trên vai trò
+                if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                 {
-                    return RedirectToAction("Index", "Bacsi");
+                    Console.WriteLine($"🔍 Login: Redirecting to returnUrl: {returnUrl}");
+                    return Redirect(returnUrl);
                 }
-                else if (user.Role == "Admin")
+                else
                 {
-                    return RedirectToAction("Index", "Admin");
+                    Console.WriteLine($"🔍 Login: No valid returnUrl, redirecting based on role: {user.Role}");
+                    // Chuyển hướng dựa trên vai trò
+                    if (user.Role == "Manager" || user.Role == "Execute" || user.Role == "Assistant")
+                    {
+                        return RedirectToAction("Index", "Bacsi");
+                    }
+                    else if (user.Role == "Admin")
+                    {
+                        return RedirectToAction("Index", "Admin");
+                    }
                 }
             }
             else

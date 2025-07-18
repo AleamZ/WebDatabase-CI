@@ -32,7 +32,7 @@ namespace CIResearch.Controllers
         private string username = "730f55fa-4390-4f48-95c7-956818534f64/linhtest";
         private string password = "332001";
 
-        private string _connectionString = "Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;";
+        private string _connectionString = "Server=localhost;Database=sakila;User=root;Password=1234";
         private readonly IMemoryCache _cache;
 
         public Manhinhchinh(IMemoryCache cache)

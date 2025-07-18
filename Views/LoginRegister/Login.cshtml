@@ -87,6 +87,10 @@
 }
 
 <form method="post" asp-action="Login" asp-controller="LoginRegister">
+    @if (!string.IsNullOrEmpty(ViewBag.ReturnUrl))
+    {
+        <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+    }
     <div>
         <label for="username">Username:</label>
         <input type="text" id="username" name="username" required />

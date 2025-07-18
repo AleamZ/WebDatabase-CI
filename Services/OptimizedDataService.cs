@@ -15,7 +15,7 @@ namespace CIResearch.Services
     public class OptimizedDataService
     {
         private readonly ILogger<OptimizedDataService> _logger;
-        private readonly string _connectionString = "Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;";
+        private readonly string _connectionString = "Server=localhost;Database=sakila;User=root;Password=1234";
         private const int BATCH_SIZE = 50000; // Process in 50K batches
         private const int MAX_CONCURRENT_OPERATIONS = 3; // Limit concurrent operations
 
@@ -47,7 +47,7 @@ namespace CIResearch.Services
                     SELECT 
                         ROUND(((data_length + index_length) / 1024 / 1024), 2) AS 'SizeMB'
                     FROM information_schema.tables 
-                    WHERE table_schema = 'admin_ciresearch' AND table_name = 'dn_all'", conn))
+                    WHERE table_schema = 'sakila' AND table_name = 'dn_all'", conn))
                 {
                     var result = await cmd.ExecuteScalarAsync();
                     health.TableSizeMB = result != DBNull.Value ? Convert.ToDouble(result) : 0;

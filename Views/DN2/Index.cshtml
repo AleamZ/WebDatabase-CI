@@ -1149,10 +1149,14 @@
                                     <i class="fas fa-chart-bar me-1"></i>
                                                 Cập nhật Charts
                                 </button>
-                                            <a href="@Url.Action("ViewRawData", "DN2")" class="btn btn-info btn-sm">
+                                            <button type="button" class="btn btn-info btn-sm" onclick="goToDetailData()" title="Yêu cầu đăng nhập để xem dữ liệu chi tiết">
                         <i class="fas fa-table me-1"></i>
                                                 Dữ liệu chi tiết
-                                            </a>
+                                            </button>
+                                            <button type="button" class="btn btn-outline-success btn-sm" onclick="exportToExcel()" title="Xuất dữ liệu ra file Excel">
+                        <i class="fas fa-file-excel me-1"></i>
+                                                Export Excel
+                                            </button>
                                             <button type="button" class="btn btn-warning btn-sm" onclick="showFilterGuide()">
                                                 <i class="fas fa-question-circle me-1"></i>
                                                 Hướng dẫn
@@ -2001,7 +2005,7 @@ function initVungKinhTeChart() {
     // ONLY USE REAL DATA FROM DATABASE - NO SAMPLE DATA
     if (!vungKinhTeData || vungKinhTeData.length === 0) {
         console.log('⚠️ No real data from database - chart will be empty');
-        console.log('⚠️ Expected database: Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;');
+        console.log('⚠️ Expected database: Server=localhost;Database=sakila;User=root;Password=1234');
         console.log('⚠️ Expected data from Vungkinhte column');
         vungKinhTeData = [];
     }
@@ -2014,7 +2018,7 @@ function initVungKinhTeChart() {
     // NO DEFAULT SAMPLE DATA - Only show empty chart if no database data
     if (total === 0) {
         console.log('⚠️ No valid data from database - displaying empty chart');
-        console.log('⚠️ Database connection: Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;');
+        console.log('⚠️ Database connection: Server=localhost;Database=sakila;User=root;Password=1234');
         console.log('⚠️ Check Vungkinhte column in dn_all table for 7 economic zones');
         console.log('⚠️ Expected: Đông Nam Bộ, Đồng bằng Sông Hồng, Duyên hải Nam Trung Bộ, Bắc Trung Bộ, ĐBSCL, Tây Nguyên, Trung du và Miền núi Bắc Bộ');
         labels = ['Không có dữ liệu Vùng Kinh Tế'];
@@ -2896,7 +2900,7 @@ function initIndustryChart() {
         
         console.log('🔍 INDUSTRY DATA DEBUG:');
         console.log('📊 Industry data from ViewBag:', industryData);
-        console.log('📊 Data source: Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx; TEN_NGANH column');
+        console.log('📊 Data source: Server=localhost;Database=sakila;User=root;Password=1234 TEN_NGANH column');
         console.log('📊 Number of industries:', industryData ? industryData.length : 0);
         
         if (industryData && industryData.length > 0) {
@@ -2919,7 +2923,7 @@ function initIndustryChart() {
     // Check if we have real data from database TEN_NGANH column
     if (!industryData || industryData.length === 0) {
         console.error('❌ No real industry data from TEN_NGANH column!');
-        console.error('📊 Database connection: Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;');
+        console.error('📊 Database connection: Server=localhost;Database=sakila;User=root;Password=1234');
         console.error('📊 Expected data from TEN_NGANH column not found');
         console.error('❌ Chart creation will be aborted - NO FALLBACK DATA');
         
@@ -2949,7 +2953,7 @@ function initIndustryChart() {
     // Validate data quality - MUST have real data from database TEN_NGANH column
     if (total === 0) {
         console.error('❌ CRITICAL: No valid industry data from TEN_NGANH column!');
-        console.error('❌ Database: Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;');
+        console.error('❌ Database: Server=localhost;Database=sakila;User=root;Password=1234');
         console.error('❌ Expected TEN_NGANH column data not found');
         console.error('❌ Check database connection and data availability');
         
@@ -6045,6 +6049,220 @@ window.addEventListener('load', function() {
         createNewQuyMoChart();
     }
 });
+
+function goToDetailData() {
+    // Lấy form chứa các filter (giả sử form có id là 'filterForm', nếu không hãy sửa lại cho đúng)
+    var form = document.querySelector('form');
+    var params = new URLSearchParams();
+    if (!form) { window.location = '/DN2/ViewRawData'; return; }
+    // Lấy tất cả input, select, radio, checkbox trong form
+    var elements = form.querySelectorAll('input, select');
+    elements.forEach(function(el) {
+        if (!el.name) return;
+        if ((el.type === 'checkbox' || el.type === 'radio') && !el.checked) return;
+        if (el.type === 'select-multiple') {
+            Array.from(el.selectedOptions).forEach(opt => {
+                params.append(el.name, opt.value);
+            });
+        } else {
+            if (el.value) params.append(el.name, el.value);
+        }
+    });
+    // Chuyển hướng sang ViewRawData với query string
+    var url = '/DN2/ViewRawData' + (params.toString() ? ('?' + params.toString()) : '');
+    window.location.href = url;
+}
+
+// Export to Excel function
+function exportToExcel() {
+    console.log('📊 Exporting to Excel...');
+
+    const form = document.querySelector('form');
+
+    if (!form) {
+        alert('❌ Không tìm thấy form filters. Vui lòng thử lại.');
+        return;
+    }
+
+    const formData = new FormData(form);
+
+    // Convert to URL parameters
+    const params = new URLSearchParams();
+
+    // Add all form data
+    for (let [key, value] of formData.entries()) {
+        params.append(key, value);
+    }
+
+    // Add hidden input values for limit options
+    const hiddenInputs = document.querySelectorAll('input[type="hidden"]');
+    hiddenInputs.forEach(input => {
+        if (input.value && input.name) {
+            params.append(input.name, input.value);
+        }
+    });
+
+    // Collect checkbox values (for multiple selections)
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+    checkboxes.forEach(checkbox => {
+        if (checkbox.name && checkbox.value) {
+            params.append(checkbox.name, checkbox.value);
+        }
+    });
+
+    // Collect radio button values
+    const radios = document.querySelectorAll('input[type="radio"]:checked');
+    radios.forEach(radio => {
+        if (radio.name && radio.value) {
+            params.append(radio.name, radio.value);
+        }
+    });
+
+    console.log('📊 Export parameters:', params.toString());
+
+    // Create download link
+    const exportUrl = '/DN2/ExportToExcel?' + params.toString();
+
+    // Show loading message
+    const originalText = event.target.innerHTML;
+    event.target.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Đang xuất...';
+    event.target.disabled = true;
+
+    // Use fetch to check for errors before downloading
+    fetch(exportUrl)
+        .then(response => {
+            // Check if response is JSON (error response)
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                // This is an error response, parse it
+                return response.json().then(errorData => {
+                    throw new Error(errorData.message || 'Lỗi khi export dữ liệu');
+                });
+            }
+            
+            // Check if response is OK for file download
+            if (response.ok) {
+                // If response is OK, trigger download
+                const link = document.createElement('a');
+                link.href = exportUrl;
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                // Show success message
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-success alert-dismissible fade show mt-3';
+                alertDiv.innerHTML = `
+                    <i class="fas fa-check-circle me-2"></i>
+                    <strong>Thành công!</strong> File Excel đang được tải về.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+
+                // Insert alert before main container
+                const mainContainer = document.querySelector('.main-container');
+                if (mainContainer) {
+                    mainContainer.parentNode.insertBefore(alertDiv, mainContainer);
+
+                    // Auto remove alert after 5 seconds
+                    setTimeout(() => {
+                        if (alertDiv.parentNode) {
+                            alertDiv.remove();
+                        }
+                    }, 5000);
+                }
+            } else {
+                // Other HTTP errors
+                throw new Error(`Lỗi HTTP: ${response.status} - ${response.statusText}`);
+            }
+        })
+        .catch(error => {
+            console.error('❌ Export error:', error);
+            
+            // Show error message with better formatting
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-danger alert-dismissible fade show mt-3';
+            
+            // Determine specific error type and message
+            let errorTitle = '⚠️ Không thể xuất Excel!';
+            let errorMessage = '';
+            let errorIcon = 'fas fa-exclamation-triangle';
+            
+            if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+                // Network error
+                errorTitle = '🌐 Lỗi kết nối mạng!';
+                errorMessage = 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối internet và thử lại.';
+                errorIcon = 'fas fa-wifi';
+            } else if (error.message.includes('ExportLimitExceeded')) {
+                // Export limit exceeded
+                errorTitle = '📊 Vượt quá giới hạn export!';
+                errorMessage = error.message.replace('ExportLimitExceeded', '');
+                errorIcon = 'fas fa-chart-line';
+            } else if (error.message.includes('Unauthorized')) {
+                // Authentication error
+                errorTitle = '🔐 Lỗi xác thực!';
+                errorMessage = 'Vui lòng đăng nhập lại để export dữ liệu.';
+                errorIcon = 'fas fa-user-lock';
+            } else if (error.message.includes('Lỗi HTTP: 500')) {
+                // Server error
+                errorTitle = '⚡ Lỗi máy chủ!';
+                errorMessage = 'Máy chủ đang gặp sự cố. Vui lòng thử lại sau vài phút.';
+                errorIcon = 'fas fa-server';
+            } else if (error.message.includes('Lỗi HTTP: 404')) {
+                // Not found error
+                errorTitle = '🔍 Không tìm thấy trang!';
+                errorMessage = 'Trang export không tồn tại. Vui lòng liên hệ quản trị viên.';
+                errorIcon = 'fas fa-search';
+            } else if (error.message.includes('Lỗi HTTP: 403')) {
+                // Forbidden error
+                errorTitle = '🚫 Không có quyền truy cập!';
+                errorMessage = 'Bạn không có quyền export dữ liệu này.';
+                errorIcon = 'fas fa-ban';
+            } else {
+                // Generic error
+                errorMessage = error.message;
+            }
+            
+            // Format specific error messages
+            if (errorMessage.includes('Tổng records export hôm nay')) {
+                errorMessage = errorMessage.replace('Tổng records export hôm nay', '📊 Tổng records export hôm nay');
+            }
+            if (errorMessage.includes('vượt quá giới hạn cho role')) {
+                errorMessage = errorMessage.replace('vượt quá giới hạn cho role', '❌ Vượt quá giới hạn cho role');
+            }
+            if (errorMessage.includes('số lần export')) {
+                errorMessage = errorMessage.replace('số lần export', '🔄 Số lần export');
+            }
+            if (errorMessage.includes('records/ngày')) {
+                errorMessage = errorMessage.replace('records/ngày', '📈 records/ngày');
+            }
+            
+            alertDiv.innerHTML = `
+                <i class="${errorIcon} me-2"></i>
+                <strong>${errorTitle}</strong><br>
+                <span style="font-size: 0.9em; line-height: 1.4;">${errorMessage}</span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+
+            // Insert alert before main container
+            const mainContainer = document.querySelector('.main-container');
+            if (mainContainer) {
+                mainContainer.parentNode.insertBefore(alertDiv, mainContainer);
+
+                // Auto remove alert after 15 seconds
+                setTimeout(() => {
+                    if (alertDiv.parentNode) {
+                        alertDiv.remove();
+                    }
+                }, 15000);
+            }
+        })
+        .finally(() => {
+            // Reset button
+            event.target.innerHTML = originalText;
+            event.target.disabled = false;
+        });
+}
 </script>
 </body>
 </html>
