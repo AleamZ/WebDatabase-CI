@@ -194,17 +194,62 @@
                 transform: translateY(-1px);
             }
 
-            /* Chevron animation */
-            #filterChevron {
-                transition: transform 0.3s ease;
-            }
+                    /* Chevron animation */
+        #filterChevron {
+            transition: transform 0.3s ease;
+        }
+
+        /* Export Options UI Styles */
+        #exportOptionsUI {
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .export-option {
+            transition: all 0.3s ease;
+        }
+
+        .export-option .form-control {
+            border-radius: 6px;
+            border: 1px solid #ced4da;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .export-option .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+        .export-option .btn-success {
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .export-option .btn-success:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .export-option .form-label {
+            color: #495057;
+            font-size: 0.9rem;
+        }
+
+        #exportOptionsUI .card {
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #exportOptionsUI .card-header {
+            border-radius: 10px 10px 0 0;
+            font-weight: 600;
+        }
 
             #filterChevron.rotated {
                 transform: rotate(180deg);
             }
 
             /* Mobile responsiveness for navigation filter */
-            @@media (max-width: 768px) {
+                        @@media (max-width: 768px) {
                     .nav-filter-body .row .col-lg-2 {
                         margin-bottom: 0.5rem;
                     }
@@ -228,7 +273,7 @@
                     }
                 }
 
-                @@media(max - width: 576px) {
+                                @@media(max - width: 576px) {
                         .top-nav {
                             padding: 0.75rem 0;
                         }
@@ -592,16 +637,15 @@
                                                     </div>
                                                 </div>
 
-                                                <!-- Giới hạn dữ liệu - Custom dropdown -->
+                                                <!-- Bộ lọc xuất dữ liệu - Custom dropdown -->
                                                 <div class="col-lg-2 col-md-4 col-sm-6">
-                                                    <div class="custom-multi-select" id="limitTypeFilter">
+                                                    <div class="custom-multi-select" id="exportTypeFilter">
                                                         <div class="select-box" onclick="toggleDropdown(this)">
-                                                            <span class="selected-options" data-placeholder="Giới hạn">Giới
-                                                                hạn</span>
+                                                            <span class="selected-options" data-placeholder="Kiểu xuất">Kiểu xuất</span>
                                                             <i class="arrow"></i>
                                                         </div>
                                                         <div class="dropdown-options">
-                                                            <!-- No search box for limit options -->
+                                                            <!-- No search box for export options -->
                                                         </div>
                                                     </div>
                                                 </div>
@@ -637,7 +681,7 @@
                                                             <i class="fas fa-chart-bar me-1"></i>
                                                             Dashboard
                                                         </a>
-                                                        <button type="button" class="btn btn-info btn-sm" onclick="exportToExcel()">
+                                                        <button type="button" class="btn btn-info btn-sm" onclick="exportToExcel(this)">
                                                             <i class="fas fa-file-excel me-1"></i>
                                                             Export Excel
                                                         </button>
@@ -650,21 +694,128 @@
                                                 </div>
                                             </div>
 
-                                            <!-- Hidden inputs for limit options -->
-                                            <input type="hidden" name="limitType" id="limitTypeInput"
-                                                value="@ViewBag.CurrentLimitType">
-                                            <input type="hidden" name="customStart" id="customStartInput"
-                                                value="@ViewBag.CurrentCustomStart">
-                                            <input type="hidden" name="customEnd" id="customEndInput"
-                                                value="@ViewBag.CurrentCustomEnd">
-                                            <input type="hidden" name="customFilter" id="customFilterInput"
-                                                value="@ViewBag.CurrentCustomFilter">
-                                            <input type="hidden" name="evenStart" id="evenStartInput"
-                                                value="@ViewBag.CurrentEvenStart">
-                                            <input type="hidden" name="evenEnd" id="evenEndInput" value="@ViewBag.CurrentEvenEnd">
-                                            <input type="hidden" name="oddStart" id="oddStartInput"
-                                                value="@ViewBag.CurrentOddStart">
-                                            <input type="hidden" name="oddEnd" id="oddEndInput" value="@ViewBag.CurrentOddEnd">
+                                            <!-- Export Options UI -->
+                                            <div id="exportOptionsUI" class="mt-3" style="display: none;">
+                                                <div class="card border-primary">
+                                                    <div class="card-header bg-primary text-white">
+                                                        <i class="fas fa-cog me-2"></i>
+                                                        <span id="exportOptionsTitle">Cấu hình xuất dữ liệu</span>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <!-- First/Last/Random Options -->
+                                                        <div id="countOptions" class="export-option" style="display: none;">
+                                                            <div class="row align-items-center">
+                                                                <div class="col-md-4">
+                                                                    <label class="form-label fw-bold">
+                                                                        <i class="fas fa-sort-numeric-up me-1"></i>
+                                                                        Số lượng dòng:
+                                                                    </label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="number" 
+                                                                           class="form-control" 
+                                                                           id="exportCountField" 
+                                                                           placeholder="Nhập số lượng (VD: 1000)"
+                                                                           min="1" 
+                                                                           max="10000">
+                                                                </div>
+                                                                <div class="col-md-2">
+                                                                    <button type="button" class="btn btn-success btn-sm" onclick="applyExportCount()">
+                                                                        <i class="fas fa-check"></i>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Range Options -->
+                                                        <div id="rangeOptions" class="export-option" style="display: none;">
+                                                            <div class="row align-items-center">
+                                                                <div class="col-md-3">
+                                                                    <label class="form-label fw-bold">
+                                                                        <i class="fas fa-arrows-alt-h me-1"></i>
+                                                                        Khoảng STT:
+                                                                    </label>
+                                                                </div>
+                                                                <div class="col-md-3">
+                                                                    <input type="number" 
+                                                                           class="form-control" 
+                                                                           id="rangeStartField" 
+                                                                           placeholder="Từ STT"
+                                                                           min="1">
+                                                                </div>
+                                                                <div class="col-md-3">
+                                                                    <input type="number" 
+                                                                           class="form-control" 
+                                                                           id="rangeEndField" 
+                                                                           placeholder="Đến STT"
+                                                                           min="1">
+                                                                </div>
+                                                                <div class="col-md-3">
+                                                                    <button type="button" class="btn btn-success btn-sm" onclick="applyRangeInput()">
+                                                                        <i class="fas fa-check"></i>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Alternate Options -->
+                                                        <div id="alternateOptions" class="export-option" style="display: none;">
+                                                            <div class="row align-items-center">
+                                                                <div class="col-md-2">
+                                                                    <label class="form-label fw-bold">
+                                                                        <i class="fas fa-random me-1"></i>
+                                                                        Khoảng:
+                                                                    </label>
+                                                                </div>
+                                                                <div class="col-md-2">
+                                                                    <input type="number" 
+                                                                           class="form-control" 
+                                                                           id="alternateStartField" 
+                                                                           placeholder="Từ"
+                                                                           min="1">
+                                                                </div>
+                                                                <div class="col-md-2">
+                                                                    <input type="number" 
+                                                                           class="form-control" 
+                                                                           id="alternateEndField" 
+                                                                           placeholder="Đến"
+                                                                           min="1">
+                                                                </div>
+                                                                <div class="col-md-2">
+                                                                    <label class="form-label fw-bold">
+                                                                        <i class="fas fa-step-forward me-1"></i>
+                                                                        Bước nhảy:
+                                                                    </label>
+                                                                </div>
+                                                                <div class="col-md-2">
+                                                                    <input type="number" 
+                                                                           class="form-control" 
+                                                                           id="stepSizeField" 
+                                                                           placeholder="N"
+                                                                           min="1">
+                                                                </div>
+                                                                <div class="col-md-2">
+                                                                    <button type="button" class="btn btn-success btn-sm" onclick="applyAlternateInput()">
+                                                                        <i class="fas fa-check"></i>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Hidden inputs for export options -->
+                                            <input type="hidden" name="exportType" id="exportTypeInput"
+                                                value="@ViewBag.CurrentExportType">
+                                            <input type="hidden" name="exportCount" id="exportCountInput"
+                                                value="@ViewBag.CurrentExportCount">
+                                            <input type="hidden" name="rangeStart" id="rangeStartInput"
+                                                value="@ViewBag.CurrentRangeStart">
+                                            <input type="hidden" name="rangeEnd" id="rangeEndInput"
+                                                value="@ViewBag.CurrentRangeEnd">
+                                            <input type="hidden" name="stepSize" id="stepSizeInput"
+                                                value="@ViewBag.CurrentStepSize">
                                         </form>
                                     </div>
                                 </div>
@@ -702,22 +853,20 @@
                                     <div class="stat-item">
                                         <div class="stat-number">
                                             @{
-                                                var currentLimitType = ViewBag.CurrentLimitType?.ToString() ?? "first1000";
-                                                var limitDisplayText = currentLimitType switch
+                                                                                                var currentExportType = ViewBag.CurrentExportType?.ToString() ?? "first";
+                                                var exportDisplayText = currentExportType switch
                                                 {
-                                                    "first1000" => "1000 đầu",
-                                                    "last1000" => "1000 cuối",
-                                                    "even" => "STT chẵn",
-                                                    "odd" => "STT lẻ",
-                                                    "random" => "Random",
-                                                    "custom" => "Tự chọn",
-                                                    "all" => "Tất cả",
-                                                    _ => "1000 đầu"
+                                                        "first" => "Đầu",
+                                                        "last" => "Cuối",
+                                                        "random" => "Random",
+                                                        "range" => "Khoảng",
+                                                        "alternate" => "Xen kẻ",
+                                                        _ => "Đầu"
                                                 };
-                                            }
-                                            @limitDisplayText
+                                                                                        }
+                                            @exportDisplayText
                                         </div>
-                                        <div class="stat-label">Giới hạn</div>
+                                        <div class="stat-label">Kiểu xuất</div>
                                     </div>
                                 </div>
                             </div>
@@ -726,19 +875,19 @@
                         <!-- Error Message -->
                         @if (!string.IsNullOrEmpty(ViewBag.Error?.ToString()))
                         {
-                            <div class="alert alert-danger">
-                                <i class="fas fa-exclamation-triangle me-2"></i>
-                                @ViewBag.Error
-                            </div>
+                                <div class="alert alert-danger">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    @ViewBag.Error
+                                </div>
                         }
 
                         <!-- Success Message -->
                         @if (TempData["SuccessMessage"] != null)
                         {
-                            <div class="alert alert-success">
-                                <i class="fas fa-check-circle me-2"></i>
-                                @TempData["SuccessMessage"]
-                            </div>
+                                <div class="alert alert-success">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    @TempData["SuccessMessage"]
+                                </div>
                         }
 
                         <!-- Data Table -->
@@ -753,7 +902,7 @@
                                         <i class="fas fa-sync-alt me-1"></i>
                                         Làm mới
                                     </button>
-                                                            <button type="button" class="btn btn-outline-success btn-sm" onclick="exportToExcel()" title="Tải về file Excel với dữ liệu hiện tại">
+                                                            <button type="button" class="btn btn-outline-success btn-sm" onclick="exportToExcel(this)" title="Tải về file Excel với dữ liệu hiện tại">
                             <i class="fas fa-file-excel me-1"></i>
                             Export Excel
                         </button>
@@ -781,20 +930,20 @@
                                     <tbody>
                                         @foreach (var item in Model)
                                         {
-                                            <tr>
-                                                <td>@item.STT</td>
-                                                <td>@item.Nam</td>
-                                                <td>@(item.Masothue ?? "N/A")</td>
-                                                <td>@(item.TenDN ?? "N/A")</td>
-                                                <td>@(item.Loaihinhkte ?? "N/A")</td>
-                                                <td>@(item.MaTinh_Dieutra ?? "N/A")</td>
-                                                <td>@(item.MaHuyen_Dieutra ?? "N/A")</td>
-                                                <td>@(item.MaXa_Dieutra ?? "N/A")</td>
-                                                <td>@(item.Diachi ?? "N/A")</td>
-                                                <td>@(item.Dienthoai ?? "N/A")</td>
-                                                <td>@(item.Email ?? "N/A")</td>
-                                                <td>@(item.Region ?? "N/A")</td>
-                                            </tr>
+                                                <tr>
+                                                    <td>@item.STT</td>
+                                                    <td>@item.Nam</td>
+                                                    <td>@(item.Masothue ?? "N/A")</td>
+                                                    <td>@(item.TenDN ?? "N/A")</td>
+                                                    <td>@(item.Loaihinhkte ?? "N/A")</td>
+                                                    <td>@(item.MaTinh_Dieutra ?? "N/A")</td>
+                                                    <td>@(item.MaHuyen_Dieutra ?? "N/A")</td>
+                                                    <td>@(item.MaXa_Dieutra ?? "N/A")</td>
+                                                    <td>@(item.Diachi ?? "N/A")</td>
+                                                    <td>@(item.Dienthoai ?? "N/A")</td>
+                                                    <td>@(item.Email ?? "N/A")</td>
+                                                    <td>@(item.Region ?? "N/A")</td>
+                                                </tr>
                                         }
                                     </tbody>
                                 </table>
@@ -977,8 +1126,8 @@
                                     populateFilterDropdown('provinceFilter', data.filters.provinces, 'MaTinh_Dieutra', @Html.Raw(Json.Serialize(ViewBag.CurrentMaTinh ?? new List<string>())));
                                     populateFilterDropdown('economicZoneFilter', data.filters.economicZones, 'Vungkinhte', @Html.Raw(Json.Serialize(ViewBag.CurrentVungkinhte ?? new List<string>())));
 
-                                    // Populate limit type filter (different structure)
-                                    populateLimitTypeFilter();
+                                    // Populate export type filter (different structure)
+                                    populateExportTypeFilter();
 
                                     // Initialize event listeners after options are loaded
                                     initializeFilterEventListeners();
@@ -1038,98 +1187,198 @@
                         console.log(`✅ Populated ${filterId} with ${options.length} options`);
                     }
 
-                    // Populate limit type filter (special handling)
-                    function populateLimitTypeFilter() {
-                        const filterElement = document.getElementById('limitTypeFilter');
+                    // Populate export type filter (special handling)
+                    function populateExportTypeFilter() {
+                        const filterElement = document.getElementById('exportTypeFilter');
                         if (!filterElement) {
-                            console.warn('⚠️ Limit type filter element not found');
+                            console.warn('⚠️ Export type filter element not found');
                             return;
                         }
 
                         const dropdown = filterElement.querySelector('.dropdown-options');
-                        const currentLimitType = '@ViewBag.CurrentLimitType' || 'first1000';
+                        const currentExportType = '@ViewBag.CurrentExportType' || 'first';
 
-                        const limitOptions = [
-                            { value: 'first1000', text: '1000 đầu tiên' },
-                            { value: 'last1000', text: '1000 cuối cùng' },
-                            { value: 'even', text: 'STT chẵn' },
-                            { value: 'odd', text: 'STT lẻ' },
-                            { value: 'random', text: 'Random 1000' },
-                            { value: 'custom', text: 'Tự chọn khoảng' },
-                            { value: 'all', text: 'Tất cả (tối đa 5000)' }
+                        const exportOptions = [
+                            { value: 'first', text: 'Xuất Các Dòng Đầu' },
+                            { value: 'last', text: 'Xuất Các Dòng Cuối' },
+                            { value: 'random', text: 'Xuất Random' },
+                            { value: 'range', text: 'Chọn Khoảng từ 2 số đầu cuối X và Y' },
+                            { value: 'alternate', text: 'Xuất Xen kẻ' }
                         ];
 
                         let optionsHTML = '';
-                        limitOptions.forEach(option => {
-                            const isChecked = currentLimitType === option.value ? 'checked' : '';
+                        exportOptions.forEach(option => {
+                            const isChecked = currentExportType === option.value ? 'checked' : '';
                             optionsHTML += `
-                                            <label onclick="handleLimitTypeChange('${option.value}')">
-                                                <input type="radio" name="limitTypeRadio" value="${option.value}" ${isChecked} /> ${option.text}
+                                            <label onclick="handleExportTypeChange('${option.value}')">
+                                                <input type="radio" name="exportTypeRadio" value="${option.value}" ${isChecked} /> ${option.text}
                                             </label>
                                         `;
                         });
 
                         dropdown.innerHTML = optionsHTML;
-                        console.log('✅ Populated limit type filter');
+                        console.log('✅ Populated export type filter');
                     }
 
-                    // Handle limit type change
-                    function handleLimitTypeChange(limitType) {
-                        console.log('🔄 Limit type changed to:', limitType);
+                    // Handle export type change
+                    function handleExportTypeChange(exportType) {
+                        console.log('🔄 Export type changed to:', exportType);
 
                         // Update hidden input
-                        document.getElementById('limitTypeInput').value = limitType;
+                        document.getElementById('exportTypeInput').value = exportType;
 
                         // Update display
-                        const limitBox = document.getElementById('limitTypeFilter').querySelector('.select-box');
-                        updateSelectedDisplay(limitBox);
+                        const exportBox = document.getElementById('exportTypeFilter').querySelector('.select-box');
+                        updateSelectedDisplay(exportBox);
 
-                        // Show additional options for custom, even, odd
-                        if (limitType === 'custom') {
-                            promptCustomRange();
-                        } else if (limitType === 'even') {
-                            promptEvenRange();
-                        } else if (limitType === 'odd') {
-                            promptOddRange();
+                        // Show/hide export options UI based on type
+                        showExportOptions(exportType);
+                    }
+
+                    // Show export options UI based on type
+                    function showExportOptions(exportType) {
+                        const exportOptionsUI = document.getElementById('exportOptionsUI');
+                        const exportOptionsTitle = document.getElementById('exportOptionsTitle');
+                        
+                        // Hide all options first
+                        document.querySelectorAll('.export-option').forEach(option => {
+                            option.style.display = 'none';
+                        });
+
+                        // Show UI and specific options based on type
+                        switch (exportType) {
+                            case 'first':
+                            case 'last':
+                            case 'random':
+                                exportOptionsUI.style.display = 'block';
+                                document.getElementById('countOptions').style.display = 'block';
+                                const typeText = exportType === 'first' ? 'Đầu' : exportType === 'last' ? 'Cuối' : 'Random';
+                                exportOptionsTitle.textContent = `Cấu hình xuất ${typeText} dòng`;
+                                
+                                // Set default value
+                                document.getElementById('exportCountField').value = '1000';
+                                break;
+                                
+                            case 'range':
+                                exportOptionsUI.style.display = 'block';
+                                document.getElementById('rangeOptions').style.display = 'block';
+                                exportOptionsTitle.textContent = 'Cấu hình xuất theo khoảng STT';
+                                
+                                // Set default values
+                                document.getElementById('rangeStartField').value = '1';
+                                document.getElementById('rangeEndField').value = '1000';
+                                break;
+                                
+                            case 'alternate':
+                                exportOptionsUI.style.display = 'block';
+                                document.getElementById('alternateOptions').style.display = 'block';
+                                exportOptionsTitle.textContent = 'Cấu hình xuất xen kẻ';
+                                
+                                // Set default values
+                                document.getElementById('alternateStartField').value = '1';
+                                document.getElementById('alternateEndField').value = '1000';
+                                document.getElementById('stepSizeField').value = '3';
+                                break;
+                                
+                            default:
+                                exportOptionsUI.style.display = 'none';
+                                break;
                         }
                     }
 
-                    // Prompt for custom range
-                    function promptCustomRange() {
-                        const start = prompt('Nhập STT bắt đầu:', '1');
-                        const end = prompt('Nhập STT kết thúc:', '1000');
-                        const filter = prompt('Bộ lọc (all/even/odd):', 'all');
-
-                        if (start && end) {
-                            document.getElementById('customStartInput').value = start;
-                            document.getElementById('customEndInput').value = end;
-                            document.getElementById('customFilterInput').value = filter || 'all';
-                            console.log('✅ Custom range set:', start, '-', end, filter);
+                    // Apply export count (for first, last, random)
+                    function applyExportCount() {
+                        const count = document.getElementById('exportCountField').value;
+                        if (count && !isNaN(count) && count > 0) {
+                            document.getElementById('exportCountInput').value = count;
+                            showSuccessMessage(`✅ Đã cấu hình xuất ${count} dòng`);
+                            console.log('✅ Export count set:', count);
+                        } else {
+                            showErrorMessage('❌ Vui lòng nhập số lượng hợp lệ');
                         }
                     }
 
-                    // Prompt for even range
-                    function promptEvenRange() {
-                        const start = prompt('Nhập STT chẵn bắt đầu:', '2');
-                        const end = prompt('Nhập STT chẵn kết thúc:', '1000');
-
-                        if (start && end) {
-                            document.getElementById('evenStartInput').value = start;
-                            document.getElementById('evenEndInput').value = end;
-                            console.log('✅ Even range set:', start, '-', end);
+                    // Apply range input (for range option)
+                    function applyRangeInput() {
+                        const start = document.getElementById('rangeStartField').value;
+                        const end = document.getElementById('rangeEndField').value;
+                        
+                        if (start && end && !isNaN(start) && !isNaN(end) && start > 0 && end > 0) {
+                            if (parseInt(start) <= parseInt(end)) {
+                                document.getElementById('rangeStartInput').value = start;
+                                document.getElementById('rangeEndInput').value = end;
+                                showSuccessMessage(`✅ Đã cấu hình khoảng STT từ ${start} đến ${end}`);
+                                console.log('✅ Range set:', start, '-', end);
+                            } else {
+                                showErrorMessage('❌ STT bắt đầu phải nhỏ hơn hoặc bằng STT kết thúc');
+                            }
+                        } else {
+                            showErrorMessage('❌ Vui lòng nhập khoảng STT hợp lệ');
                         }
                     }
 
-                    // Prompt for odd range
-                    function promptOddRange() {
-                        const start = prompt('Nhập STT lẻ bắt đầu:', '1');
-                        const end = prompt('Nhập STT lẻ kết thúc:', '999');
-
-                        if (start && end) {
-                            document.getElementById('oddStartInput').value = start;
-                            document.getElementById('oddEndInput').value = end;
-                            console.log('✅ Odd range set:', start, '-', end);
+                    // Apply alternate input (for alternate option)
+                    function applyAlternateInput() {
+                        const start = document.getElementById('alternateStartField').value;
+                        const end = document.getElementById('alternateEndField').value;
+                        const step = document.getElementById('stepSizeField').value;
+                        
+                        if (start && end && step && !isNaN(start) && !isNaN(end) && !isNaN(step) && 
+                            start > 0 && end > 0 && step > 0) {
+                            if (parseInt(start) <= parseInt(end)) {
+                                document.getElementById('rangeStartInput').value = start;
+                                document.getElementById('rangeEndInput').value = end;
+                                document.getElementById('stepSizeInput').value = step;
+                                showSuccessMessage(`✅ Đã cấu hình xuất xen kẻ từ ${start} đến ${end} với bước nhảy ${step}`);
+                                console.log('✅ Alternate set:', start, '-', end, 'step:', step);
+                            } else {
+                                showErrorMessage('❌ STT bắt đầu phải nhỏ hơn hoặc bằng STT kết thúc');
+                            }
+                        } else {
+                            showErrorMessage('❌ Vui lòng nhập thông tin hợp lệ');
                         }
+                    }
+
+                    // Show success message
+                    function showSuccessMessage(message) {
+                        const alertDiv = document.createElement('div');
+                        alertDiv.className = 'alert alert-success alert-dismissible fade show mt-2';
+                        alertDiv.innerHTML = `
+                            <i class="fas fa-check-circle me-2"></i>
+                            ${message}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        `;
+
+                        const exportOptionsUI = document.getElementById('exportOptionsUI');
+                        exportOptionsUI.parentNode.insertBefore(alertDiv, exportOptionsUI.nextSibling);
+
+                        // Auto remove after 3 seconds
+                        setTimeout(() => {
+                            if (alertDiv.parentNode) {
+                                alertDiv.remove();
+                            }
+                        }, 3000);
+                    }
+
+                    // Show error message
+                    function showErrorMessage(message) {
+                        const alertDiv = document.createElement('div');
+                        alertDiv.className = 'alert alert-danger alert-dismissible fade show mt-2';
+                        alertDiv.innerHTML = `
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            ${message}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        `;
+
+                        const exportOptionsUI = document.getElementById('exportOptionsUI');
+                        exportOptionsUI.parentNode.insertBefore(alertDiv, exportOptionsUI.nextSibling);
+
+                        // Auto remove after 5 seconds
+                        setTimeout(() => {
+                            if (alertDiv.parentNode) {
+                                alertDiv.remove();
+                            }
+                        }, 5000);
                     }
 
                     // Initialize event listeners after filters are populated
@@ -1158,7 +1407,7 @@
                         populateFilterDropdown('businessTypeFilter', fallbackData.businessTypes, 'Loaihinhkte', []);
                         populateFilterDropdown('provinceFilter', fallbackData.provinces, 'MaTinh_Dieutra', []);
                         populateFilterDropdown('economicZoneFilter', fallbackData.economicZones, 'Vungkinhte', []);
-                        populateLimitTypeFilter();
+                        populateExportTypeFilter();
 
                         initializeFilterEventListeners();
                         console.log('✅ Fallback options loaded');
@@ -1241,7 +1490,7 @@
                     }
 
                     // Export to Excel function
-                    function exportToExcel() {
+                    function exportToExcel(buttonElement) {
                         console.log('📊 Exporting to Excel...');
 
                         const form = document.querySelector('.filter-form');
@@ -1291,9 +1540,9 @@
                         const exportUrl = '/DN/ExportToExcel?' + params.toString();
 
                         // Show loading message
-                        const originalText = event.target.innerHTML;
-                        event.target.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Đang xuất...';
-                        event.target.disabled = true;
+                        const originalText = buttonElement.innerHTML;
+                        buttonElement.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Đang xuất...';
+                        buttonElement.disabled = true;
 
                         // Use fetch to check for errors before downloading
                         fetch(exportUrl)
@@ -1426,8 +1675,8 @@
                             })
                             .finally(() => {
                                 // Reset button
-                                event.target.innerHTML = originalText;
-                                event.target.disabled = false;
+                                buttonElement.innerHTML = originalText;
+                                buttonElement.disabled = false;
                             });
                     }
 
@@ -1438,6 +1687,12 @@
 
                             // Show filter guide
         function showFilterGuide() {
+            // Prevent multiple alerts
+            if (window.guideAlertShown) {
+                return;
+            }
+            window.guideAlertShown = true;
+            
             const guide = `🎯 HƯỚNG DẪN SỬ DỤNG BỘ LỌC VIEWRAWDATA
 
 📋 BỘ LỌC NAVIGATION:
@@ -1451,14 +1706,14 @@
    • Tỉnh/Thành phố: Lọc theo địa phương  
    • Loại hình KT: Lọc theo loại hình kinh tế
    • Vùng KT: Lọc theo vùng kinh tế
-   • Giới hạn: Chọn cách hiển thị dữ liệu
+   • Kiểu xuất: Chọn cách xuất dữ liệu
 
-📊 GIỚI HẠN DỮ LIỆU:
-   • 1000 đầu: Hiển thị 1000 records đầu tiên
-   • 1000 cuối: Hiển thị 1000 records cuối cùng
-   • STT chẵn/lẻ: Lọc theo số thứ tự
-   • Tự chọn: Nhập khoảng STT tùy ý
-   • Tất cả: Hiển thị tối đa 5000 records
+📊 KIỂU XUẤT DỮ LIỆU:
+   • Xuất Các Dòng Đầu: Nhập số lượng
+   • Xuất Các Dòng Cuối: Nhập số lượng
+   • Xuất Random: Nhập số lượng
+   • Chọn Khoảng: Nhập STT từ X đến Y
+   • Xuất Xen kẻ: Nhập khoảng và bước nhảy
 
 ⚡ TÍNH NĂNG:
    • Export Excel: Xuất dữ liệu đã lọc
@@ -1478,10 +1733,21 @@
    • Tên file có timestamp và thông tin bộ lọc`;
             
             alert(guide);
+            
+            // Reset flag after 2 seconds
+            setTimeout(() => {
+                window.guideAlertShown = false;
+            }, 2000);
         }
 
         // Test Export Excel function
         function testExportExcel() {
+            // Prevent multiple alerts
+            if (window.testAlertShown) {
+                return;
+            }
+            window.testAlertShown = true;
+            
             console.log('🧪 TESTING EXPORT EXCEL FUNCTION...');
             
             // Check if form exists
@@ -1490,6 +1756,7 @@
             
             if (!form) {
                 alert('❌ Form not found for export');
+                window.testAlertShown = false;
                 return;
             }
             
@@ -1533,6 +1800,11 @@
             console.log('🔗 Export URL:', exportUrl);
             
             alert(`✅ Export URL generated successfully!\n\nParameters found:\n- Hidden inputs: ${hiddenInputs.length}\n- Checkboxes: ${checkboxes.length}\n- Radio buttons: ${radios.length}\n\nCheck console for details.`);
+            
+            // Reset flag after 2 seconds
+            setTimeout(() => {
+                window.testAlertShown = false;
+            }, 2000);
             
             return exportUrl;
         }

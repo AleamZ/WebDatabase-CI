@@ -162,14 +162,11 @@ namespace CIResearch.Controllers
             List<string>? Masothue = null,
             List<string>? Loaihinhkte = null,
             List<string>? Vungkinhte = null,
-            string limitType = "first1000",
-            int? customStart = null,
-            int? customEnd = null,
-            string customFilter = "all",
-            int? evenStart = null,
-            int? evenEnd = null,
-            int? oddStart = null,
-            int? oddEnd = null)
+            string exportType = "first",
+            int? exportCount = null,
+            int? rangeStart = null,
+            int? rangeEnd = null,
+            int? stepSize = null)
         {
             try
             {
@@ -180,13 +177,13 @@ namespace CIResearch.Controllers
                 Console.WriteLine($"   - Masothue: [{string.Join(", ", Masothue ?? new List<string>())}]");
                 Console.WriteLine($"   - Loaihinhkte: [{string.Join(", ", Loaihinhkte ?? new List<string>())}]");
                 Console.WriteLine($"   - Vungkinhte: [{string.Join(", ", Vungkinhte ?? new List<string>())}]");
-                Console.WriteLine($"   - LimitType: {limitType}");
-                Console.WriteLine($"   - CustomStart: {customStart}, CustomEnd: {customEnd}, CustomFilter: {customFilter}");
-                Console.WriteLine($"   - EvenStart: {evenStart}, EvenEnd: {evenEnd}");
-                Console.WriteLine($"   - OddStart: {oddStart}, OddEnd: {oddEnd}");
+                Console.WriteLine($"   - ExportType: {exportType}");
+                Console.WriteLine($"   - ExportCount: {exportCount}");
+                Console.WriteLine($"   - RangeStart: {rangeStart}, RangeEnd: {rangeEnd}");
+                Console.WriteLine($"   - StepSize: {stepSize}");
 
                 // Validate inputs
-                string validationError = ValidateLimitInputs(limitType, customStart, customEnd, customFilter, evenStart, evenEnd, oddStart, oddEnd);
+                string validationError = ValidateExportInputs(exportType, exportCount, rangeStart, rangeEnd, stepSize);
                 if (!string.IsNullOrEmpty(validationError))
                 {
                     ViewBag.Error = validationError;
@@ -200,10 +197,10 @@ namespace CIResearch.Controllers
 
                 Console.WriteLine($"📊 Data after filtering: {filteredData.Count} records");
 
-                // Apply data limiting based on limitType
-                var limitedData = ApplyDataLimiting(filteredData, limitType, customStart, customEnd, customFilter, evenStart, evenEnd, oddStart, oddEnd);
+                // Apply data limiting based on exportType
+                var limitedData = ApplyExportLimiting(filteredData, exportType, exportCount, rangeStart, rangeEnd, stepSize);
 
-                Console.WriteLine($"📊 Data after limiting ({limitType}): {limitedData.Count} records");
+                Console.WriteLine($"📊 Data after limiting ({exportType}): {limitedData.Count} records");
 
                 // Prepare ViewBag data for filters
                 ViewBag.CurrentStt = stt;
@@ -212,14 +209,11 @@ namespace CIResearch.Controllers
                 ViewBag.CurrentMasothue = Masothue;
                 ViewBag.CurrentLoaihinhkte = Loaihinhkte;
                 ViewBag.CurrentVungkinhte = Vungkinhte;
-                ViewBag.CurrentLimitType = limitType;
-                ViewBag.CurrentCustomStart = customStart;
-                ViewBag.CurrentCustomEnd = customEnd;
-                ViewBag.CurrentCustomFilter = customFilter;
-                ViewBag.CurrentEvenStart = evenStart;
-                ViewBag.CurrentEvenEnd = evenEnd;
-                ViewBag.CurrentOddStart = oddStart;
-                ViewBag.CurrentOddEnd = oddEnd;
+                ViewBag.CurrentExportType = exportType;
+                ViewBag.CurrentExportCount = exportCount;
+                ViewBag.CurrentRangeStart = rangeStart;
+                ViewBag.CurrentRangeEnd = rangeEnd;
+                ViewBag.CurrentStepSize = stepSize;
 
                 // Statistics for display
                 ViewBag.TotalRecords = allData.Count;
@@ -333,162 +327,96 @@ namespace CIResearch.Controllers
             }
         }
 
-        private static List<QLKH> ApplyDataLimiting(List<QLKH> data, string limitType, int? customStart, int? customEnd, string customFilter = "all", int? evenStart = null, int? evenEnd = null, int? oddStart = null, int? oddEnd = null)
+        private static List<QLKH> ApplyExportLimiting(List<QLKH> data, string exportType, int? exportCount, int? rangeStart, int? rangeEnd, int? stepSize)
         {
             if (data == null || !data.Any())
                 return data ?? new List<QLKH>();
 
-            switch (limitType.ToLower())
+            switch (exportType.ToLower())
             {
-                case "first1000":
-                    return data.Take(1000).ToList();
+                case "first":
+                    var count = exportCount ?? 1000;
+                    Console.WriteLine($"🔍 Taking first {count} records");
+                    return data.Take(count).ToList();
 
-                case "last1000":
-                    return data.TakeLast(1000).ToList();
-
-                case "even":
-                    var evenData = data.Where(x => x.STT % 2 == 0);
-                    if (evenStart.HasValue && evenEnd.HasValue)
-                    {
-                        Console.WriteLine($"🔍 Even range: {evenStart.Value} to {evenEnd.Value}");
-                        evenData = evenData.Where(x => x.STT >= evenStart.Value && x.STT <= evenEnd.Value);
-
-                        var expectedEvenCount = (evenEnd.Value - evenStart.Value) / 2 + 1;
-                        var dynamicEvenLimit = Math.Min(5000, Math.Max(1000, expectedEvenCount));
-                        Console.WriteLine($"🔍 Even expected: ~{expectedEvenCount}, using limit: {dynamicEvenLimit}");
-
-                        return evenData.Take(dynamicEvenLimit).ToList();
-                    }
-                    return evenData.Take(1000).ToList();
-
-                case "odd":
-                    var oddData = data.Where(x => x.STT % 2 != 0);
-                    if (oddStart.HasValue && oddEnd.HasValue)
-                    {
-                        Console.WriteLine($"🔍 Odd range: {oddStart.Value} to {oddEnd.Value}");
-                        oddData = oddData.Where(x => x.STT >= oddStart.Value && x.STT <= oddEnd.Value);
-
-                        var expectedOddCount = (oddEnd.Value - oddStart.Value) / 2 + 1;
-                        var dynamicOddLimit = Math.Min(5000, Math.Max(1000, expectedOddCount));
-                        Console.WriteLine($"🔍 Odd expected: ~{expectedOddCount}, using limit: {dynamicOddLimit}");
-
-                        return oddData.Take(dynamicOddLimit).ToList();
-                    }
-                    return oddData.Take(1000).ToList();
+                case "last":
+                    var lastCount = exportCount ?? 1000;
+                    Console.WriteLine($"🔍 Taking last {lastCount} records");
+                    return data.TakeLast(lastCount).ToList();
 
                 case "random":
+                    var randomCount = exportCount ?? 1000;
+                    Console.WriteLine($"🔍 Taking {randomCount} random records");
                     var random = new Random();
-                    return data.OrderBy(x => random.Next()).Take(1000).ToList();
+                    return data.OrderBy(x => random.Next()).Take(randomCount).ToList();
 
-                case "custom":
-                    if (customStart.HasValue && customEnd.HasValue)
+                case "range":
+                    if (rangeStart.HasValue && rangeEnd.HasValue)
                     {
-                        Console.WriteLine($"🔍 Custom range: {customStart.Value} to {customEnd.Value}, filter: {customFilter}");
-
-                        var customData = data.Where(x => x.STT >= customStart.Value && x.STT <= customEnd.Value);
-                        Console.WriteLine($"🔍 Records in range {customStart.Value}-{customEnd.Value}: {customData.Count()}");
-
-                        // Apply even/odd filter if specified
-                        switch (customFilter?.ToLower())
-                        {
-                            case "even":
-                                customData = customData.Where(x => x.STT % 2 == 0);
-                                Console.WriteLine($"🔍 After even filter: {customData.Count()}");
-                                break;
-                            case "odd":
-                                customData = customData.Where(x => x.STT % 2 != 0);
-                                Console.WriteLine($"🔍 After odd filter: {customData.Count()}");
-                                break;
-                            default: // "all"
-                                Console.WriteLine($"🔍 No additional filter applied");
-                                break;
-                        }
-
-                        // Calculate expected count vs actual limit
-                        var expectedCount = customEnd.Value - customStart.Value + 1;
-                        var actualResults = customData.ToList();
-
-                        Console.WriteLine($"🔍 Expected records: {expectedCount}, Actual found: {actualResults.Count}");
-
-                        // Dynamic limit based on range size, max 5000 for performance
-                        var dynamicLimit = Math.Min(5000, Math.Max(1000, expectedCount));
-                        var finalResults = actualResults.Take(dynamicLimit).ToList();
-
-                        Console.WriteLine($"🔍 Final results after limit {dynamicLimit}: {finalResults.Count}");
-                        return finalResults;
+                        Console.WriteLine($"🔍 Range filter: STT BETWEEN {rangeStart.Value} AND {rangeEnd.Value}");
+                        var rangeData = data.Where(x => x.STT >= rangeStart.Value && x.STT <= rangeEnd.Value).ToList();
+                        Console.WriteLine($"🔍 Found {rangeData.Count} records in range");
+                        return rangeData;
                     }
-                    return data.Take(1000).ToList(); // Fallback to first 1000
+                    return data.Take(1000).ToList(); // Fallback
 
-                case "all":
-                    return data.Take(5000).ToList(); // Limit to 5000 for performance
+                case "alternate":
+                    if (rangeStart.HasValue && rangeEnd.HasValue && stepSize.HasValue)
+                    {
+                        Console.WriteLine($"🔍 Alternate filter: STT BETWEEN {rangeStart.Value} AND {rangeEnd.Value}, STEP {stepSize.Value}");
+                        var alternateData = data.Where(x =>
+                            x.STT >= rangeStart.Value &&
+                            x.STT <= rangeEnd.Value &&
+                            (x.STT - rangeStart.Value) % stepSize.Value == 0).ToList();
+                        Console.WriteLine($"🔍 Found {alternateData.Count} records with alternate pattern");
+                        return alternateData;
+                    }
+                    return data.Take(1000).ToList(); // Fallback
 
                 default:
                     return data.Take(1000).ToList();
             }
         }
 
-        private static string ValidateLimitInputs(string limitType, int? customStart, int? customEnd, string customFilter,
-            int? evenStart, int? evenEnd, int? oddStart, int? oddEnd)
+        private static string ValidateExportInputs(string exportType, int? exportCount, int? rangeStart, int? rangeEnd, int? stepSize)
         {
-            switch (limitType?.ToLower())
+            switch (exportType?.ToLower())
             {
-                case "custom":
-                    if (!customStart.HasValue || !customEnd.HasValue)
-                        return "Vui lòng nhập đầy đủ giá trị Từ và Đến cho Tự chọn khoảng";
-
-                    if (customStart.Value <= 0 || customEnd.Value <= 0)
-                        return "Giá trị STT phải lớn hơn 0";
-
-                    if (customStart.Value > customEnd.Value)
-                        return "Giá trị 'Từ' phải nhỏ hơn hoặc bằng 'Đến'";
-
-                    if (customEnd.Value - customStart.Value > 10000)
-                        return "Khoảng không được vượt quá 10,000 records để đảm bảo hiệu suất";
-
+                case "first":
+                case "last":
+                case "random":
+                    if (!exportCount.HasValue || exportCount.Value <= 0)
+                        return $"Vui lòng nhập số lượng dòng để xuất cho tùy chọn '{exportType}'.";
+                    if (exportCount.Value > 10000)
+                        return "Số lượng dòng xuất không được vượt quá 10,000.";
                     break;
 
-                case "even":
-                    if (evenStart.HasValue || evenEnd.HasValue)
-                    {
-                        if (!evenStart.HasValue || !evenEnd.HasValue)
-                            return "Vui lòng nhập đầy đủ khoảng STT chẵn";
-
-                        if (evenStart.Value <= 0 || evenEnd.Value <= 0)
-                            return "Giá trị STT chẵn phải lớn hơn 0";
-
-                        if (evenStart.Value % 2 != 0 || evenEnd.Value % 2 != 0)
-                            return "Vui lòng chỉ nhập số chẵn cho khoảng STT chẵn";
-
-                        if (evenStart.Value > evenEnd.Value)
-                            return "STT chẵn 'Từ' phải nhỏ hơn hoặc bằng 'Đến'";
-
-                        if (evenEnd.Value - evenStart.Value > 10000)
-                            return "Khoảng STT chẵn không được vượt quá 10,000 để đảm bảo hiệu suất";
-                    }
+                case "range":
+                    if (!rangeStart.HasValue || !rangeEnd.HasValue)
+                        return "Vui lòng nhập đầy đủ STT bắt đầu (X) và kết thúc (Y) cho tùy chọn khoảng.";
+                    if (rangeStart.Value < 1 || rangeEnd.Value < 1)
+                        return "STT bắt đầu và kết thúc phải lớn hơn 0.";
+                    if (rangeStart.Value > rangeEnd.Value)
+                        return "STT bắt đầu phải nhỏ hơn hoặc bằng STT kết thúc.";
+                    if (rangeEnd.Value - rangeStart.Value > 10000)
+                        return "Khoảng STT không được vượt quá 10,000.";
                     break;
 
-                case "odd":
-                    if (oddStart.HasValue || oddEnd.HasValue)
-                    {
-                        if (!oddStart.HasValue || !oddEnd.HasValue)
-                            return "Vui lòng nhập đầy đủ khoảng STT lẻ";
-
-                        if (oddStart.Value <= 0 || oddEnd.Value <= 0)
-                            return "Giá trị STT lẻ phải lớn hơn 0";
-
-                        if (oddStart.Value % 2 == 0 || oddEnd.Value % 2 == 0)
-                            return "Vui lòng chỉ nhập số lẻ cho khoảng STT lẻ";
-
-                        if (oddStart.Value > oddEnd.Value)
-                            return "STT lẻ 'Từ' phải nhỏ hơn hoặc bằng 'Đến'";
-
-                        if (oddEnd.Value - oddStart.Value > 10000)
-                            return "Khoảng STT lẻ không được vượt quá 10,000 để đảm bảo hiệu suất";
-                    }
+                case "alternate":
+                    if (!rangeStart.HasValue || !rangeEnd.HasValue || !stepSize.HasValue)
+                        return "Vui lòng nhập đầy đủ STT bắt đầu (X), kết thúc (Y) và bước nhảy (N) cho tùy chọn xen kẻ.";
+                    if (rangeStart.Value < 1 || rangeEnd.Value < 1 || stepSize.Value < 1)
+                        return "STT bắt đầu, kết thúc và bước nhảy phải lớn hơn 0.";
+                    if (rangeStart.Value > rangeEnd.Value)
+                        return "STT bắt đầu phải nhỏ hơn hoặc bằng STT kết thúc.";
+                    if (rangeEnd.Value - rangeStart.Value > 10000)
+                        return "Khoảng STT không được vượt quá 10,000.";
+                    if (stepSize.Value > 100)
+                        return "Bước nhảy không được vượt quá 100.";
                     break;
             }
 
-            return null; // No validation errors
+            return string.Empty; // No validation errors
         }
 
         private async Task PrepareFilterOptions(List<QLKH> allData)
@@ -2126,14 +2054,11 @@ namespace CIResearch.Controllers
             List<string>? Masothue = null,
             List<string>? Loaihinhkte = null,
             List<string>? Vungkinhte = null,
-            string limitType = "first1000",
-            int? customStart = null,
-            int? customEnd = null,
-            string customFilter = "all",
-            int? evenStart = null,
-            int? evenEnd = null,
-            int? oddStart = null,
-            int? oddEnd = null)
+            string exportType = "first",
+            int? exportCount = null,
+            int? rangeStart = null,
+            int? rangeEnd = null,
+            int? stepSize = null)
         {
             try
             {
@@ -2184,7 +2109,7 @@ namespace CIResearch.Controllers
                 Console.WriteLine($"   - MaTinh_Dieutra: [{string.Join(", ", MaTinh_Dieutra ?? new List<string>())}]");
                 Console.WriteLine($"   - Loaihinhkte: [{string.Join(", ", Loaihinhkte ?? new List<string>())}]");
                 Console.WriteLine($"   - Vungkinhte: [{string.Join(", ", Vungkinhte ?? new List<string>())}]");
-                Console.WriteLine($"   - LimitType: {limitType}");
+                Console.WriteLine($"   - ExportType: {exportType}");
 
                 ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
@@ -2192,8 +2117,8 @@ namespace CIResearch.Controllers
                 var allData = await GetCachedDataAsync();
                 var filteredData = GetCachedFilteredData(allData, stt, Nam, MaTinh_Dieutra, Masothue, Loaihinhkte, Vungkinhte);
 
-                // Apply data limiting based on limitType (same as ViewRawData)
-                var limitedData = ApplyDataLimiting(filteredData, limitType, customStart, customEnd, customFilter, evenStart, evenEnd, oddStart, oddEnd);
+                // Apply data limiting based on exportType (same as ViewRawData)
+                var limitedData = ApplyExportLimiting(filteredData, exportType, exportCount, rangeStart, rangeEnd, stepSize);
 
                 Console.WriteLine($"📊 Data for Excel export: {limitedData.Count} records");
 
@@ -2287,16 +2212,14 @@ namespace CIResearch.Controllers
                 worksheet.Cells[summaryRow, 2].Value = limitedData.Count;
                 worksheet.Cells[summaryRow, 1].Style.Font.Bold = true;
                 worksheet.Cells[summaryRow + 1, 1].Value = "Loại giới hạn:";
-                worksheet.Cells[summaryRow + 1, 2].Value = limitType switch
+                worksheet.Cells[summaryRow + 1, 2].Value = exportType switch
                 {
-                    "first1000" => "1000 đầu",
-                    "last1000" => "1000 cuối",
-                    "even" => "STT chẵn",
-                    "odd" => "STT lẻ",
-                    "random" => "Random 1000",
-                    "custom" => "Tự chọn",
-                    "all" => "Tất cả",
-                    _ => limitType
+                    "first" => "Đầu",
+                    "last" => "Cuối",
+                    "random" => "Random",
+                    "range" => "Khoảng",
+                    "alternate" => "Xen kẻ",
+                    _ => exportType
                 };
                 worksheet.Cells[summaryRow + 1, 1].Style.Font.Bold = true;
                 worksheet.Cells[summaryRow + 2, 1].Value = "Xuất lúc:";
@@ -2305,7 +2228,7 @@ namespace CIResearch.Controllers
 
                 var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
                 var filterInfo = string.IsNullOrEmpty(stt) && (Nam?.Count ?? 0) == 0 ? "TatCa" : "DaLoc";
-                var fileName = $"DuLieu_DN_{filterInfo}_{limitType}_{timestamp}.xlsx";
+                var fileName = $"DuLieu_DN_{filterInfo}_{exportType}_{timestamp}.xlsx";
 
                 // Serialize filter params để lưu vào bảng
                 var filterParams = new
@@ -2316,14 +2239,11 @@ namespace CIResearch.Controllers
                     Masothue,
                     Loaihinhkte,
                     Vungkinhte,
-                    limitType,
-                    customStart,
-                    customEnd,
-                    customFilter,
-                    evenStart,
-                    evenEnd,
-                    oddStart,
-                    oddEnd
+                    exportType,
+                    exportCount,
+                    rangeStart,
+                    rangeEnd,
+                    stepSize
                 };
                 string filterParamsJson = Newtonsoft.Json.JsonConvert.SerializeObject(filterParams);
 
@@ -7561,25 +7481,24 @@ namespace CIResearch.Controllers
 
                 var testCases = new[]
                 {
-                    new { limitType = "custom", customStart = (int?)1, customEnd = (int?)2000, customFilter = "all", expected = "success" },
-                    new { limitType = "custom", customStart = (int?)2000, customEnd = (int?)1, customFilter = "all", expected = "error" },
-                    new { limitType = "custom", customStart = (int?)0, customEnd = (int?)100, customFilter = "all", expected = "error" },
-                    new { limitType = "custom", customStart = (int?)1, customEnd = (int?)15000, customFilter = "all", expected = "error" },
-                    new { limitType = "even", customStart = (int?)null, customEnd = (int?)null, customFilter = "all", expected = "success" },
-                    new { limitType = "odd", customStart = (int?)null, customEnd = (int?)null, customFilter = "all", expected = "success" }
+                    new { exportType = "range", rangeStart = (int?)1, rangeEnd = (int?)2000, exportCount = (int?)null, stepSize = (int?)null, expected = "success" },
+                    new { exportType = "range", rangeStart = (int?)2000, rangeEnd = (int?)1, exportCount = (int?)null, stepSize = (int?)null, expected = "error" },
+                    new { exportType = "range", rangeStart = (int?)0, rangeEnd = (int?)100, exportCount = (int?)null, stepSize = (int?)null, expected = "error" },
+                    new { exportType = "range", rangeStart = (int?)1, rangeEnd = (int?)15000, exportCount = (int?)null, stepSize = (int?)null, expected = "error" },
+                    new { exportType = "first", rangeStart = (int?)null, rangeEnd = (int?)null, exportCount = (int?)1000, stepSize = (int?)null, expected = "success" },
+                    new { exportType = "last", rangeStart = (int?)null, rangeEnd = (int?)null, exportCount = (int?)1000, stepSize = (int?)null, expected = "success" }
                 };
 
                 var results = new List<object>();
 
                 foreach (var test in testCases)
                 {
-                    var validationResult = ValidateLimitInputs(
-                        test.limitType,
-                        test.customStart,
-                        test.customEnd,
-                        test.customFilter,
-                        null, null, null, null
-                    );
+                    var validationResult = ValidateExportInputs(
+                        test.exportType,
+                        test.exportCount,
+                        test.rangeStart,
+                        test.rangeEnd,
+                        test.stepSize);
 
                     var actualResult = string.IsNullOrEmpty(validationResult) ? "success" : "error";
                     var testPassed = actualResult == test.expected;
@@ -7593,7 +7512,7 @@ namespace CIResearch.Controllers
                         testPassed = testPassed
                     });
 
-                    Console.WriteLine($"🧪 Test: {test.limitType} {test.customStart}-{test.customEnd}");
+                    Console.WriteLine($"🧪 Test: {test.exportType} {test.rangeStart}-{test.rangeEnd}");
                     Console.WriteLine($"   Expected: {test.expected}, Actual: {actualResult}, Passed: {testPassed}");
                     if (!string.IsNullOrEmpty(validationResult))
                     {
