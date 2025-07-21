@@ -1531,9 +1531,7 @@ D:\Projects\Webdatabase-CI\obj\Debug\net8.0\CIResearch.MvcApplicationPartsAssemb
 D:\Projects\Webdatabase-CI\obj\Debug\net8.0\CIResearch.RazorAssemblyInfo.cache
 D:\Projects\Webdatabase-CI\obj\Debug\net8.0\CIResearch.RazorAssemblyInfo.cs
 D:\Projects\Webdatabase-CI\obj\Debug\net8.0\CIResearch.sourcelink.json
-D:\Projects\Webdatabase-CI\obj\Debug\net8.0\scopedcss\Views\Shared\_Layout.cshtml.rz.scp.css
 D:\Projects\Webdatabase-CI\obj\Debug\net8.0\scopedcss\bundle\CIResearch.styles.css
-D:\Projects\Webdatabase-CI\obj\Debug\net8.0\scopedcss\projectbundle\CIResearch.bundle.scp.css
 D:\Projects\Webdatabase-CI\obj\Debug\net8.0\staticwebassets.build.json
 D:\Projects\Webdatabase-CI\obj\Debug\net8.0\staticwebassets.build.json.cache
 D:\Projects\Webdatabase-CI\obj\Debug\net8.0\staticwebassets.development.json

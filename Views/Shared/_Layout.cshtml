@@ -12,281 +12,421 @@
 	<link href="~/adminpanel/css/style.css" rel="stylesheet" />
 	<link href="~/login11_6/css/style.css" rel="stylesheet" />
 	<link href='https://unpkg.com/boxicons@2.0.9/css/boxicons.min.css' rel='stylesheet'>
-	<title>@ViewBag.Title - AdminHub</title>
-</head>
+	<title>AdminHub - Fixed Layout</title>
 
-<body>
+	<style>
+		/* THAY THẾ CSS CŨ BẰNG CSS MỚI NÀY ĐỂ FIX THANH SCROLL */
 
-	<!-- SIDEBAR -->
-	<section id="sidebar">
-		<div class="sidebar-header">
-			<a href="#" class="brand">
-				<i>
-					<img src="~/img(4uu)/logo ci.png"
-						style="width: 200px; height: auto; margin-top: 40px; margin-left:20px;" alt="CI Research Logo"
-						onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
-					<span style="display: none; font-size: 18px; font-weight: bold; color: var(--blue);">CI
-						RESEARCH</span>
-				</i>
-			</a>
-		</div>
+		/* Sidebar collapse styles */
+		#sidebar.collapsed {
+			width: 60px !important;
+			min-width: 60px !important;
+		}
 
-		<ul class="side-menu top">
-			@if (Context.Session.GetString("Username") != null)
-			{
-				var userRole = Context.Session.GetString("Role");
-				<li class="dropdown">
-					<a href="#" class="dropdown-toggle" data-tooltip="Dữ liệu công ty">
+		#sidebar.collapsed .text {
+			display: none !important;
+		}
+
+		#sidebar.collapsed .dropdown-menu {
+			display: none !important;
+		}
+
+		/* FIX: Sidebar container - Remove scroll và tăng chiều cao */
+		#sidebar {
+			height: 100vh;
+			overflow-y: auto;
+			/* Thay vì scroll, dùng auto */
+			overflow-x: hidden;
+		}
+
+		/* FIX: Side menu container - loại bỏ chiều cao cố định */
+		#sidebar .side-menu {
+			height: auto !important;
+			/* Không giới hạn chiều cao */
+			max-height: none !important;
+			overflow: visible !important;
+			padding-bottom: 20px;
+			/* Thêm padding dưới */
+		}
+
+		/* FIX: Menu items - tăng chiều cao */
+		#sidebar .side-menu li {
+			position: relative;
+			min-height: 48px;
+			/* Tăng chiều cao tối thiểu */
+		}
+
+		#sidebar .side-menu li a {
+			padding: 12px 20px !important;
+			/* Tăng padding để item cao hơn */
+			min-height: 48px !important;
+			display: flex !important;
+			align-items: center !important;
+			line-height: 1.4 !important;
+		}
+
+		/* FIX: Dropdown positioning */
+		#sidebar .dropdown,
+		#sidebar li {
+			position: relative;
+		}
+
+		/* Bootstrap dropdown custom for sidebar - FIX POSITIONING */
+		#sidebar .bootstrap-dropdown {
+			position: relative;
+		}
+
+		#sidebar .bootstrap-dropdown .dropdown-menu {
+			display: none;
+			position: absolute;
+			background: #fff;
+			border-radius: 8px;
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+			margin-top: 4px;
+			min-width: 200px;
+			left: 0;
+			/* FIX: Căn trái thay vì để auto */
+			right: auto;
+			top: 100%;
+			z-index: 1000;
+			border: 1px solid #e0e0e0;
+			padding: 8px 0;
+		}
+
+		/* Show dropdown when active */
+		#sidebar .bootstrap-dropdown .dropdown-menu.show {
+			display: block;
+		}
+
+		/* FIX: Dropdown items - tăng chiều cao */
+		#sidebar .bootstrap-dropdown .dropdown-item {
+			color: #333;
+			font-size: 14px;
+			padding: 12px 16px !important;
+			/* Tăng padding */
+			text-decoration: none;
+			display: block;
+			transition: all 0.2s ease;
+			border: none;
+			background: none;
+			min-height: 44px;
+			/* Tăng chiều cao tối thiểu */
+			line-height: 1.4;
+		}
+
+		#sidebar .bootstrap-dropdown .dropdown-item:hover {
+			background: #f8f9fa;
+			color: #007bff;
+			transform: translateX(4px);
+		}
+
+		/* Tooltip styles */
+		.sidebar-tooltip {
+			position: absolute;
+			z-index: 9999;
+			background: #222;
+			color: #fff;
+			padding: 8px 12px;
+			border-radius: 6px;
+			font-size: 13px;
+			white-space: nowrap;
+			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+			pointer-events: none;
+			transition: opacity 0.2s;
+		}
+
+		/* FIX: Hide scrollbar nhưng vẫn có thể scroll */
+		#sidebar::-webkit-scrollbar {
+			width: 0px;
+			background: transparent;
+			/* Ẩn scrollbar cho webkit browsers */
+		}
+
+		#sidebar {
+			-ms-overflow-style: none;
+			/* IE and Edge */
+			scrollbar-width: none;
+			/* Firefox */
+		}
+
+		/* FIX: Đảm bảo content không bị cắt */
+		#sidebar .side-menu.top {
+			flex: 1;
+			display: flex;
+			flex-direction: column;
+			gap: 2px;
+			/* Khoảng cách giữa các item */
+		}
+
+		/* FIX: Responsive - trên màn hình nhỏ */
+		@@media(max - height: 700px) {
+				#sidebar .side-menu li a {
+					padding: 10px 20px !important;
+					min-height: 42px !important;
+				}
+
+				#sidebar .bootstrap-dropdown .dropdown-item {
+					padding: 10px 16px !important;
+					min-height: 40px !important;
+				}
+			}
+
+			/* FIX: Đảm bảo logo không bị ảnh hưởng */
+			#sidebar .sidebar-header {
+				flex-shrink: 0;
+				padding: 15px;
+			}
+
+			/* FIX: Menu toggle ở cuối */
+			#sidebar .side-menu li:last-child {
+				margin-top: auto;
+				border-top: 1px solid #eee;
+				padding-top: 10px;
+			}
+		</style>
+	</head>
+
+	<body>
+
+		<!-- SIDEBAR (BOOTSTRAP DROPDOWN) -->
+		<section id="sidebar" class="sidebar">
+			<div class="sidebar-header">
+				<a href="#" class="brand">
+					<i>
+						<img src="~/img(4uu)/logo ci.png"
+							style="width: 200px; height: auto; margin-top: 40px; margin-left:20px;" alt="CI Research Logo"
+							onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+						<span style="display: none; font-size: 18px; font-weight: bold; color: var(--blue);">CI
+							RESEARCH</span>
+					</i>
+				</a>
+			</div>
+			<ul class="side-menu top">
+				<!-- Dữ liệu công ty dropdown -->
+				<li class="dropdown bootstrap-dropdown">
+					<a href="#" class="dropdown-toggle" data-tooltip="Dữ liệu công ty" aria-haspopup="true"
+						aria-expanded="false">
 						<i class='bx bxs-briefcase'></i>
 						<span class="text">Dữ liệu công ty</span>
 					</a>
-					<ul class="dropdown-menu">
-						<li>
-							<a href="@Url.Action("Index", "Bacsi")" data-tooltip="Bác sĩ">
-								<span class="text">Bác sĩ</span>
-							</a>
-						</li>
-						<li>
-							<a href="@Url.Action("Index", "Manhinhchinh")" data-tooltip="Consumer">
-								<span class="text">Consumer</span>
-							</a>
-						</li>
-					</ul>
+					<div class="dropdown-menu">
+						<a class="dropdown-item" href="/Bacsi" data-tooltip="Bác sĩ">
+							<span class="text">Bác sĩ</span>
+						</a>
+						<a class="dropdown-item" href="#" data-tooltip="Consumer">
+							<span class="text">Consumer</span>
+						</a>
+					</div>
 				</li>
+
+				<!-- Thông tin doanh nghiệp dropdown -->
+				<li class="dropdown bootstrap-dropdown">
+					<a href="#" class="dropdown-toggle" data-tooltip="Thông tin doanh nghiệp" aria-haspopup="true"
+						aria-expanded="false">
+						<i class='bx bxs-briefcase'></i>
+						<span class="text">Thông tin doanh nghiệp</span>
+					</a>
+					<div class="dropdown-menu">
+						<a class="dropdown-item" href="#">
+							<span class="text">Trang doanh nghiệp</span>
+						</a>
+						<a class="dropdown-item" href="#">
+							<span class="text">Thêm doanh nghiệp mới</span>
+						</a>
+						<a class="dropdown-item" href="#">
+							<span class="text">Import từ Excel</span>
+						</a>
+						<a class="dropdown-item" href="#">
+							<span class="text">Năm 2023</span>
+						</a>
+						<a class="dropdown-item" href="#">
+							<span class="text">Năm 2021</span>
+						</a>
+						<a class="dropdown-item" href="#">
+							<span class="text">Năm 2022</span>
+						</a>
+					</div>
+				</li>
+
+				<!-- Regular menu items -->
 				<li>
-					<a href="@Url.Action("ViewProfile", "Profile")" data-tooltip="Hồ sơ của tôi">
+					<a href="#" data-tooltip="Hồ sơ của tôi">
 						<i class='bx bxs-user'></i>
 						<span class="text">Hồ sơ của tôi</span>
 					</a>
 				</li>
 				<li>
-					<a href="@Url.Action("ChangePassword", "LoginRegister")" data-tooltip="Đổi mật khẩu">
+					<a href="#" data-tooltip="Đổi mật khẩu">
 						<i class='bx bxs-lock'></i>
 						<span class="text">Đổi mật khẩu</span>
 					</a>
 				</li>
-				@if (userRole == "Manager")
-				{
-					<li>
-						<a href="@Url.Action("Index", "Tracuulocxuat")" data-tooltip="Lịch sử lọc xuất">
-							<i class='bx bx-history'></i>
-							<span class="text">Lịch sử lọc xuất</span>
-						</a>
-					</li>
-				}
-				@if (userRole == "Admin")
-				{
-					<li class="dropdown">
-						<a href="#" class="dropdown-toggle" data-tooltip="Thông tin doanh nghiệp">
-							<i class='bx bxs-briefcase'></i>
-							<span class="text">Thông tin doanh nghiệp</span>
-						</a>
-						<ul class="dropdown-menu">
-							<li>
-								<a href="@Url.Action("Index", "DN")">
-									<span class="text">Trang doanh nghiệp</span>
-								</a>
-							</li>
-							<li>
-								<a href="@Url.Action("Index", "DNInsert")">
-									<span class="text">Thêm doanh nghiệp mới</span>
-								</a>
-							</li>
-							<li>
-								<a href="@Url.Action("Index", "DNImport")">
-									<span class="text">Import từ Excel</span>
-								</a>
-							</li>
-							<li>
-								<a href="@Url.Action("Index", "DN")">
-									<span class="text">Năm 2023</span>
-								</a>
-							</li>
-							<li>
-								<a href="@Url.Action("Index", "DN")">
-									<span class="text">Năm 2021</span>
-								</a>
-							</li>
-							<li>
-								<a href="@Url.Action("Index", "DN")">
-									<span class="text">Năm 2022</span>
-								</a>
-							</li>
-						</ul>
-					</li>
-					<li>
-						<a href="@Url.Action("Index", "Admin")" data-tooltip="Trang admin">
-							<i class='bx bxs-user-plus'></i>
-							<span class="text">Trang admin</span>
-						</a>
-					</li>
-					<li>
-						<a href="@Url.Action("Register", "LoginRegister")" data-tooltip="Đăng ký tài khoản">
-							<i class='bx bxs-user-plus'></i>
-							<span class="text">Đăng ký tài khoản</span>
-						</a>
-					</li>
-					<li>
-						<a href="@Url.Action("Index", "ManageUsers")" data-tooltip="Quản lý tài khoản">
-							<i class='bx bxs-cog'></i>
-							<span class="text">Quản lý tài khoản</span>
-						</a>
-					</li>
-					<li>
-						<a href="@Url.Action("Index", "ALLDATA")" data-tooltip="Thêm dữ liệu dự án">
-							<i class='bx bxs-data'></i>
-							<span class="text">Thêm dữ liệu dự án</span>
-						</a>
-					</li>
-					<li>
-						<a href="@Url.Action("Index", "Tracuulocxuat")" data-tooltip="Lịch sử lọc xuất">
-							<i class='bx bx-history'></i>
-							<span class="text">Lịch sử lọc xuất</span>
-						</a>
-					</li>
-				}
 				<li>
-					<a href="@Url.Action("Logout", "LoginRegister")" class="logout" data-tooltip="Đăng Xuất">
+					<a href="#" data-tooltip="Lịch sử lọc xuất">
+						<i class='bx bx-history'></i>
+						<span class="text">Lịch sử lọc xuất</span>
+					</a>
+				</li>
+				<li>
+					<a href="#" data-tooltip="Trang admin">
+						<i class='bx bxs-user-plus'></i>
+						<span class="text">Trang admin</span>
+					</a>
+				</li>
+				<li>
+					<a href="#" data-tooltip="Đăng ký tài khoản">
+						<i class='bx bxs-user-plus'></i>
+						<span class="text">Đăng ký tài khoản</span>
+					</a>
+				</li>
+				<li>
+					<a href="#" data-tooltip="Quản lý tài khoản">
+						<i class='bx bxs-cog'></i>
+						<span class="text">Quản lý tài khoản</span>
+					</a>
+				</li>
+				<li>
+					<a href="#" data-tooltip="Thêm dữ liệu dự án">
+						<i class='bx bxs-data'></i>
+						<span class="text">Thêm dữ liệu dự án</span>
+					</a>
+				</li>
+				<li>
+					<a href="/LoginRegister/Logout" class="logout" data-tooltip="Đăng Xuất">
 						<i class='bx bxs-log-out-circle'></i>
 						<span class="text">Đăng Xuất</span>
 					</a>
 				</li>
-			}
-			else
-			{
-				<li>
-					<a href="@Url.Action("Login", "LoginRegister")" class="logout" data-tooltip="ĐĂNG NHẬP">
-						<i class='bx bxs-log-in-circle'></i>
-						<span class="text">ĐĂNG NHẬP</span>
+				@* <li>
+					<a href="#" class="menu-toggle" id="menu-toggle" data-tooltip="Thu gọn menu">
+						<i class='bx bx-chevron-left'></i>
+						<span class="text">Thu gọn menu</span>
 					</a>
-				</li>
-			}
-			<li>
-				<a href="#" class="menu-toggle" id="menu-toggle" data-tooltip="Thu gọn menu">
-					<i class='bx bx-chevron-left'></i>
-					<span class="text">Thu gọn menu</span>
-				</a>
-			</li>
-		</ul>
-	</section>
-	<!-- SIDEBAR -->
-	<!-- CONTENT -->
-	<section id="content">
-		<!-- NAVBAR -->
-		<nav>
-			<a href="#" class="nav-link">CÔNG TY TNHH CI RESEARCH</a>
-			<form action="#">
-			</form>
-			<input type="checkbox" id="switch-mode" hidden>
-			@{
-				// Lấy thông báo từ session và tách chúng bằng dấu ';'
-				var notifications = Context.Session.GetString("Notifications")?.Split(';') ?? new string[] { };
-			}
+				</li> *@
+			</ul>
+		</section>
 
+		<!-- CONTENT -->
+		<section id="content">
+			<!-- NAVBAR -->
+			<nav>
+				<a href="#" class="nav-link">CÔNG TY TNHH CI RESEARCH</a>
+				<div style="float: right;">
+					<span style="color: black;">Xin chào Admin!</span>
+				</div>
+			</nav>
+			<!-- NAVBAR -->
 
+			<!-- MAIN -->
+			<main>
+				@RenderBody()
+			</main>
+			<!-- MAIN -->
+		</section>
+		<!-- CONTENT -->
 
+		<!-- jQuery -->
+		<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+		<script>
+			// Sidebar collapse, tooltip, and custom dropdown toggle logic
+			document.addEventListener('DOMContentLoaded', function () {
+				var sidebar = document.getElementById('sidebar');
+				var toggleBtn = document.getElementById('menu-toggle');
 
-
-			<a href="#" class="profile">
-				@if (Context.Session.GetString("Username") != null)
-				{
-					<span style="color: black;">Xin chào @Context.Session.GetString("Username")!</span>
+				// Sidebar collapse logic
+				if (toggleBtn && sidebar) {
+					toggleBtn.addEventListener('click', function (e) {
+						e.preventDefault();
+						sidebar.classList.toggle('collapsed');
+						// Hide all open dropdowns when collapsed
+						if (sidebar.classList.contains('collapsed')) {
+							document.querySelectorAll('.bootstrap-dropdown .dropdown-menu').forEach(function (menu) {
+								menu.classList.remove('show');
+							});
+						}
+					});
 				}
 
-			</a>
-		</nav>
-		<!-- NAVBAR -->
-		<!-- MAIN -->
-		<main>
-			@RenderBody()
-		</main>
-		<!-- MAIN -->
-	</section>
-	<!-- CONTENT -->
-	@RenderSection("Scripts", required: false)
+				// FIXED: Custom dropdown toggle logic
+				document.querySelectorAll('.bootstrap-dropdown .dropdown-toggle').forEach(function (toggle) {
+					toggle.addEventListener('click', function (e) {
+						e.preventDefault();
+						e.stopPropagation(); // Prevent event bubbling
 
+						if (sidebar.classList.contains('collapsed')) return;
 
-	<script src="~/adminpanel/js/script.js"></script>
-	<!-- jQuery -->
-	<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-	<script>
-		// Unified sidebar management - removing conflicts
-		document.addEventListener('DOMContentLoaded', function () {
-			console.log('DOM loaded - unified sidebar system');
-			var sidebar = document.getElementById('sidebar');
-			console.log('Sidebar found:', sidebar);
+						var parent = this.closest('.bootstrap-dropdown');
+						var menu = parent.querySelector('.dropdown-menu');
+						var isOpen = menu.classList.contains('show');
 
-			// Xử lý sự kiện khi người dùng nhấn nút toggle sidebar
-			var toggleBtn = document.getElementById('menu-toggle');
-			console.log('Toggle button found:', toggleBtn);
+						// Close all other dropdowns first
+						document.querySelectorAll('.bootstrap-dropdown .dropdown-menu').forEach(function (m) {
+							if (m !== menu) {
+								m.classList.remove('show');
+							}
+						});
 
-			if (toggleBtn && sidebar) {
-				// Remove any existing event listeners to prevent conflicts
-				toggleBtn.removeEventListener('click', arguments.callee);
-
-				toggleBtn.addEventListener('click', function (e) {
-					console.log('Sidebar toggle clicked');
-					e.preventDefault();
-					e.stopPropagation();
-
-					// Use consistent class management
-					sidebar.classList.toggle('hide');
-					var isHidden = sidebar.classList.contains('hide');
-					console.log('Sidebar is now:', isHidden ? 'collapsed' : 'expanded');
-					console.log('Sidebar classes:', sidebar.classList.toString());
-
-					// Đóng tất cả dropdown khi toggle sidebar
-					document.querySelectorAll('.dropdown').forEach(function (item) {
-						item.classList.remove('active');
+						// Toggle current dropdown
+						if (!isOpen) {
+							menu.classList.add('show');
+						} else {
+							menu.classList.remove('show');
+						}
 					});
-
-					// Force layout recalculation
-					setTimeout(function () {
-						window.dispatchEvent(new Event('resize'));
-					}, 300);
 				});
-			} else {
-				console.error('Toggle button or sidebar not found!');
-			}
 
-			// Xử lý dropdown menu
-			var dropdowns = document.querySelectorAll('.dropdown > a');
-			dropdowns.forEach(function (dropdown) {
-				dropdown.addEventListener('click', function (e) {
-					e.preventDefault();
-					var parent = this.parentElement;
-					var menu = parent.querySelector('.dropdown-menu');
+				// FIXED: Close dropdown when clicking on dropdown items
+				document.querySelectorAll('.bootstrap-dropdown .dropdown-item').forEach(function (item) {
+					item.addEventListener('click', function (e) {
+						// Close all dropdowns when clicking on an item
+						document.querySelectorAll('.bootstrap-dropdown .dropdown-menu').forEach(function (menu) {
+							menu.classList.remove('show');
+						});
 
-					// Nếu sidebar bị collapsed, không cho mở dropdown
-					if (sidebar.classList.contains('hide')) {
-						return;
+						// Let the default action proceed (navigation)
+						console.log('Navigating to:', this.href || this.textContent.trim());
+					});
+				});
+
+				// Close dropdown when clicking outside
+				document.addEventListener('click', function (e) {
+					// If click is not inside any dropdown, close all dropdowns
+					if (!e.target.closest('.bootstrap-dropdown')) {
+						document.querySelectorAll('.bootstrap-dropdown .dropdown-menu').forEach(function (menu) {
+							menu.classList.remove('show');
+						});
 					}
+				});
 
-					// Đóng tất cả dropdown khác
-					document.querySelectorAll('.dropdown').forEach(function (item) {
-						if (item !== parent) {
-							item.classList.remove('active');
+				// Tooltip logic for collapsed sidebar
+				document.querySelectorAll('.side-menu li a[data-tooltip]').forEach(function (el) {
+					el.addEventListener('mouseenter', function () {
+						if (sidebar.classList.contains('collapsed')) {
+							var tooltip = document.createElement('div');
+							tooltip.className = 'sidebar-tooltip';
+							tooltip.innerText = el.getAttribute('data-tooltip');
+							document.body.appendChild(tooltip);
+
+							var rect = el.getBoundingClientRect();
+							tooltip.style.top = (rect.top + window.scrollY + rect.height / 2 - tooltip.offsetHeight / 2) + 'px';
+							tooltip.style.left = (rect.right + 10) + 'px';
+							el._tooltip = tooltip;
 						}
 					});
 
-					// Toggle dropdown hiện tại
-					parent.classList.toggle('active');
+					el.addEventListener('mouseleave', function () {
+						if (el._tooltip) {
+							document.body.removeChild(el._tooltip);
+							el._tooltip = null;
+						}
+					});
 				});
 			});
+		</script>
 
-			// Đóng dropdown khi click bên ngoài
-			document.addEventListener('click', function (e) {
-				if (!e.target.closest('.dropdown')) {
-					document.querySelectorAll('.dropdown').forEach(function (item) {
-						item.classList.remove('active');
-					});
-				}
-			});
-		});	</script>
-	<!-- Bootstrap JS -->
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+		<!-- Bootstrap JS -->
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 
+	</body>
 
-</body>
-
-</html>
+	</html>

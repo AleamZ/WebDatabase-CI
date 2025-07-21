@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CIResearch")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+abe4894792bcef78a257e140cc45395e2f7e5a14")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a455ad4e8523da770ecff1bd653a9c05cb2e4a30")]
 [assembly: System.Reflection.AssemblyProductAttribute("CIResearch")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CIResearch")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

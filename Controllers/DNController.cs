@@ -5159,26 +5159,40 @@ namespace CIResearch.Controllers
         {
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
+            // Tạo cache key theo năm
+            int targetYear;
+            if (nam.HasValue)
+            {
+                targetYear = nam.Value;
+            }
+            else
+            {
+                // Lấy năm mới nhất từ DB (giữ nguyên logic cũ)
+                using var connYear = new MySqlConnection(_connectionString);
+                await connYear.OpenAsync();
+                var yearQuery = "SELECT MAX(Nam) FROM dn_all WHERE Nam IS NOT NULL";
+                using var cmdYear = new MySqlCommand(yearQuery, connYear);
+                var result = await cmdYear.ExecuteScalarAsync();
+                targetYear = result != DBNull.Value ? Convert.ToInt32(result) : DateTime.Now.Year;
+            }
+            string cacheKey = $"market_share_chart_{targetYear}";
+
+            // Kiểm tra cache
+            if (_cache.TryGetValue(cacheKey, out object cachedResult))
+            {
+                return Json(cachedResult);
+            }
+
             try
             {
                 Console.WriteLine($"🚀 OPTIMIZED MARKET SHARE CHART - Starting SQL-based calculation...");
-
-                // Determine target year
-                int targetYear;
+                // Không khai báo lại int targetYear ở đây nữa, chỉ sử dụng biến đã có
                 if (nam.HasValue)
                 {
-                    targetYear = nam.Value;
                     Console.WriteLine($"🔍 Using specified year: {targetYear}");
                 }
                 else
                 {
-                    // Get latest year from database directly
-                    using var connYear = new MySqlConnection(_connectionString);
-                    await connYear.OpenAsync();
-                    var yearQuery = "SELECT MAX(Nam) FROM dn_all WHERE Nam IS NOT NULL";
-                    using var cmdYear = new MySqlCommand(yearQuery, connYear);
-                    var result = await cmdYear.ExecuteScalarAsync();
-                    targetYear = result != DBNull.Value ? Convert.ToInt32(result) : DateTime.Now.Year;
                     Console.WriteLine($"🔍 Using latest available year: {targetYear}");
                 }
 
@@ -5495,6 +5509,12 @@ namespace CIResearch.Controllers
                 Console.WriteLine($"   - Market share total: {totalMarketShareCheck:N2}%");
                 Console.WriteLine($"   - Memory usage: Minimal (SQL-only)");
 
+                // Cache the result for 10 minutes
+                _cache.Set(cacheKey, chartData, new MemoryCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10),
+                    Size = 1
+                });
                 return Json(chartData);
             }
             catch (Exception ex)
@@ -7415,51 +7435,34 @@ namespace CIResearch.Controllers
                     },
 
                     companies = companies.Select((x, index) =>
-{
-    var marketShare = Math.Round(((dynamic)x).MarketShare, 4);
-    var cumulativeShare = 0m;
-    for (int i = 0; i <= index; i++)
-    {
-        cumulativeShare += ((dynamic)companies[i]).MarketShare;
-    }
-
-    return new
-    {
-        rank = ((dynamic)x).Rank,
-        companyName = ((dynamic)x).CompanyName,
-        taxCode = ((dynamic)x).TaxCode,
-        revenue = Math.Round(((dynamic)x).RevenueInBillion, 2),
-        marketShare = marketShare,
-        cumulativeShare = Math.Round(cumulativeShare, 2)
-    };
-}),
-
-                    navigationOptions = new
                     {
-                        showTop10 = $"/DN/GetFlexibleMarketShareChart?nam={targetYear}&topCount=10",
-                        showTop20 = $"/DN/GetFlexibleMarketShareChart?nam={targetYear}&topCount=20",
-                        showTop50 = $"/DN/GetFlexibleMarketShareChart?nam={targetYear}&topCount=50",
-                        showAll = $"/DN/GetFlexibleMarketShareChart?nam={targetYear}&includeAll=true&page=1",
-                        nextPage = hasNextPage ? $"/DN/GetFlexibleMarketShareChart?nam={targetYear}&includeAll=true&page={currentPage + 1}" : null,
-                        prevPage = hasPrevPage ? $"/DN/GetFlexibleMarketShareChart?nam={targetYear}&includeAll=true&page={currentPage - 1}" : null,
-                        getInsights = $"/DN/GetMarketShareInsights?nam={targetYear}"
-                    },
+                        var marketShare = Math.Round(((dynamic)x).MarketShare, 4);
+                        var cumulativeShare = 0m;
+                        for (int i = 0; i <= index; i++)
+                        {
+                            cumulativeShare += ((dynamic)companies[i]).MarketShare;
+                        }
 
-                    transparency = new
-                    {
-                        dataSource = "Complete database query without artificial limits",
-                        methodology = "All companies ranked by revenue, pagination for large datasets",
-                        dataQuality = $"Showing {companies.Count} out of {totalRecords} companies with positive revenue",
-                        noHiddenData = "Full market visibility with flexible views"
-                    },
+                        return new
+                        {
+                            rank = ((dynamic)x).Rank,
+                            companyName = ((dynamic)x).CompanyName,
+                            taxCode = ((dynamic)x).TaxCode,
+                            revenue = Math.Round(((dynamic)x).RevenueInBillion, 2),
+                            marketShare = marketShare,
+                            cumulativeShare = Math.Round(cumulativeShare, 2)
+                        };
+                    }).ToList(),
 
                     timestamp = DateTime.Now
                 };
 
-                Console.WriteLine($"✅ FLEXIBLE MARKET SHARE COMPLETED:");
-                Console.WriteLine($"   - View: {chartData.currentView.viewType}");
-                Console.WriteLine($"   - Companies shown: {companies.Count}/{totalRecords}");
-                Console.WriteLine($"   - Execution: {executionTime}ms");
+                Console.WriteLine($"✅ FLEXIBLE MARKET SHARE CHART COMPLETED:");
+                Console.WriteLine($"   - Query execution: {executionTime}ms");
+                Console.WriteLine($"   - Showing companies: {companies.Count}");
+                Console.WriteLine($"   - Total available: {totalRecords}");
+                Console.WriteLine($"   - Current page: {currentPage}");
+                Console.WriteLine($"   - Total pages: {totalPages}");
 
                 return Json(chartData);
             }
@@ -7467,665 +7470,14 @@ namespace CIResearch.Controllers
             {
                 stopwatch.Stop();
                 Console.WriteLine($"❌ Error in flexible market share chart: {ex.Message}");
+                Console.WriteLine($"❌ Execution time before error: {stopwatch.ElapsedMilliseconds}ms");
                 return Json(new
                 {
                     success = false,
                     error = ex.Message,
                     message = "❌ Failed to get flexible market share data",
+                    stackTrace = ex.StackTrace,
                     executionTime = stopwatch.ElapsedMilliseconds,
-                    timestamp = DateTime.Now
-                });
-            }
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> TestCustomLimitValidation()
-        {
-            try
-            {
-                Console.WriteLine("🧪 TESTING CUSTOM LIMIT VALIDATION");
-
-                var testCases = new[]
-                {
-                    new { exportType = "range", rangeStart = (int?)1, rangeEnd = (int?)2000, exportCount = (int?)null, stepSize = (int?)null, expected = "success" },
-                    new { exportType = "range", rangeStart = (int?)2000, rangeEnd = (int?)1, exportCount = (int?)null, stepSize = (int?)null, expected = "error" },
-                    new { exportType = "range", rangeStart = (int?)0, rangeEnd = (int?)100, exportCount = (int?)null, stepSize = (int?)null, expected = "error" },
-                    new { exportType = "range", rangeStart = (int?)1, rangeEnd = (int?)15000, exportCount = (int?)null, stepSize = (int?)null, expected = "error" },
-                    new { exportType = "first", rangeStart = (int?)null, rangeEnd = (int?)null, exportCount = (int?)1000, stepSize = (int?)null, expected = "success" },
-                    new { exportType = "last", rangeStart = (int?)null, rangeEnd = (int?)null, exportCount = (int?)1000, stepSize = (int?)null, expected = "success" }
-                };
-
-                var results = new List<object>();
-
-                foreach (var test in testCases)
-                {
-                    var validationResult = ValidateExportInputs(
-                        test.exportType,
-                        test.exportCount,
-                        test.rangeStart,
-                        test.rangeEnd,
-                        test.stepSize);
-
-                    var actualResult = string.IsNullOrEmpty(validationResult) ? "success" : "error";
-                    var testPassed = actualResult == test.expected;
-
-                    results.Add(new
-                    {
-                        testCase = test,
-                        validationMessage = validationResult,
-                        actualResult = actualResult,
-                        expectedResult = test.expected,
-                        testPassed = testPassed
-                    });
-
-                    Console.WriteLine($"🧪 Test: {test.exportType} {test.rangeStart}-{test.rangeEnd}");
-                    Console.WriteLine($"   Expected: {test.expected}, Actual: {actualResult}, Passed: {testPassed}");
-                    if (!string.IsNullOrEmpty(validationResult))
-                    {
-                        Console.WriteLine($"   Validation: {validationResult}");
-                    }
-                }
-
-                return Json(new
-                {
-                    success = true,
-                    message = "✅ Custom limit validation tests completed",
-                    testResults = results,
-                    summary = new
-                    {
-                        totalTests = results.Count,
-                        passed = results.Count(x => ((dynamic)x).testPassed),
-                        failed = results.Count(x => !((dynamic)x).testPassed)
-                    },
-                    fixes = new
-                    {
-                        dynamicLimit = "Limit now scales from 1000 to 5000 based on range size",
-                        validation = "Added comprehensive input validation",
-                        logging = "Added detailed debug logging for troubleshooting",
-                        errorHandling = "Proper error messages for invalid inputs"
-                    },
-                    timestamp = DateTime.Now
-                });
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"❌ Error testing validation: {ex.Message}");
-                return Json(new
-                {
-                    success = false,
-                    error = ex.Message,
-                    message = "❌ Failed to test custom limit validation",
-                    timestamp = DateTime.Now
-                });
-            }
-        }
-
-        #region Performance Optimization Test Endpoints
-
-        [HttpGet]
-        public async Task<IActionResult> TestPerformanceOptimizations()
-        {
-            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
-
-            try
-            {
-                Console.WriteLine("🚀 TESTING PERFORMANCE OPTIMIZATIONS...");
-
-                var testResults = new List<object>();
-
-                // Test 1: Filter Options Caching
-                stopwatch.Restart();
-                await GetCachedFilterOptionsAsync();
-                var filterOptionsTime = stopwatch.ElapsedMilliseconds;
-                testResults.Add(new { Test = "Filter Options Caching", Time = filterOptionsTime });
-
-                // Test 2: Method Memoization
-                stopwatch.Restart();
-                var data1 = GetMemoizedResult("test_calculation", () =>
-                {
-                    Thread.Sleep(100); // Simulate calculation
-                    return "test_result";
-                });
-                var firstCallTime = stopwatch.ElapsedMilliseconds;
-
-                stopwatch.Restart();
-                var data2 = GetMemoizedResult("test_calculation", () =>
-                {
-                    Thread.Sleep(100); // This shouldn't execute
-                    return "test_result";
-                });
-                var secondCallTime = stopwatch.ElapsedMilliseconds;
-
-                testResults.Add(new { Test = "Method Memoization - First Call", Time = firstCallTime });
-                testResults.Add(new { Test = "Method Memoization - Cached Call", Time = secondCallTime });
-
-                // Test 3: Filtered Data Caching
-                var allData = await GetCachedDataAsync();
-
-                stopwatch.Restart();
-                var filteredData1 = GetCachedFilteredData(allData, "", new List<string> { "2020" }, null, null, null, null);
-                var firstFilterTime = stopwatch.ElapsedMilliseconds;
-
-                stopwatch.Restart();
-                var filteredData2 = GetCachedFilteredData(allData, "", new List<string> { "2020" }, null, null, null, null);
-                var secondFilterTime = stopwatch.ElapsedMilliseconds;
-
-                testResults.Add(new { Test = "Filtered Data - First Call", Time = firstFilterTime, Records = filteredData1.Count });
-                testResults.Add(new { Test = "Filtered Data - Cached Call", Time = secondFilterTime, Records = filteredData2.Count });
-
-                // Test 4: Background Cache Refresh
-                await StartBackgroundCacheRefresh();
-
-                var totalTime = stopwatch.ElapsedMilliseconds;
-
-                return Json(new
-                {
-                    success = true,
-                    message = "✅ Performance optimization tests completed",
-                    results = testResults,
-                    summary = new
-                    {
-                        totalTestTime = totalTime,
-                        memoizationSpeedup = firstCallTime > 0 ? $"{firstCallTime / Math.Max(secondCallTime, 1)}x faster" : "N/A",
-                        filterCacheSpeedup = firstFilterTime > 0 ? $"{firstFilterTime / Math.Max(secondFilterTime, 1)}x faster" : "N/A",
-                        backgroundCacheStatus = "Started successfully"
-                    },
-                    optimizations = new
-                    {
-                        methodLevelMemoization = "✅ Active",
-                        filterOptionsCaching = "✅ Active",
-                        filteredDataCaching = "✅ Active",
-                        backgroundRefresh = "✅ Active",
-                        intelligentCacheKeys = "✅ Active"
-                    },
-                    timestamp = DateTime.Now
-                });
-            }
-            catch (Exception ex)
-            {
-                return Json(new
-                {
-                    success = false,
-                    error = ex.Message,
-                    message = "❌ Performance optimization test failed",
-                    timestamp = DateTime.Now
-                });
-            }
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> ComparePerformance(string filters = "")
-        {
-            try
-            {
-                Console.WriteLine("⚖️ COMPARING OLD VS NEW PERFORMANCE...");
-
-                var allData = await GetCachedDataAsync();
-                var testFilters = new List<string> { "2020", "2023" };
-
-                var results = new
-                {
-                    success = true,
-                    message = "✅ Performance comparison completed",
-
-                    oldMethod = new
-                    {
-                        description = "Direct calculation without caching",
-                        filterOptionsTime = await TimeOperation(async () =>
-                        {
-                            await PrepareFilterOptions(allData);
-                        }),
-                        filteredDataTime = TimeOperation(() =>
-                        {
-                            return ApplyFiltersOptimized(allData, "", testFilters, null, null, null, null);
-                        })
-                    },
-
-                    newMethod = new
-                    {
-                        description = "Optimized with multi-level caching",
-                        filterOptionsTime = await TimeOperation(async () =>
-                        {
-                            await PrepareFilterOptionsOptimized();
-                        }),
-                        filteredDataTime = TimeOperation(() =>
-                        {
-                            return GetCachedFilteredData(allData, "", testFilters, null, null, null, null);
-                        })
-                    },
-
-                    cacheStatus = new
-                    {
-                        methodCacheEntries = _methodCache.Count,
-                        memoryCacheActive = true,
-                        backgroundRefreshActive = true
-                    },
-
-                    recommendations = new
-                    {
-                        useCase = "Ideal for frequently accessed filter combinations",
-                        memoryUsage = "Minimal - only cache filtered results, not raw data",
-                        scalability = "Excellent - cache hit rate improves with usage",
-                        maintenance = "Auto-expiring caches with configurable timeouts"
-                    },
-
-                    timestamp = DateTime.Now
-                };
-
-                return Json(results);
-            }
-            catch (Exception ex)
-            {
-                return Json(new
-                {
-                    success = false,
-                    error = ex.Message,
-                    timestamp = DateTime.Now
-                });
-            }
-        }
-
-        [HttpPost]
-        public IActionResult ClearPerformanceCaches()
-        {
-            try
-            {
-                ClearAllPerformanceCaches();
-
-                return Json(new
-                {
-                    success = true,
-                    message = "✅ All performance caches cleared successfully",
-                    cacheStatus = new
-                    {
-                        mainDataCache = "Cleared",
-                        filterOptionsCache = "Cleared",
-                        methodMemoization = "Cleared",
-                        filteredDataCache = "Cleared"
-                    },
-                    timestamp = DateTime.Now
-                });
-            }
-            catch (Exception ex)
-            {
-                return Json(new
-                {
-                    success = false,
-                    error = ex.Message,
-                    message = "❌ Failed to clear performance caches",
-                    timestamp = DateTime.Now
-                });
-            }
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> GetCacheStatistics()
-        {
-            try
-            {
-                var filterOptions = await GetCachedFilterOptionsAsync();
-
-                return Json(new
-                {
-                    success = true,
-                    message = "✅ Cache statistics retrieved",
-
-                    cacheStatistics = new
-                    {
-                        methodCache = new
-                        {
-                            entries = _methodCache.Count,
-                            timestamps = _methodCacheTimestamps.Count,
-                            timeout = _methodCacheTimeout.TotalMinutes,
-                            sampleKeys = _methodCache.Keys.Take(5).ToList()
-                        },
-
-                        filterOptionsCache = new
-                        {
-                            generatedAt = filterOptions.GeneratedAt,
-                            yearsCount = filterOptions.Years.Count,
-                            provincesCount = filterOptions.Provinces.Count,
-                            businessTypesCount = filterOptions.BusinessTypes.Count,
-                            economicZonesCount = filterOptions.EconomicZones.Count
-                        },
-
-                        cacheConfiguration = new
-                        {
-                            dataCache = $"{CACHE_DURATION_MINUTES} minutes",
-                            summaryCache = $"{SUMMARY_CACHE_DURATION_MINUTES} minutes",
-                            filterOptionsCache = $"{FILTER_OPTIONS_CACHE_MINUTES} minutes",
-                            statisticsCache = $"{STATISTICS_CACHE_MINUTES} minutes",
-                            filteredDataCache = $"{FILTERED_DATA_CACHE_MINUTES} minutes",
-                            methodCache = $"{METHOD_CACHE_MINUTES} minutes"
-                        }
-                    },
-
-                    performanceMetrics = new
-                    {
-                        estimatedSpeedImprovement = "5-50x faster for repeated operations",
-                        memoryUsage = "Optimized - only cache results, not raw data",
-                        cacheHitRate = "Improves over time with usage patterns"
-                    },
-
-                    timestamp = DateTime.Now
-                });
-            }
-            catch (Exception ex)
-            {
-                return Json(new
-                {
-                    success = false,
-                    error = ex.Message,
-                    timestamp = DateTime.Now
-                });
-            }
-        }
-
-        /// <summary>
-        /// Helper method to time operations
-        /// </summary>
-        private static long TimeOperation(Func<object> operation)
-        {
-            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
-            operation();
-            stopwatch.Stop();
-            return stopwatch.ElapsedMilliseconds;
-        }
-
-        /// <summary>
-        /// Helper method to time async operations
-        /// </summary>
-        private static async Task<long> TimeOperation(Func<Task> operation)
-        {
-            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
-            await operation();
-            stopwatch.Stop();
-            return stopwatch.ElapsedMilliseconds;
-        }
-
-        #endregion
-
-        [HttpGet]
-        public async Task<IActionResult> TestNavigationPerformance()
-        {
-            try
-            {
-                Console.WriteLine("🧪 TESTING NAVIGATION PERFORMANCE AFTER OPTIMIZATION...");
-
-                var results = new List<object>();
-
-                // Test 1: DN Index load time
-                var stopwatch = System.Diagnostics.Stopwatch.StartNew();
-                var allData = await GetCachedDataAsync();
-                var indexLoadTime = stopwatch.ElapsedMilliseconds;
-                results.Add(new { Test = "DN Index - GetCachedDataAsync()", Time = indexLoadTime, Records = allData.Count });
-
-                // Test 2: ViewRawData load time
-                stopwatch.Restart();
-                var filteredData = ApplyFiltersOptimized(allData, "", null, null, null, null, null);
-                var viewRawDataTime = stopwatch.ElapsedMilliseconds;
-                results.Add(new { Test = "ViewRawData - ApplyFiltersOptimized()", Time = viewRawDataTime, Records = filteredData.Count });
-
-                // Test 3: Statistics calculation time
-                stopwatch.Restart();
-                var stats = CalculateAllStatistics(allData);
-                var statsTime = stopwatch.ElapsedMilliseconds;
-                results.Add(new { Test = "Statistics - CalculateAllStatistics()", Time = statsTime, Companies = stats.TotalCompanies });
-
-                // Test 4: Filter options load time
-                stopwatch.Restart();
-                await PrepareFilterOptionsOptimized();
-                var filterOptionsTime = stopwatch.ElapsedMilliseconds;
-                results.Add(new { Test = "Filter Options - PrepareFilterOptionsOptimized()", Time = filterOptionsTime });
-
-                var totalTime = results.Sum(x => (long)((dynamic)x).Time);
-
-                return Json(new
-                {
-                    success = true,
-                    message = "✅ Navigation performance test completed",
-
-                    performanceResults = results,
-
-                    summary = new
-                    {
-                        totalNavigationTime = totalTime,
-                        cacheHitRatio = "High (data loaded from cache)",
-                        getSafeNullableDecimalCalls = "Eliminated during navigation",
-                        expectedUserExperience = totalTime < 2000 ? "Instant navigation" : "Fast navigation"
-                    },
-
-                    beforeOptimization = new
-                    {
-                        issue = "GetSafeNullableDecimal called millions of times with debug logging",
-                        cacheDuration = "30 minutes (too short)",
-                        forceReload = "Cache cleared on every DN Index call",
-                        debugLogging = "Console.WriteLine for every NULL value",
-                        typicalLoadTime = "30-60 seconds"
-                    },
-
-                    afterOptimization = new
-                    {
-                        fix1 = "Removed debug logging from GetSafeNullableDecimal",
-                        fix2 = "Increased cache duration to 2-4 hours",
-                        fix3 = "Removed force cache clear from Index action",
-                        fix4 = "Added PreloadCache endpoint for instant performance",
-                        fix5 = "Optimized database reading with command timeout and pre-allocation",
-                        currentLoadTime = $"{totalTime}ms"
-                    },
-
-                    recommendations = new
-                    {
-                        preloadCache = "Call /DN/PreloadCache on application startup",
-                        monitoring = "Monitor cache hit rates for optimization",
-                        furtherOptimization = "Consider using SQL-based endpoints for complex operations"
-                    },
-
-                    timestamp = DateTime.Now
-                });
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"❌ Error in navigation performance test: {ex.Message}");
-                return Json(new
-                {
-                    success = false,
-                    error = ex.Message,
-                    message = "❌ Failed to test navigation performance",
-                    timestamp = DateTime.Now
-                });
-            }
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> TestExcelExport()
-        {
-            try
-            {
-                Console.WriteLine("🧪 TESTING EXCEL EXPORT WITH ALL 25 COLUMNS...");
-
-                var allData = await GetCachedDataAsync();
-                var testData = allData.Take(5).ToList(); // Get first 5 records for testing
-
-                Console.WriteLine($"📊 Test data: {testData.Count} records");
-
-                // Test each field to ensure they exist in the model
-                var fieldTests = new List<string>();
-
-                foreach (var item in testData.Take(1)) // Test first record
-                {
-                    fieldTests.Add($"STT: {item.STT}");
-                    fieldTests.Add($"TenDN: {item.TenDN ?? "NULL"}");
-                    fieldTests.Add($"Diachi: {item.Diachi ?? "NULL"}");
-                    fieldTests.Add($"MaTinh_Dieutra: {item.MaTinh_Dieutra ?? "NULL"}");
-                    fieldTests.Add($"MaHuyen_Dieutra: {item.MaHuyen_Dieutra ?? "NULL"}");
-                    fieldTests.Add($"MaXa_Dieutra: {item.MaXa_Dieutra ?? "NULL"}");
-                    fieldTests.Add($"DNTB_MaTinh: {item.DNTB_MaTinh ?? "NULL"}");
-                    fieldTests.Add($"DNTB_MaHuyen: {item.DNTB_MaHuyen ?? "NULL"}");
-                    fieldTests.Add($"DNTB_MaXa: {item.DNTB_MaXa ?? "NULL"}");
-                    fieldTests.Add($"Region: {item.Region ?? "NULL"}");
-                    fieldTests.Add($"Loaihinhkte: {item.Loaihinhkte ?? "NULL"}");
-                    fieldTests.Add($"Email: {item.Email ?? "NULL"}");
-                    fieldTests.Add($"Dienthoai: {item.Dienthoai ?? "NULL"}");
-                    fieldTests.Add($"Nam: {item.Nam}");
-                    fieldTests.Add($"Masothue: {item.Masothue ?? "NULL"}");
-                    fieldTests.Add($"Vungkinhte: {item.Vungkinhte ?? "NULL"}");
-                    fieldTests.Add($"QUY_MO: {item.QUY_MO ?? "NULL"}");
-                    fieldTests.Add($"MaNganhC5_Chinh: {item.MaNganhC5_Chinh ?? "NULL"}");
-                    fieldTests.Add($"TEN_NGANH: {item.TEN_NGANH ?? "NULL"}");
-                    fieldTests.Add($"SR_Doanhthu_Thuan_BH_CCDV: {item.SR_Doanhthu_Thuan_BH_CCDV?.ToString("N2") ?? "NULL"}");
-                    fieldTests.Add($"SR_Loinhuan_TruocThue: {item.SR_Loinhuan_TruocThue?.ToString("N2") ?? "NULL"}");
-                    fieldTests.Add($"SoLaodong_DauNam: {item.SoLaodong_DauNam ?? 0}");
-                    fieldTests.Add($"SoLaodong_CuoiNam: {item.SoLaodong_CuoiNam ?? 0}");
-                    fieldTests.Add($"Taisan_Tong_CK: {item.Taisan_Tong_CK?.ToString("N2") ?? "NULL"}");
-                    fieldTests.Add($"Taisan_Tong_DK: {item.Taisan_Tong_DK?.ToString("N2") ?? "NULL"}");
-                }
-
-                Console.WriteLine("📋 Field availability test:");
-                fieldTests.ForEach(test => Console.WriteLine($"   {test}"));
-
-                return Json(new
-                {
-                    success = true,
-                    message = "✅ All 25 fields are available in the model",
-                    totalRecords = allData.Count,
-                    testRecords = testData.Count,
-                    fieldTests = fieldTests,
-                    availableColumns = 25
-                });
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"❌ TestExcelExport error: {ex.Message}");
-                return Json(new
-                {
-                    success = false,
-                    error = ex.Message,
-                    message = "❌ Error testing Excel export: " + ex.Message
-                });
-            }
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> GetMarketShareInsights(int? nam = null)
-        {
-            try
-            {
-                var targetYear = nam ?? GetLatestYear(await GetCachedDataAsync());
-                Console.WriteLine($"🔍 MARKET SHARE INSIGHTS - Year: {targetYear}");
-
-                using var conn = new MySqlConnection(_connectionString);
-                await conn.OpenAsync();
-
-                // Market concentration analysis
-                var insightsQuery = @"
-                    WITH CompanyRevenues AS (
-                        SELECT 
-                            Masothue,
-                            MAX(TenDN) AS TenDN,
-                            SUM(COALESCE(SR_Doanhthu_Thuan_BH_CCDV, 0)) AS CompanyRevenue,
-                            ROW_NUMBER() OVER (ORDER BY SUM(COALESCE(SR_Doanhthu_Thuan_BH_CCDV, 0)) DESC) AS RevenueRank
-                        FROM dn_all
-                        WHERE Nam = @year 
-                          AND Masothue IS NOT NULL 
-                          AND TRIM(Masothue) != ''
-                          AND SR_Doanhthu_Thuan_BH_CCDV > 0
-                        GROUP BY Masothue
-                    ),
-                    MarketStats AS (
-                        SELECT 
-                            COUNT(*) AS TotalCompanies,
-                            SUM(CompanyRevenue) AS TotalRevenue,
-                            AVG(CompanyRevenue) AS AvgRevenue,
-                            MAX(CompanyRevenue) AS MaxRevenue,
-                            MIN(CompanyRevenue) AS MinRevenue,
-                            SUM(CASE WHEN RevenueRank <= 5 THEN CompanyRevenue ELSE 0 END) AS Top5Revenue,
-                            SUM(CASE WHEN RevenueRank <= 10 THEN CompanyRevenue ELSE 0 END) AS Top10Revenue,
-                            SUM(CASE WHEN RevenueRank <= 20 THEN CompanyRevenue ELSE 0 END) AS Top20Revenue
-                        FROM CompanyRevenues
-                    )
-                    SELECT 
-                        TotalCompanies,
-                        ROUND(TotalRevenue / 1000, 2) AS TotalRevenueInBillion,
-                        ROUND(AvgRevenue / 1000, 4) AS AvgRevenueInBillion,
-                        ROUND(MaxRevenue / 1000, 2) AS MaxRevenueInBillion,
-                        ROUND(MinRevenue / 1000, 4) AS MinRevenueInBillion,
-                        ROUND((Top5Revenue / TotalRevenue) * 100, 2) AS Top5Concentration,
-                        ROUND((Top10Revenue / TotalRevenue) * 100, 2) AS Top10Concentration,
-                        ROUND((Top20Revenue / TotalRevenue) * 100, 2) AS Top20Concentration
-                    FROM MarketStats";
-
-                var insights = new object();
-                using var cmd = new MySqlCommand(insightsQuery, conn);
-                cmd.Parameters.AddWithValue("@year", targetYear);
-                using var reader = await cmd.ExecuteReaderAsync();
-                if (await reader.ReadAsync())
-                {
-                    var top5Conc = reader.GetDecimal("Top5Concentration");
-                    var top10Conc = reader.GetDecimal("Top10Concentration");
-                    var totalCompanies = reader.GetInt32("TotalCompanies");
-
-                    // Market structure analysis
-                    string marketStructure = "Competitive";
-                    if (top5Conc > 60) marketStructure = "Oligopoly (Highly Concentrated)";
-                    else if (top5Conc > 40) marketStructure = "Oligopoly (Moderately Concentrated)";
-                    else if (top10Conc > 50) marketStructure = "Monopolistic Competition";
-
-                    insights = new
-                    {
-                        success = true,
-                        targetYear = targetYear,
-
-                        marketStructure = new
-                        {
-                            type = marketStructure,
-                            concentration = new
-                            {
-                                top5Share = top5Conc,
-                                top10Share = top10Conc,
-                                top20Share = reader.GetDecimal("Top20Concentration"),
-                                interpretation = marketStructure
-                            }
-                        },
-
-                        metrics = new
-                        {
-                            totalCompanies = totalCompanies,
-                            totalMarketSize = reader.GetDecimal("TotalRevenueInBillion"),
-                            averageCompanySize = reader.GetDecimal("AvgRevenueInBillion"),
-                            largestCompany = reader.GetDecimal("MaxRevenueInBillion"),
-                            smallestCompany = reader.GetDecimal("MinRevenueInBillion")
-                        },
-
-                        recommendations = new
-                        {
-                            visualizationApproach = totalCompanies <= 20 ?
-                                "Show all companies for complete transparency" :
-                                top10Conc > 70 ?
-                                "Focus on Top 10 + Others grouping" :
-                                "Show Top 20-50 companies for balanced view",
-
-                            analysisNote = $"Market shows {marketStructure.ToLower()} structure with {totalCompanies} active companies"
-                        }
-                    };
-                }
-
-                Console.WriteLine($"📊 MARKET INSIGHTS:");
-                var dynamicInsights = (dynamic)insights;
-                Console.WriteLine($"   - Market Structure: {dynamicInsights.marketStructure.type}");
-                Console.WriteLine($"   - Total Companies: {dynamicInsights.metrics.totalCompanies}");
-                Console.WriteLine($"   - Top 5 Concentration: {dynamicInsights.marketStructure.concentration.top5Share}%");
-
-                return Json(insights);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"❌ Error in market insights: {ex.Message}");
-                return Json(new
-                {
-                    success = false,
-                    error = ex.Message,
-                    message = "❌ Failed to analyze market insights",
                     timestamp = DateTime.Now
                 });
             }

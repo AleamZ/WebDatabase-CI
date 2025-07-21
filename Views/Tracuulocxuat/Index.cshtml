@@ -1,13 +1,14 @@
 ﻿@model IEnumerable<CIResearch.Controllers.UserAction>
 @{
     ViewData["Title"] = "Index";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    Layout = "~/Views/Shared/Menu.cshtml";
 }
 
 <link href="~/adminpanel/css/style.css" rel="stylesheet" />
 <script src="~/adminpanel/js/script.js"></script>
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="viewport" content="initial-scale=1, maximum-scale=1">
@@ -35,15 +36,17 @@
     <style>
         /* Tùy chỉnh màu xanh đậm cho bảng */
         .table-custom {
-           
-            color: black; /* Màu chữ trắng */
+
+            color: black;
+            /* Màu chữ trắng */
         }
 
-            .table-custom th {
-                 /* Màu nền tiêu đề bảng */
-            }
+        .table-custom th {
+            /* Màu nền tiêu đề bảng */
+        }
     </style>
 </head>
+
 <body>
 
     <div class="container mt-5">
@@ -51,7 +54,8 @@
 
         <form method="get" action="@Url.Action("Index")" class="form-inline mb-4">
             <div class="form-group mx-sm-3 mb-2">
-                <input type="text" name="searchUser" class="form-control" placeholder="Tìm kiếm theo tên " value="@ViewBag.SearchUser" />
+                <input type="text" name="searchUser" class="form-control" placeholder="Tìm kiếm theo tên "
+                    value="@ViewBag.SearchUser" />
             </div>
             <button type="submit" class="btn btn-primary mb-2">Tìm kiếm</button>
             <a href="@Url.Action("Index", "Tracuulocxuat")" class="btn btn-danger mb-2 ml-2">
@@ -97,4 +101,5 @@
     <script src="https://cdn.jsdelivr.net/npm/popperjs/core@2.0.11/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
+
 </html>
