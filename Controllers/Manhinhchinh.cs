@@ -30,9 +30,9 @@ namespace CIResearch.Controllers
         private string surveyID = "af7a65b9-26e0-4dcd-a5af-8c6b0d825928";
 
         private string username = "730f55fa-4390-4f48-95c7-956818534f64/linhtest";
-        private string password = "332001";
+        private string password = "030301";
 
-        private string _connectionString = "Server=localhost;Database=sakila;User=root;Password=1234;";
+        private string _connectionString = "Server=localhost;Database=sakila;User=root;Password=123456;";
         private readonly IMemoryCache _cache;
 
         public Manhinhchinh(IMemoryCache cache)

@@ -1,0 +1,53 @@
+@{
+    ViewBag.Title = "Tìm kiếm số điện thoại";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var results = Model as List<CIResearch.Models.ALLDATA>;
+}
+
+<h2>Tìm kiếm số điện thoại</h2>
+
+<form method="get" action="">
+    <div class="form-group">
+        <label for="phoneNumber">Nhập số điện thoại:</label>
+        <input type="text" class="form-control" id="phoneNumber" name="phoneNumber" value="@ViewBag.PhoneNumber" placeholder="Nhập số điện thoại cần tìm">
+    </div>
+    <button type="submit" class="btn btn-success">Tìm kiếm</button>
+    <a href="@Url.Action("Index", "Admin")" class="btn btn-secondary">Quay lại</a>
+</form>
+
+@if (results != null)
+{
+    if (results.Count > 0)
+    {
+        <h4>Kết quả tìm kiếm:</h4>
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>STT</th>
+                    <th>Họ tên</th>
+                    <th>Số điện thoại</th>
+                    <th>Thành phố</th>
+                    <th>Dự án</th>
+                    <th>Năm</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in results)
+                {
+                    <tr>
+                        <td>@item.Stt</td>
+                        <td>@item.Fullname</td>
+                        <td>@item.PhoneNumber</td>
+                        <td>@item.City</td>
+                        <td>@item.ProjectName</td>
+                        <td>@item.Year</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="alert alert-warning mt-3">Không tìm thấy kết quả phù hợp.</div>
+    }
+} 
