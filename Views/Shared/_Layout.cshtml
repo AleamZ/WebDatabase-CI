@@ -1,77 +1,70 @@
-﻿<!DOCTYPE html>
+﻿﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-	<!-- Boxicons -->
-	<link href="https://unpkg.com/boxicons@2.0.9/css/boxicons.min.css" rel="stylesheet">
-	<link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-	<!-- My CSS -->
-	<link href="~/adminpanel/css/style.css" rel="stylesheet" />
-	<link href="~/login11_6/css/style.css" rel="stylesheet" />
-	<link href='https://unpkg.com/boxicons@2.0.9/css/boxicons.min.css' rel='stylesheet'>
 	<title>AdminHub - Fixed Layout</title>
 
-	<style>
-		/* THAY THẾ CSS CŨ BẰNG CSS MỚI NÀY ĐỂ FIX THANH SCROLL */
+	<!-- Boxicons & Bootstrap CDN -->
+	<link href="https://unpkg.com/boxicons@2.0.9/css/boxicons.min.css" rel="stylesheet">
+	<link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 
-		/* Sidebar collapse styles */
+	<!-- Custom CSS -->
+	<link href="@Url.Content("~/adminpanel/css/style.css")" rel="stylesheet" />
+	<link href="@Url.Content("~/login11_6/css/style.css")" rel="stylesheet" />
+
+	<style>
+		/* SIDEBAR FIXED STYLE */
+
 		#sidebar.collapsed {
 			width: 60px !important;
 			min-width: 60px !important;
 		}
 
-		#sidebar.collapsed .text {
-			display: none !important;
-		}
-
+		#sidebar.collapsed .text,
 		#sidebar.collapsed .dropdown-menu {
 			display: none !important;
 		}
 
-		/* FIX: Sidebar container - Remove scroll và tăng chiều cao */
 		#sidebar {
 			height: 100vh;
 			overflow-y: auto;
-			/* Thay vì scroll, dùng auto */
 			overflow-x: hidden;
+			-ms-overflow-style: none;
+			scrollbar-width: none;
 		}
 
-		/* FIX: Side menu container - loại bỏ chiều cao cố định */
+		#sidebar::-webkit-scrollbar {
+			width: 0px;
+			background: transparent;
+		}
+
 		#sidebar .side-menu {
 			height: auto !important;
-			/* Không giới hạn chiều cao */
 			max-height: none !important;
 			overflow: visible !important;
 			padding-bottom: 20px;
-			/* Thêm padding dưới */
 		}
 
-		/* FIX: Menu items - tăng chiều cao */
 		#sidebar .side-menu li {
 			position: relative;
 			min-height: 48px;
-			/* Tăng chiều cao tối thiểu */
 		}
 
 		#sidebar .side-menu li a {
 			padding: 12px 20px !important;
-			/* Tăng padding để item cao hơn */
 			min-height: 48px !important;
 			display: flex !important;
 			align-items: center !important;
 			line-height: 1.4 !important;
 		}
 
-		/* FIX: Dropdown positioning */
 		#sidebar .dropdown,
 		#sidebar li {
 			position: relative;
 		}
 
-		/* Bootstrap dropdown custom for sidebar - FIX POSITIONING */
 		#sidebar .bootstrap-dropdown {
 			position: relative;
 		}
@@ -85,32 +78,26 @@
 			margin-top: 4px;
 			min-width: 200px;
 			left: 0;
-			/* FIX: Căn trái thay vì để auto */
-			right: auto;
 			top: 100%;
 			z-index: 1000;
 			border: 1px solid #e0e0e0;
 			padding: 8px 0;
 		}
 
-		/* Show dropdown when active */
 		#sidebar .bootstrap-dropdown .dropdown-menu.show {
 			display: block;
 		}
 
-		/* FIX: Dropdown items - tăng chiều cao */
 		#sidebar .bootstrap-dropdown .dropdown-item {
 			color: #333;
 			font-size: 14px;
 			padding: 12px 16px !important;
-			/* Tăng padding */
 			text-decoration: none;
 			display: block;
 			transition: all 0.2s ease;
 			border: none;
 			background: none;
 			min-height: 44px;
-			/* Tăng chiều cao tối thiểu */
 			line-height: 1.4;
 		}
 
@@ -120,7 +107,6 @@
 			transform: translateX(4px);
 		}
 
-		/* Tooltip styles */
 		.sidebar-tooltip {
 			position: absolute;
 			z-index: 9999;
@@ -135,30 +121,13 @@
 			transition: opacity 0.2s;
 		}
 
-		/* FIX: Hide scrollbar nhưng vẫn có thể scroll */
-		#sidebar::-webkit-scrollbar {
-			width: 0px;
-			background: transparent;
-			/* Ẩn scrollbar cho webkit browsers */
-		}
-
-		#sidebar {
-			-ms-overflow-style: none;
-			/* IE and Edge */
-			scrollbar-width: none;
-			/* Firefox */
-		}
-
-		/* FIX: Đảm bảo content không bị cắt */
 		#sidebar .side-menu.top {
 			flex: 1;
 			display: flex;
 			flex-direction: column;
 			gap: 2px;
-			/* Khoảng cách giữa các item */
 		}
 
-		/* FIX: Responsive - trên màn hình nhỏ */
 		@@media(max - height: 700px) {
 				#sidebar .side-menu li a {
 					padding: 10px 20px !important;
@@ -171,13 +140,11 @@
 				}
 			}
 
-			/* FIX: Đảm bảo logo không bị ảnh hưởng */
 			#sidebar .sidebar-header {
 				flex-shrink: 0;
 				padding: 15px;
 			}
 
-			/* FIX: Menu toggle ở cuối */
 			#sidebar .side-menu li:last-child {
 				margin-top: auto;
 				border-top: 1px solid #eee;
@@ -185,6 +152,7 @@
 			}
 		</style>
 	</head>
+
 
 	<body>
 

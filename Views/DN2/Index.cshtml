@@ -2005,7 +2005,7 @@ function initVungKinhTeChart() {
     // ONLY USE REAL DATA FROM DATABASE - NO SAMPLE DATA
     if (!vungKinhTeData || vungKinhTeData.length === 0) {
         console.log('⚠️ No real data from database - chart will be empty');
-        console.log('⚠️ Expected database: Server=localhost;Database=sakila;User=root;Password=1234;');
+        console.log('⚠️ Expected database: Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;');
         console.log('⚠️ Expected data from Vungkinhte column');
         vungKinhTeData = [];
     }
@@ -2018,7 +2018,7 @@ function initVungKinhTeChart() {
     // NO DEFAULT SAMPLE DATA - Only show empty chart if no database data
     if (total === 0) {
         console.log('⚠️ No valid data from database - displaying empty chart');
-        console.log('⚠️ Database connection: Server=localhost;Database=sakila;User=root;Password=1234;
+        console.log('⚠️ Database connection: Server=127.0.0.1;Database=admin_ciresearchciresearch;User=admin_dbciresearch;Password=9t52$7sBx;=admin_dbciresearch;Password=9t52$7sBx;
         console.log('⚠️ Check Vungkinhte column in dn_all table for 7 economic zones');
         console.log('⚠️ Expected: Đông Nam Bộ, Đồng bằng Sông Hồng, Duyên hải Nam Trung Bộ, Bắc Trung Bộ, ĐBSCL, Tây Nguyên, Trung du và Miền núi Bắc Bộ');
         labels = ['Không có dữ liệu Vùng Kinh Tế'];
@@ -2892,7 +2892,7 @@ function initIndustryChart() {
         return false;
     }
     
-    // Get data from ViewBag - MUST be from database sakila TEN_NGANH column
+    // Get data from ViewBag - MUST be from database admin_ciresearchciresearch TEN_NGANH column
     let industryData = [];
     try {
         // Get data from ViewBag.IndustryData (passed from controller)
@@ -2900,7 +2900,7 @@ function initIndustryChart() {
         
         console.log('🔍 INDUSTRY DATA DEBUG:');
         console.log('📊 Industry data from ViewBag:', industryData);
-        console.log('📊 Data source: Server=localhost;Database=sakila;User=root;Password=1234;
+        console.log('📊 Data source: Server=127.0.0.1;Database=admin_ciresearchciresearch;User=admin_dbciresearch;Password=9t52$7sBx;=admin_dbciresearch;Password=9t52$7sBx;
         console.log('📊 Number of industries:', industryData ? industryData.length : 0);
         
         if (industryData && industryData.length > 0) {
@@ -2923,7 +2923,7 @@ function initIndustryChart() {
     // Check if we have real data from database TEN_NGANH column
     if (!industryData || industryData.length === 0) {
         console.error('❌ No real industry data from TEN_NGANH column!');
-        console.error('📊 Database connection: Server=localhost;Database=sakila;User=root;Password=1234;
+        console.error('📊 Database connection: Server=127.0.0.1;Database=admin_ciresearchciresearch;User=admin_dbciresearch;Password=9t52$7sBx;=admin_dbciresearch;Password=9t52$7sBx;
         console.error('📊 Expected data from TEN_NGANH column not found');
         console.error('❌ Chart creation will be aborted - NO FALLBACK DATA');
         
@@ -2932,7 +2932,7 @@ function initIndustryChart() {
         return false;
     } else {
         console.log('✅ Using REAL industry data from TEN_NGANH column');
-        console.log('📊 Data source: database sakila, table dn_all, column TEN_NGANH');
+        console.log('📊 Data source: database admin_ciresearchciresearch, table dn_all, column TEN_NGANH');
         console.log('📊 Number of industries found:', industryData.length);
     }
     
@@ -2953,17 +2953,17 @@ function initIndustryChart() {
     // Validate data quality - MUST have real data from database TEN_NGANH column
     if (total === 0) {
         console.error('❌ CRITICAL: No valid industry data from TEN_NGANH column!');
-        console.error('❌ Database: Server=localhost;Database=sakila;User=root;Password=1234;
+        console.error('❌ Database: Server=127.0.0.1;Database=admin_ciresearchciresearch;User=admin_dbciresearch;Password=9t52$7sBx;=admin_dbciresearch;Password=9t52$7sBx;
         console.error('❌ Expected TEN_NGANH column data not found');
         console.error('❌ Check database connection and data availability');
         
         // Show error message to user
-        alert('⚠️ Không thể tải dữ liệu ngành nghề từ cột TEN_NGANH!\n\nVui lòng kiểm tra:\n- Kết nối database sakila\n- Dữ liệu trong cột TEN_NGANH\n- Server: localhost, User: root, Password: 1234');
+        alert('⚠️ Không thể tải dữ liệu ngành nghề từ cột TEN_NGANH!\n\nVui lòng kiểm tra:\n- Kết nối database admin_ciresearchciresearch\n- Dữ liệu trong cột TEN_NGANH\n- Server: localhost, User: root, Password: 1234');
         
         // Return false to indicate chart creation failed
         return false;
     } else {
-        console.log('✅ CONFIRMED: Using real TEN_NGANH data from database sakila');
+        console.log('✅ CONFIRMED: Using real TEN_NGANH data from database admin_ciresearchciresearch');
         console.log('📊 Total companies with TEN_NGANH data:', total);
         console.log('📊 Top 5 industries:', labels.slice(0, 5));
     }
@@ -3205,7 +3205,7 @@ function testIndustryDataFromDatabase() {
             } else {
                 alert(`❌ Industry Data Test FAILED!\n\n` +
                       `Error: ${data.message}\n` +
-                      `Database: ${data.database || 'sakila'}\n` +
+                      `Database: ${data.database || 'admin_ciresearchciresearch'}\n` +
                       `Table: ${data.table || 'dn_all'}\n` +
                       `Column: ${data.column || 'TEN_NGANH'}`);
             }

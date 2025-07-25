@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using CIResearch.Models;
 using System.Text;
 using System.Drawing;
+using System.Linq; // Added for .Where() and .Any()
 
 namespace CIResearch.Controllers
 {
@@ -22,8 +23,59 @@ namespace CIResearch.Controllers
     List<string> job = null, List<string> householdIncome = null, List<string> personalIncome = null,
     List<string> maritalStatus = null, string mostFrequentlyUsedBrand = "",
     string source = "", List<string> Classname = null, string education = "",
-    List<string> provinces = null, string qc = "", string qa = "", List<string> Khuvuc = null, List<String> Nganhhang = null, List<string> region = null)
+    List<string> provinces = null, string qc = "", string qa = "", List<string> Khuvuc = null, List<String> Nganhhang = null, List<string> region = null, List<string> chuyenKhoa = null)
         {
+            // Chuẩn hóa filter đầu vào
+            code = code?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
+            projectName = projectName?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
+            year = year?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
+            city = city?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
+            sex = sex?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
+            age = age?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
+            job = job?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
+            maritalStatus = maritalStatus?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
+            Classname = Classname?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
+            Nganhhang = Nganhhang?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
+            provinces = provinces?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
+            Khuvuc = Khuvuc?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
+            chuyenKhoa = chuyenKhoa?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
+
+            // Truyền lại filter về ViewBag
+            ViewBag.Code = code;
+            ViewBag.Projectname = projectName;
+            ViewBag.Year = year;
+            ViewBag.City = city;
+            ViewBag.Sex = sex;
+            ViewBag.Age = age;
+            ViewBag.Job = job;
+            ViewBag.MaritalStatus = maritalStatus;
+            ViewBag.Classname = Classname;
+            ViewBag.Nganhhang = Nganhhang;
+            ViewBag.Provinces = provinces;
+            ViewBag.Khuvuc = Khuvuc;
+            ViewBag.ChuyenKhoa = chuyenKhoa;
+
+            // --- TRUYỀN DỮ LIỆU FILTER ĐỘNG ---
+            ViewBag.CodeList = GetDistinctCodes();
+            ViewBag.ProjectNameList = GetDistinctProjectNames();
+            ViewBag.YearList = GetDistinctYears();
+            ViewBag.CityList = GetDistinctCities();
+            ViewBag.JobList = GetDistinctJobs();
+            ViewBag.EducationList = GetDistinctEducations();
+            ViewBag.SexList = GetDistinctSexes();
+            ViewBag.MaritalStatusList = GetDistinctMaritalStatuses();
+            ViewBag.HouseholdIncomeList = GetDistinctHouseholdIncomes();
+            ViewBag.PersonalIncomeList = GetDistinctPersonalIncomes();
+            ViewBag.DistrictList = GetDistinctDistricts();
+            ViewBag.WardList = GetDistinctWards();
+            ViewBag.ProvincesList = GetDistinctProvinces();
+            ViewBag.ClassList = GetDistinctClasses();
+            ViewBag.NganhhangList = GetDistinctNganhhangs();
+            ViewBag.QcList = GetDistinctQcs();
+            ViewBag.QaList = GetDistinctQas();
+            ViewBag.KhuvucList = GetDistinctKhuvucs();
+            ViewBag.ChuyenKhoaList = GetDistinctChuyenKhoas();
+
             var userRole = HttpContext.Session.GetString("Role");
             if (userRole != "Admin")
             {
@@ -31,36 +83,8 @@ namespace CIResearch.Controllers
                 return RedirectToAction("Index", "Home"); // Thay "Home" bằng controller phù hợp nếu cần
             }
 
-            ViewBag.Year = year;
-            ViewBag.Projectname = projectName;
-            ViewBag.City = city;
-            ViewBag.Sex = sex;
-            ViewBag.Age = age;
-            ViewBag.Region = region;
-            ViewBag.Job = job;
-            ViewBag.Classname = Classname;
-            ViewBag.MaritalStatus = maritalStatus;
-            ViewBag.Code = code;
-            ViewBag.Nganhhang = Nganhhang;
-
-
-            if (sbjnum != null && sbjnum.All(string.IsNullOrWhiteSpace))
-            {
-                sbjnum = null;
-            }
-
-            ViewBag.Sbjnum = sbjnum != null ? string.Join(",", sbjnum) : "";
-
-            if (phoneNumber != null && phoneNumber.All(string.IsNullOrWhiteSpace))
-            {
-                phoneNumber = null;
-            }
-
-            ViewBag.Phonenumber = phoneNumber != null ? string.Join(",", phoneNumber) : "";
-
-            List<ALLDATA> adminChart = new List<ALLDATA>();
-
-            adminChart = getadminChart(stt, code, projectName, year, contactObject, sbjnum, fullname, city, address, street, ward, district, phoneNumber, email, dateOfBirth, age, sex, job, householdIncome, personalIncome, maritalStatus, mostFrequentlyUsedBrand, source, Classname, education, provinces, qc, qa, Khuvuc, Nganhhang);
+            // Lọc dữ liệu
+            var adminChart = getadminChart(stt, code, projectName, year, contactObject, sbjnum, fullname, city, address, street, ward, district, phoneNumber, email, dateOfBirth, age, sex, job, householdIncome, personalIncome, maritalStatus, mostFrequentlyUsedBrand, source, Classname, education, provinces, qc, qa, Khuvuc, Nganhhang, chuyenKhoa);
 
             //lọc theo 3 miền
 
@@ -321,6 +345,12 @@ namespace CIResearch.Controllers
 
 
 
+            // Log ra file tạm để kiểm tra dữ liệu đã lọc
+            var logPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "admin_filter_debug.log");
+            var logContent = $"[{DateTime.Now}] Tổng số mẫu sau lọc: {adminChart.Count}\n";
+            logContent += string.Join("\n", adminChart.Take(10).Select(x => $"STT: {x.Stt}, Code: {x.Code}, ProjectName: {x.ProjectName}, Year: {x.Year}, City: {x.City}, Sex: {x.Sex}"));
+            System.IO.File.AppendAllText(logPath, logContent + "\n-------------------\n");
+
             return View(adminChart);
         }
 
@@ -338,7 +368,7 @@ namespace CIResearch.Controllers
   List<string> job, List<string> householdIncome, List<string> personalIncome,
   List<string> maritalStatus, string mostFrequentlyUsedBrand,
   string source, List<string> className, string education,
-  List<string> provinces, string qc, string qa, List<string> Khuvuc, List<string> Nganhhang)
+  List<string> provinces, string qc, string qa, List<string> Khuvuc, List<string> Nganhhang, List<string> chuyenKhoa)
         {
             List<ALLDATA> project = new List<ALLDATA>();
 
@@ -421,6 +451,11 @@ namespace CIResearch.Controllers
                     var NganhhangParams = Nganhhang.Select((_, i) => $"@Nganhhang{i}").ToArray();
                     queryBuilder.Append(" AND Nganhhang IN (" + string.Join(", ", NganhhangParams) + ")");
                 }
+                if (chuyenKhoa != null && chuyenKhoa.Any())
+                {
+                    var chuyenKhoaParams = chuyenKhoa.Select((_, i) => $"@chuyenKhoa{i}").ToArray();
+                    queryBuilder.Append(" AND ChuyenKhoa IN (" + string.Join(", ", chuyenKhoaParams) + ")");
+                }
 
 
                 // Lấy tổng số dòng
@@ -479,6 +514,9 @@ namespace CIResearch.Controllers
                     if (Nganhhang != null && Nganhhang.Any())
                         for (int i = 0; i < Nganhhang.Count; i++)
                             command.Parameters.AddWithValue($"@Nganhhang{i}", Nganhhang[i]);
+                    if (chuyenKhoa != null && chuyenKhoa.Any())
+                        for (int i = 0; i < chuyenKhoa.Count; i++)
+                            command.Parameters.AddWithValue($"@chuyenKhoa{i}", chuyenKhoa[i]);
 
 
 
@@ -491,35 +529,36 @@ namespace CIResearch.Controllers
                         {
                             ALLDATA Alldatas = new ALLDATA
                             {
-                                Stt = reader.GetInt32("STT"),
-                                Code = reader.GetString("CODE"),
-                                ProjectName = reader.GetString("PROJECTNAME"),
-                                Year = reader.GetInt32("YEAR"),
-                                ContactObject = reader.GetString("CONTACTOBJECT"),
-                                Sbjnum = reader.GetInt32("SBJNUM"),
-                                Fullname = reader.GetString("FULLNAME"),
-                                City = reader.GetString("CITY"),
-                                Address = reader.GetString("ADDRESS"),
-                                Street = reader.GetString("STREET"),
-                                Ward = reader.GetString("WARD"),
-                                District = reader.GetString("DISTRICT"),
-                                PhoneNumber = reader.GetString("PHONENUMBER"),
-                                Email = reader.GetString("EMAIL"),
+                                Stt = reader.IsDBNull(reader.GetOrdinal("STT")) ? 0 : reader.GetInt32("STT"),
+                                Code = reader.IsDBNull(reader.GetOrdinal("CODE")) ? null : reader.GetString("CODE"),
+                                ProjectName = reader.IsDBNull(reader.GetOrdinal("PROJECTNAME")) ? null : reader.GetString("PROJECTNAME"),
+                                Year = reader.IsDBNull(reader.GetOrdinal("YEAR")) ? 0 : reader.GetInt32("YEAR"),
+                                ContactObject = reader.IsDBNull(reader.GetOrdinal("CONTACTOBJECT")) ? null : reader.GetString("CONTACTOBJECT"),
+                                Sbjnum = reader.IsDBNull(reader.GetOrdinal("SBJNUM")) ? 0 : reader.GetInt32("SBJNUM"),
+                                Fullname = reader.IsDBNull(reader.GetOrdinal("FULLNAME")) ? null : reader.GetString("FULLNAME"),
+                                City = reader.IsDBNull(reader.GetOrdinal("CITY")) ? null : reader.GetString("CITY"),
+                                Address = reader.IsDBNull(reader.GetOrdinal("ADDRESS")) ? null : reader.GetString("ADDRESS"),
+                                Street = reader.IsDBNull(reader.GetOrdinal("STREET")) ? null : reader.GetString("STREET"),
+                                Ward = reader.IsDBNull(reader.GetOrdinal("WARD")) ? null : reader.GetString("WARD"),
+                                District = reader.IsDBNull(reader.GetOrdinal("DISTRICT")) ? null : reader.GetString("DISTRICT"),
+                                PhoneNumber = reader.IsDBNull(reader.GetOrdinal("PHONENUMBER")) ? null : reader.GetString("PHONENUMBER"),
+                                Email = reader.IsDBNull(reader.GetOrdinal("EMAIL")) ? null : reader.GetString("EMAIL"),
                                 DateOfBirth = reader.IsDBNull(reader.GetOrdinal("DATEOFBIRTH")) ? (int?)null : reader.GetInt32("DATEOFBIRTH"),
-                                Age = reader.GetInt32("AGE"),
-                                Sex = reader.GetString("SEX"),
-                                Job = reader.GetString("JOB"),
-                                HouseholdIncome = reader.GetString("HOUSEHOLDINCOME"),
-                                PersonalIncome = reader.GetString("PERSONALINCOME"),
-                                MaritalStatus = reader.GetString("MARITALSTATUS"),
-                                MostFrequentlyUsedBrand = reader.GetString("MOSTFREQUENTLYUSEDBRAND"),
-                                Source = reader.GetString("SOURCE"),
-                                Class = reader.GetString("Class"),
-                                Education = reader.GetString("EDUCATION"),
-                                Provinces = reader.GetString("PROVINCES"),
-                                Qc = reader.GetString("QC"),
-                                Qa = reader.GetString("QA"),
-                                Nganhhang = reader.GetString("Nganhhang")
+                                Age = reader.IsDBNull(reader.GetOrdinal("AGE")) ? 0 : reader.GetInt32("AGE"),
+                                Sex = reader.IsDBNull(reader.GetOrdinal("SEX")) ? null : reader.GetString("SEX"),
+                                Job = reader.IsDBNull(reader.GetOrdinal("JOB")) ? null : reader.GetString("JOB"),
+                                HouseholdIncome = reader.IsDBNull(reader.GetOrdinal("HOUSEHOLDINCOME")) ? null : reader.GetString("HOUSEHOLDINCOME"),
+                                PersonalIncome = reader.IsDBNull(reader.GetOrdinal("PERSONALINCOME")) ? null : reader.GetString("PERSONALINCOME"),
+                                MaritalStatus = reader.IsDBNull(reader.GetOrdinal("MARITALSTATUS")) ? null : reader.GetString("MARITALSTATUS"),
+                                MostFrequentlyUsedBrand = reader.IsDBNull(reader.GetOrdinal("MOSTFREQUENTLYUSEDBRAND")) ? null : reader.GetString("MOSTFREQUENTLYUSEDBRAND"),
+                                Source = reader.IsDBNull(reader.GetOrdinal("SOURCE")) ? null : reader.GetString("SOURCE"),
+                                Class = reader.IsDBNull(reader.GetOrdinal("Class")) ? null : reader.GetString("Class"),
+                                Education = reader.IsDBNull(reader.GetOrdinal("EDUCATION")) ? null : reader.GetString("EDUCATION"),
+                                Provinces = reader.IsDBNull(reader.GetOrdinal("PROVINCES")) ? null : reader.GetString("PROVINCES"),
+                                Qc = reader.IsDBNull(reader.GetOrdinal("QC")) ? null : reader.GetString("QC"),
+                                Qa = reader.IsDBNull(reader.GetOrdinal("QA")) ? null : reader.GetString("QA"),
+                                Nganhhang = reader.IsDBNull(reader.GetOrdinal("Nganhhang")) ? null : reader.GetString("Nganhhang"),
+                                ChuyenKhoa = reader.IsDBNull(reader.GetOrdinal("ChuyenKhoa")) ? null : reader.GetString("ChuyenKhoa")
                             };
                             project.Add(Alldatas);
                         }
@@ -574,7 +613,104 @@ namespace CIResearch.Controllers
 
         }
 
-
+        // --- DISTINCT FILTER VALUE HELPERS ---
+        private List<string> GetDistinctCodes()
+        {
+            return GetDistinctValuesFromDb("CODE");
+        }
+        private List<string> GetDistinctProjectNames()
+        {
+            return GetDistinctValuesFromDb("PROJECTNAME");
+        }
+        private List<string> GetDistinctYears()
+        {
+            return GetDistinctValuesFromDb("YEAR");
+        }
+        private List<string> GetDistinctCities()
+        {
+            return GetDistinctValuesFromDb("CITY");
+        }
+        private List<string> GetDistinctJobs()
+        {
+            return GetDistinctValuesFromDb("JOB");
+        }
+        private List<string> GetDistinctEducations()
+        {
+            return GetDistinctValuesFromDb("EDUCATION");
+        }
+        private List<string> GetDistinctSexes()
+        {
+            return GetDistinctValuesFromDb("SEX");
+        }
+        private List<string> GetDistinctMaritalStatuses()
+        {
+            return GetDistinctValuesFromDb("MARITALSTATUS");
+        }
+        private List<string> GetDistinctHouseholdIncomes()
+        {
+            return GetDistinctValuesFromDb("HOUSEHOLDINCOME");
+        }
+        private List<string> GetDistinctPersonalIncomes()
+        {
+            return GetDistinctValuesFromDb("PERSONALINCOME");
+        }
+        private List<string> GetDistinctDistricts()
+        {
+            return GetDistinctValuesFromDb("DISTRICT");
+        }
+        private List<string> GetDistinctWards()
+        {
+            return GetDistinctValuesFromDb("WARD");
+        }
+        private List<string> GetDistinctProvinces()
+        {
+            return GetDistinctValuesFromDb("PROVINCES");
+        }
+        private List<string> GetDistinctClasses()
+        {
+            return GetDistinctValuesFromDb("Class");
+        }
+        private List<string> GetDistinctNganhhangs()
+        {
+            return GetDistinctValuesFromDb("Nganhhang");
+        }
+        private List<string> GetDistinctQcs()
+        {
+            return GetDistinctValuesFromDb("QC");
+        }
+        private List<string> GetDistinctQas()
+        {
+            return GetDistinctValuesFromDb("QA");
+        }
+        private List<string> GetDistinctKhuvucs()
+        {
+            return GetDistinctValuesFromDb("KHUVUC");
+        }
+        private List<string> GetDistinctChuyenKhoas()
+        {
+            return GetDistinctValuesFromDb("ChuyenKhoa");
+        }
+        // Helper for all distinct value queries
+        private List<string> GetDistinctValuesFromDb(string column)
+        {
+            var values = new List<string>();
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+                var query = $"SELECT DISTINCT `{column}` FROM all_data_final WHERE `{column}` IS NOT NULL AND `{column}` != '' ORDER BY `{column}`";
+                using (var command = new MySqlCommand(query, connection))
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        var val = reader[0]?.ToString();
+                        if (!string.IsNullOrWhiteSpace(val))
+                            values.Add(val);
+                    }
+                }
+            }
+            return values;
+        }
 
 
     }

@@ -47,172 +47,102 @@ namespace CIResearch.Controllers
       List<string> job = null, List<string> householdIncome = null, List<string> personalIncome = null,
       List<string> maritalStatus = null, string mostFrequentlyUsedBrand = "",
       string source = "", List<string> Classname = null, List<string> education = null,
-      List<string> provinces = null, List<string> qc = null, string qa = "", List<string> Khuvuc = null, List<string> Nganhhang = null, List<string> region = null)
+      List<string> provinces = null, List<string> qc = null, string qa = "", List<string> Khuvuc = null, List<string> Nganhhang = null, List<string> region = null, List<string> chuyenKhoa = null)
         {
-
-
-            ViewBag.Education = education;
-            ViewBag.Year = year;
-            ViewBag.Projectname = projectName;
-            ViewBag.City = city;
-            ViewBag.Sex = sex;
-            ViewBag.Age = age;
-            ViewBag.Region = region;
-            ViewBag.Nganhhang = Nganhhang;
-            ViewBag.Classname = Classname;
-            ViewBag.Job = job;
-            ViewBag.MaritalStatus = maritalStatus;
-            ViewBag.Code = code;
-            ViewBag.Sbjnum = sbjnum != null ? string.Join(",", sbjnum) : "";
-            ViewBag.Phonenumber = phoneNumber != null ? string.Join(",", phoneNumber) : "";
-            ViewBag.Qc = qc;
-
-
-
-
-            List<ALLDATA> projectt = new List<ALLDATA>();
-
-
-
-            if (sbjnum != null && sbjnum.All(string.IsNullOrWhiteSpace))
+            try
             {
-                sbjnum = null;
-            }
+                // --- TRUYỀN DỮ LIỆU FILTER ĐỘNG ---
+                ViewBag.CodeList = GetDistinctCodes();
+                ViewBag.ProjectNameList = GetDistinctProjectNames();
+                ViewBag.YearList = GetDistinctYears();
+                ViewBag.CityList = GetDistinctCities();
+                ViewBag.JobList = GetDistinctJobs();
+                ViewBag.EducationList = GetDistinctEducations();
+                ViewBag.SexList = GetDistinctSexes();
+                ViewBag.MaritalStatusList = GetDistinctMaritalStatuses();
+                ViewBag.HouseholdIncomeList = GetDistinctHouseholdIncomes();
+                ViewBag.PersonalIncomeList = GetDistinctPersonalIncomes();
+                ViewBag.DistrictList = GetDistinctDistricts();
+                ViewBag.WardList = GetDistinctWards();
+                ViewBag.ProvincesList = GetDistinctProvinces();
+                ViewBag.ClassList = GetDistinctClasses();
+                ViewBag.NganhhangList = GetDistinctNganhhangs();
+                ViewBag.QcList = GetDistinctQcs();
+                ViewBag.QaList = GetDistinctQas();
+                ViewBag.KhuvucList = GetDistinctKhuvucs();
+                ViewBag.ChuyenKhoaList = GetDistinctChuyenKhoas();
 
-            if (phoneNumber != null && phoneNumber.All(string.IsNullOrWhiteSpace))
-            {
-                phoneNumber = null;
-            }
 
-            // Kiểm tra nếu tất cả đều rỗng và không có giá trị nào khác ngoài sbjnum hoặc phoneNumber
-            if (string.IsNullOrEmpty(stt) &&
-                (code == null || !code.Any()) &&
-                (projectName == null || !projectName.Any()) &&
-                (year == null || !year.Any()) &&
-                (contactObject == null || !contactObject.Any()) &&
-                (string.IsNullOrEmpty(fullname)) &&
-                (city == null || !city.Any()) &&
-                (string.IsNullOrEmpty(address)) &&
-                (string.IsNullOrEmpty(street)) &&
-                (string.IsNullOrEmpty(ward)) &&
-                (string.IsNullOrEmpty(district)) &&
-                (string.IsNullOrEmpty(email)) &&
-                (string.IsNullOrEmpty(dateOfBirth)) &&
-                (age == null || !age.Any()) &&
-                (sex == null || !sex.Any()) &&
-                (job == null || !job.Any()) &&
-                (householdIncome == null || !householdIncome.Any()) &&
-                (personalIncome == null || !personalIncome.Any()) &&
-                (maritalStatus == null || !maritalStatus.Any()) &&
-                (string.IsNullOrEmpty(mostFrequentlyUsedBrand)) &&
-                (string.IsNullOrEmpty(source)) &&
-                (Classname == null || !Classname.Any()) &&
-                (education == null || !education.Any()) &&
-                (provinces == null || !provinces.Any()) &&
-
-                (qc == null || !qc.Any()) && (string.IsNullOrEmpty(qa)) &&
-                (Nganhhang == null || !Nganhhang.Any()) &&
-                sbjnum == null &&
-                phoneNumber == null)
-            {
-                ViewBag.TotalSamples = 0;
-                return View(projectt);
-            }
-
-            projectt = GetProjectts(stt, code, projectName, year, contactObject, sbjnum, fullname, city, address, street, ward, district, phoneNumber, email, dateOfBirth, age, sex, job, householdIncome, personalIncome, maritalStatus, mostFrequentlyUsedBrand, source, Classname, education, provinces, qc, qa, Khuvuc, Nganhhang);
+                ViewBag.Education = education;
+                ViewBag.Year = year;
+                ViewBag.Projectname = projectName;
+                ViewBag.City = city;
+                ViewBag.Sex = sex;
+                ViewBag.Age = age;
+                ViewBag.Region = region;
+                ViewBag.Nganhhang = Nganhhang;
+                ViewBag.Classname = Classname;
+                ViewBag.Job = job;
+                ViewBag.MaritalStatus = maritalStatus;
+                ViewBag.Code = code;
+                ViewBag.Sbjnum = sbjnum != null ? string.Join(",", sbjnum) : "";
+                ViewBag.Phonenumber = phoneNumber != null ? string.Join(",", phoneNumber) : "";
+                ViewBag.Qc = qc;
+                ViewBag.ChuyenKhoa = chuyenKhoa;
 
 
 
 
+                List<ALLDATA> projectt = new List<ALLDATA>();
 
 
 
-            var pieData = projectt.GroupBy(p => p.ProjectName)
-                                   .Select(g => new { ProjectName = g.Key, Count = g.Count() })
-                                   .ToList();
-
-            ViewBag.PieLabels = pieData.Select(g => g.ProjectName).ToArray();
-            ViewBag.PieData = pieData.Select(g => g.Count).ToArray();
-
-
-
-
-
-
-
-
-
-
-
-
-            var yearlyData = projectt.GroupBy(p => p.Year)
-                                     .Select(g => new { Year = g.Key, Count = g.Count() })
-                                     .OrderBy(g => g.Year)
-                                     .ToList();
-
-            ViewBag.YearLabels = yearlyData.Select(g => g.Year).ToArray();
-            ViewBag.YearData = yearlyData.Select(g => g.Count).ToArray();
-
-
-            var personalIncomeData = projectt.Where(p => p.PersonalIncome != "0")
-                .GroupBy(p => p.PersonalIncome)
-                                             .Select(g => new { PersonalIncome = g.Key, Count = g.Count() })
-                                             .ToList();
-
-            ViewBag.PersonalIncomeLabels = personalIncomeData.Select(g => g.PersonalIncome).ToArray();
-            ViewBag.PersonalIncomeData = personalIncomeData.Select(g => g.Count).ToArray();
-
-
-
-
-            var maritalStatusData = projectt.Where(p => p.MaritalStatus != "0")
-                .GroupBy(p => p.MaritalStatus)
-                                            .Select(g => new { MaritalStatus = g.Key, Count = g.Count() })
-                                            .ToList();
-
-            ViewBag.MaritalStatusLabels = maritalStatusData.Select(g => g.MaritalStatus).ToArray();
-            ViewBag.MaritalStatusData = maritalStatusData.Select(g => g.Count).ToArray();
-
-
-
-
-            var ageData = projectt.Where(p => p.Age != 0)
-                                 .GroupBy(p => (p.Age / 5) * 5)  // Nhóm theo khoảng 10 tuổi
-                                 .Select(g => new
-                                 {
-                                     AgeRange = g.Key == 100 ? "99+" : $"{g.Key} đến {g.Key + 5}", // Tạo chuỗi khoảng tuổi
-                                     Count = g.Count()
-                                 })
-                                 .OrderBy(g => g.AgeRange) // Sắp xếp theo AgeRange
-                                 .ToList();
-
-            ViewBag.LineLabels = ageData.Select(g => g.AgeRange).ToArray();
-            ViewBag.LineData = ageData.Select(g => g.Count).ToArray();
-
-
-
-
-            var normalizedSexData = projectt
-                .Select(p => new
+                if (sbjnum != null && sbjnum.All(string.IsNullOrWhiteSpace))
                 {
-                    Sex = p.Sex.Replace(" ", "").ToLower() switch
-                    {
-                        "1.nữ" => "Nữ",
-                        "2.nữ" => "Nữ",
-                        "1.nam" => "Nam",
-                        "male" => "Nam",
-                        "female" => "Nữ",
-                        _ => p.Sex // Giữ nguyên nếu không phải male hoặc female
-                    }
-                })
-                .GroupBy(p => p.Sex)
-                .Select(g => new { Sex = g.Key, Count = g.Count() })
-                .Where(g => g.Sex != "0")  // Lọc các giới tính có số lượng lớn hơn 0
-                .ToList();
+                    sbjnum = null;
+                }
 
-            // Truyền dữ liệu cho biểu đồ giới tính vào ViewBag
-            ViewBag.SexLabels = normalizedSexData.Select(g => g.Sex).ToArray();
-            ViewBag.SexData = normalizedSexData.Select(g => g.Count).ToArray();
+                if (phoneNumber != null && phoneNumber.All(string.IsNullOrWhiteSpace))
+                {
+                    phoneNumber = null;
+                }
+
+                // Kiểm tra nếu tất cả đều rỗng và không có giá trị nào khác ngoài sbjnum hoặc phoneNumber
+                if (string.IsNullOrEmpty(stt) &&
+                    (code == null || !code.Any()) &&
+                    (projectName == null || !projectName.Any()) &&
+                    (year == null || !year.Any()) &&
+                    (contactObject == null || !contactObject.Any()) &&
+                    (string.IsNullOrEmpty(fullname)) &&
+                    (city == null || !city.Any()) &&
+                    (string.IsNullOrEmpty(address)) &&
+                    (string.IsNullOrEmpty(street)) &&
+                    (string.IsNullOrEmpty(ward)) &&
+                    (string.IsNullOrEmpty(district)) &&
+                    (string.IsNullOrEmpty(email)) &&
+                    (string.IsNullOrEmpty(dateOfBirth)) &&
+                    (age == null || !age.Any()) &&
+                    (sex == null || !sex.Any()) &&
+                    (job == null || !job.Any()) &&
+                    (householdIncome == null || !householdIncome.Any()) &&
+                    (personalIncome == null || !personalIncome.Any()) &&
+                    (maritalStatus == null || !maritalStatus.Any()) &&
+                    (string.IsNullOrEmpty(mostFrequentlyUsedBrand)) &&
+                    (string.IsNullOrEmpty(source)) &&
+                    (Classname == null || !Classname.Any()) &&
+                    (education == null || !education.Any()) &&
+                    (provinces == null || !provinces.Any()) &&
+                    (chuyenKhoa == null || !chuyenKhoa.Any()) &&
+                    (qc == null || !qc.Any()) && (string.IsNullOrEmpty(qa)) &&
+                    (Nganhhang == null || !Nganhhang.Any()) &&
+                    sbjnum == null &&
+                    phoneNumber == null)
+                {
+                    ViewBag.TotalSamples = 0;
+                    return View(projectt);
+                }
+
+                projectt = GetProjectts(stt, code, projectName, year, contactObject, sbjnum, fullname, city, address, street, ward, district, phoneNumber, email, dateOfBirth, age, sex, job, householdIncome, personalIncome, maritalStatus, mostFrequentlyUsedBrand, source, Classname, education, provinces, qc, qa, Khuvuc, Nganhhang, chuyenKhoa);
 
 
 
@@ -220,71 +150,162 @@ namespace CIResearch.Controllers
 
 
 
-
-
-
-            // Dữ liệu cho bảng ( không có dữ liệu )
-            var tableData = projectt.GroupBy(p => p.City)
-                                     .Select(g => new { City = g.Key, Count = g.Count() })
-                                     .Where(x => x.Count > 0)
-                                     .ToList();
-            ViewBag.TableData = tableData;
-
-
-
-            ViewBag.TotalSamples = projectt.Count;
-            //biểu đồ cột
-
-            // Dữ liệu cho biểu đồ cột (số lượng mẫu theo tỉnh done)
-            var provinceData = projectt.Where(p => p.City != "0")
-                .GroupBy(p => p.City) // Nhóm theo tỉnh
-                                       .Select(g => new { City = g.Key, Count = g.Count() }) // Đếm số lượng mẫu
+                var pieData = projectt.GroupBy(p => p.ProjectName)
+                                       .Select(g => new { ProjectName = g.Key, Count = g.Count() })
                                        .ToList();
 
-            ViewBag.BarLabels = provinceData.Select(g => g.City).ToArray(); // Nhãn cho biểu đồ cột
-            ViewBag.BarData = provinceData.Select(g => g.Count).ToArray(); // Dữ liệu cho biểu đồ cột
+                ViewBag.PieLabels = pieData.Select(g => g.ProjectName).ToArray();
+                ViewBag.PieData = pieData.Select(g => g.Count).ToArray();
 
 
-            var maleCount = projectt.Count(p => p.Sex == "Nam");
-            var femaleCount = projectt.Count(p => p.Sex == "Nữ");
-            ViewBag.GenderSummary = $"Các thông tin đã được lọc có:  {maleCount} nam, {femaleCount} nữ";
-
-            var projectNames = projectt.Select(p => p.ProjectName).Distinct().ToList(); // Lấy tên dự án duy nhất
-            ViewBag.Cacduanduocloc = "Tất cả dự án đã được lọc: " + string.Join(", ", projectNames);
-            //
-
-            var totalProjects = projectt.Count();
-            ViewBag.TotalProjects = $"Tổng số dự án đã lọc: {totalProjects}";
 
 
-            var youngCount = projectt.Count(p => p.Age < 30);
-            var middleAgedCount = projectt.Count(p => p.Age >= 30 && p.Age < 60);
-            var seniorCount = projectt.Count(p => p.Age >= 60);
 
-            ViewBag.AgeGroupSummary = $"Độ tuổi: Người trẻ (dưới 30): {youngCount}, Trung niên (30-60): {middleAgedCount}, Người già (60 trở lên): {seniorCount}";
-            var northernProvinces = new List<string>
+
+
+
+
+
+
+
+                var yearlyData = projectt.GroupBy(p => p.Year)
+                                         .Select(g => new { Year = g.Key, Count = g.Count() })
+                                         .OrderBy(g => g.Year)
+                                         .ToList();
+
+                ViewBag.YearLabels = yearlyData.Select(g => g.Year).ToArray();
+                ViewBag.YearData = yearlyData.Select(g => g.Count).ToArray();
+
+
+                var personalIncomeData = projectt.Where(p => p.PersonalIncome != "0")
+                    .GroupBy(p => p.PersonalIncome)
+                                                 .Select(g => new { PersonalIncome = g.Key, Count = g.Count() })
+                                                 .ToList();
+
+                ViewBag.PersonalIncomeLabels = personalIncomeData.Select(g => g.PersonalIncome).ToArray();
+                ViewBag.PersonalIncomeData = personalIncomeData.Select(g => g.Count).ToArray();
+
+
+
+
+                var maritalStatusData = projectt.Where(p => p.MaritalStatus != "0")
+                    .GroupBy(p => p.MaritalStatus)
+                                                .Select(g => new { MaritalStatus = g.Key, Count = g.Count() })
+                                                .ToList();
+
+                ViewBag.MaritalStatusLabels = maritalStatusData.Select(g => g.MaritalStatus).ToArray();
+                ViewBag.MaritalStatusData = maritalStatusData.Select(g => g.Count).ToArray();
+
+
+
+
+                var ageData = projectt.Where(p => p.Age != 0)
+                                     .GroupBy(p => (p.Age / 5) * 5)  // Nhóm theo khoảng 10 tuổi
+                                     .Select(g => new
+                                     {
+                                         AgeRange = g.Key == 100 ? "99+" : $"{g.Key} đến {g.Key + 5}", // Tạo chuỗi khoảng tuổi
+                                         Count = g.Count()
+                                     })
+                                     .OrderBy(g => g.AgeRange) // Sắp xếp theo AgeRange
+                                     .ToList();
+
+                ViewBag.LineLabels = ageData.Select(g => g.AgeRange).ToArray();
+                ViewBag.LineData = ageData.Select(g => g.Count).ToArray();
+
+
+
+
+                var normalizedSexData = projectt
+                    .Select(p => new
+                    {
+                        Sex = p.Sex.Replace(" ", "").ToLower() switch
+                        {
+                            "1.nữ" => "Nữ",
+                            "2.nữ" => "Nữ",
+                            "1.nam" => "Nam",
+                            "male" => "Nam",
+                            "female" => "Nữ",
+                            _ => p.Sex // Giữ nguyên nếu không phải male hoặc female
+                        }
+                    })
+                    .GroupBy(p => p.Sex)
+                    .Select(g => new { Sex = g.Key, Count = g.Count() })
+                    .Where(g => g.Sex != "0")  // Lọc các giới tính có số lượng lớn hơn 0
+                    .ToList();
+
+                // Truyền dữ liệu cho biểu đồ giới tính vào ViewBag
+                ViewBag.SexLabels = normalizedSexData.Select(g => g.Sex).ToArray();
+                ViewBag.SexData = normalizedSexData.Select(g => g.Count).ToArray();
+
+
+
+
+
+
+
+
+
+
+                // Dữ liệu cho bảng ( không có dữ liệu )
+                var tableData = projectt.GroupBy(p => p.City)
+                                         .Select(g => new { City = g.Key, Count = g.Count() })
+                                         .Where(x => x.Count > 0)
+                                         .ToList();
+                ViewBag.TableData = tableData;
+
+
+
+                ViewBag.TotalSamples = projectt.Count;
+                //biểu đồ cột
+
+                // Dữ liệu cho biểu đồ cột (số lượng mẫu theo tỉnh done)
+                var provinceData = projectt.Where(p => p.City != "0")
+                    .GroupBy(p => p.City) // Nhóm theo tỉnh
+                                           .Select(g => new { City = g.Key, Count = g.Count() }) // Đếm số lượng mẫu
+                                           .ToList();
+
+                ViewBag.BarLabels = provinceData.Select(g => g.City).ToArray(); // Nhãn cho biểu đồ cột
+                ViewBag.BarData = provinceData.Select(g => g.Count).ToArray(); // Dữ liệu cho biểu đồ cột
+
+
+                var maleCount = projectt.Count(p => p.Sex == "Nam");
+                var femaleCount = projectt.Count(p => p.Sex == "Nữ");
+                ViewBag.GenderSummary = $"Các thông tin đã được lọc có:  {maleCount} nam, {femaleCount} nữ";
+
+                var projectNames = projectt.Select(p => p.ProjectName).Distinct().ToList(); // Lấy tên dự án duy nhất
+                ViewBag.Cacduanduocloc = "Tất cả dự án đã được lọc: " + string.Join(", ", projectNames);
+                //
+
+                var totalProjects = projectt.Count();
+                ViewBag.TotalProjects = $"Tổng số dự án đã lọc: {totalProjects}";
+
+
+                var youngCount = projectt.Count(p => p.Age < 30);
+                var middleAgedCount = projectt.Count(p => p.Age >= 30 && p.Age < 60);
+                var seniorCount = projectt.Count(p => p.Age >= 60);
+
+                ViewBag.AgeGroupSummary = $"Độ tuổi: Người trẻ (dưới 30): {youngCount}, Trung niên (30-60): {middleAgedCount}, Người già (60 trở lên): {seniorCount}";
+                var northernProvinces = new List<string>
 {
    "Bắc Giang", "Bắc Kạn", "Bắc Ninh", "Cao Bằng","Điện Biên","Hà Giang","Hà Nam","Hà Nội","Hải Dương","Hải Phòng","Hòa Bình","Hưng Yên","Lai Châu","Lào Cai","Nam Định","Ninh Bình","Phú Thọ","Quảng Ninh","Sơn La","Thái Bình","Thái Nguyên","Tuyên Quang","Vĩnh Phúc","Lạng Sơn","Yên bái"
 };
 
-            var centralProvinces = new List<string>
+                var centralProvinces = new List<string>
 {
   "Bình Định","Đà Nẵng","Đắk Lắk","Đắk Nông","Gia Lai","Hà Tĩnh","Khánh Hòa","Kon Tum","Nghệ An","Phú Yên","Thanh Hóa","Quảng Bình","Quảng Nam","Quảng Ngãi","Quảng Trị","Thừa Thiên Huế"
 };
 
-            var southernProvinces = new List<string>
+                var southernProvinces = new List<string>
 {
     "An Giang","Bà Rịa Vũng Tàu","Bạc Liêu","Bến Tre","Bình Dương", "Bình Phước","Bình Thuận","Cà Mau","Cần Thơ","Đồng Nai","Đồng Tháp","Hậu Giang","Hồ Chí Minh","Kiên Giang","Lâm Đồng","Long An","Ninh Thuận","Sóc Trăng","Tây Ninh","Tiền Giang","Trà Vinh","Vĩnh Long"
 };
 
-            // Đếm số lượng mẫu ở từng miền
-            var northernCount = projectt.Count(p => northernProvinces.Contains(p.City));
-            var centralCount = projectt.Count(p => centralProvinces.Contains(p.City));
-            var southernCount = projectt.Count(p => southernProvinces.Contains(p.City));
+                // Đếm số lượng mẫu ở từng miền
+                var northernCount = projectt.Count(p => northernProvinces.Contains(p.City));
+                var centralCount = projectt.Count(p => centralProvinces.Contains(p.City));
+                var southernCount = projectt.Count(p => southernProvinces.Contains(p.City));
 
-            // Tạo thông tin thống kê
-
-
+                // Tạo thông tin thống kê
 
 
 
@@ -293,24 +314,24 @@ namespace CIResearch.Controllers
 
 
 
-            //// Dữ liệu cho biểu đồ cột - Số lượng dự án theo quận
-            var districtData = projectt.Where(p => p.District != "0")
-                .GroupBy(p => p.District)
-                                       .Select(g => new { District = g.Key, Count = g.Count() })
-                                       .ToList();
-
-            ViewBag.DistrictLabels = districtData.Select(g => g.District).ToArray();
-            ViewBag.DistrictData = districtData.Select(g => g.Count).ToArray();
 
 
+                //// Dữ liệu cho biểu đồ cột - Số lượng dự án theo quận
+                var districtData = projectt.Where(p => p.District != "0")
+                    .GroupBy(p => p.District)
+                                           .Select(g => new { District = g.Key, Count = g.Count() })
+                                           .ToList();
+
+                ViewBag.DistrictLabels = districtData.Select(g => g.District).ToArray();
+                ViewBag.DistrictData = districtData.Select(g => g.Count).ToArray();
 
 
 
 
-            // Truyền dữ liệu cho View
-            // Truyền dữ liệu vào ViewBag
 
 
+                // Truyền dữ liệu cho View
+                // Truyền dữ liệu vào ViewBag
 
 
 
@@ -323,11 +344,18 @@ namespace CIResearch.Controllers
 
 
 
-            return View(projectt);
 
 
-
-
+                return View(projectt);
+            }
+            catch (Exception ex)
+            {
+                // Ghi log lỗi ra thư mục tạm của hệ thống (an toàn quyền ghi)
+                string logPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "bacsi_error.log");
+                System.IO.File.AppendAllText(logPath, DateTime.Now + " - " + ex.ToString() + Environment.NewLine);
+                // Trả về thông báo lỗi đơn giản
+                return Content("Có lỗi xảy ra: " + ex.Message);
+            }
         }
 
 
@@ -341,7 +369,7 @@ namespace CIResearch.Controllers
   List<string> job, List<string> householdIncome, List<string> personalIncome,
   List<string> maritalStatus, string mostFrequentlyUsedBrand,
   string source, List<string> className, List<string> education,
-  List<string> provinces, List<string> qc, string qa, List<string> Khuvuc, List<string> Nganhhang)
+  List<string> provinces, List<string> qc, string qa, List<string> Khuvuc, List<string> Nganhhang, List<string> chuyenKhoa)
         {
 
             List<ALLDATA> project = new List<ALLDATA>();
@@ -425,6 +453,11 @@ namespace CIResearch.Controllers
                     var NganhhangParams = Nganhhang.Select((_, i) => $"@Nganhhang{i}").ToArray();
                     queryBuilder.Append(" AND Nganhhang IN (" + string.Join(", ", NganhhangParams) + ")");
                 }
+                if (chuyenKhoa != null && chuyenKhoa.Any())
+                {
+                    var chuyenKhoaParams = chuyenKhoa.Select((_, i) => $"@chuyenKhoa{i}").ToArray();
+                    queryBuilder.Append(" AND ChuyenKhoa IN (" + string.Join(", ", chuyenKhoaParams) + ")");
+                }
 
 
                 if (qc != null && qc.Any())
@@ -494,6 +527,9 @@ namespace CIResearch.Controllers
                     if (Nganhhang != null && Nganhhang.Any())
                         for (int i = 0; i < Nganhhang.Count; i++)
                             command.Parameters.AddWithValue($"@Nganhhang{i}", Nganhhang[i]);
+                    if (chuyenKhoa != null && chuyenKhoa.Any())
+                        for (int i = 0; i < chuyenKhoa.Count; i++)
+                            command.Parameters.AddWithValue($"@chuyenKhoa{i}", chuyenKhoa[i]);
 
 
                     if (qc != null && qc.Any())
@@ -512,35 +548,36 @@ namespace CIResearch.Controllers
                             ALLDATA Alldatas = new ALLDATA
                             {
                                 Stt = reader.GetInt32("STT"),
-                                Code = reader.GetString("CODE"),
-                                ProjectName = reader.GetString("PROJECTNAME"),
+                                Code = reader.IsDBNull(reader.GetOrdinal("CODE")) ? null : reader.GetString("CODE"),
+                                ProjectName = reader.IsDBNull(reader.GetOrdinal("PROJECTNAME")) ? null : reader.GetString("PROJECTNAME"),
                                 Year = reader.GetInt32("YEAR"),
-                                ContactObject = reader.GetString("CONTACTOBJECT"),
+                                ContactObject = reader.IsDBNull(reader.GetOrdinal("CONTACTOBJECT")) ? null : reader.GetString("CONTACTOBJECT"),
                                 Sbjnum = reader.GetInt32("SBJNUM"),
-                                Fullname = reader.GetString("FULLNAME"),
-                                City = reader.GetString("CITY"),
-                                Address = reader.GetString("ADDRESS"),
-                                Street = reader.GetString("STREET"),
-                                Ward = reader.GetString("WARD"),
-                                District = reader.GetString("DISTRICT"),
-                                PhoneNumber = reader.GetString("PHONENUMBER"),
-                                Email = reader.GetString("EMAIL"),
+                                Fullname = reader.IsDBNull(reader.GetOrdinal("FULLNAME")) ? null : reader.GetString("FULLNAME"),
+                                City = reader.IsDBNull(reader.GetOrdinal("CITY")) ? null : reader.GetString("CITY"),
+                                Address = reader.IsDBNull(reader.GetOrdinal("ADDRESS")) ? null : reader.GetString("ADDRESS"),
+                                Street = reader.IsDBNull(reader.GetOrdinal("STREET")) ? null : reader.GetString("STREET"),
+                                Ward = reader.IsDBNull(reader.GetOrdinal("WARD")) ? null : reader.GetString("WARD"),
+                                District = reader.IsDBNull(reader.GetOrdinal("DISTRICT")) ? null : reader.GetString("DISTRICT"),
+                                PhoneNumber = reader.IsDBNull(reader.GetOrdinal("PHONENUMBER")) ? null : reader.GetString("PHONENUMBER"),
+                                Email = reader.IsDBNull(reader.GetOrdinal("EMAIL")) ? null : reader.GetString("EMAIL"),
                                 DateOfBirth = reader.IsDBNull(reader.GetOrdinal("DATEOFBIRTH")) ? (int?)null : reader.GetInt32("DATEOFBIRTH"),
-                                Age = reader.GetInt32("AGE"),
-                                Sex = reader.GetString("SEX"),
-                                Job = reader.GetString("JOB"),
-                                HouseholdIncome = reader.GetString("HOUSEHOLDINCOME"),
-                                PersonalIncome = reader.GetString("PERSONALINCOME"),
-                                MaritalStatus = reader.GetString("MARITALSTATUS"),
-                                MostFrequentlyUsedBrand = reader.GetString("MOSTFREQUENTLYUSEDBRAND"),
-                                Source = reader.GetString("SOURCE"),
-                                Class = reader.GetString("Class"),
-                                Education = reader.GetString("EDUCATION"),
-                                Provinces = reader.GetString("PROVINCES"),
-                                Qc = reader.GetString("QC"),
-                                Qa = reader.GetString("QA"),
-                                Khuvuc = reader.GetString("KHUVUC"),
-                                Nganhhang = reader.GetString("Nganhhang")
+                                Age = reader.IsDBNull(reader.GetOrdinal("AGE")) ? 0 : reader.GetInt32("AGE"),
+                                Sex = reader.IsDBNull(reader.GetOrdinal("SEX")) ? null : reader.GetString("SEX"),
+                                Job = reader.IsDBNull(reader.GetOrdinal("JOB")) ? null : reader.GetString("JOB"),
+                                HouseholdIncome = reader.IsDBNull(reader.GetOrdinal("HOUSEHOLDINCOME")) ? null : reader.GetString("HOUSEHOLDINCOME"),
+                                PersonalIncome = reader.IsDBNull(reader.GetOrdinal("PERSONALINCOME")) ? null : reader.GetString("PERSONALINCOME"),
+                                MaritalStatus = reader.IsDBNull(reader.GetOrdinal("MARITALSTATUS")) ? null : reader.GetString("MARITALSTATUS"),
+                                MostFrequentlyUsedBrand = reader.IsDBNull(reader.GetOrdinal("MOSTFREQUENTLYUSEDBRAND")) ? null : reader.GetString("MOSTFREQUENTLYUSEDBRAND"),
+                                Source = reader.IsDBNull(reader.GetOrdinal("SOURCE")) ? null : reader.GetString("SOURCE"),
+                                Class = reader.IsDBNull(reader.GetOrdinal("Class")) ? null : reader.GetString("Class"),
+                                Education = reader.IsDBNull(reader.GetOrdinal("EDUCATION")) ? null : reader.GetString("EDUCATION"),
+                                Provinces = reader.IsDBNull(reader.GetOrdinal("PROVINCES")) ? null : reader.GetString("PROVINCES"),
+                                Qc = reader.IsDBNull(reader.GetOrdinal("QC")) ? null : reader.GetString("QC"),
+                                Qa = reader.IsDBNull(reader.GetOrdinal("QA")) ? null : reader.GetString("QA"),
+                                Khuvuc = reader.IsDBNull(reader.GetOrdinal("KHUVUC")) ? null : reader.GetString("KHUVUC"),
+                                Nganhhang = reader.IsDBNull(reader.GetOrdinal("Nganhhang")) ? null : reader.GetString("Nganhhang"),
+                                ChuyenKhoa = reader.IsDBNull(reader.GetOrdinal("ChuyenKhoa")) ? null : reader.GetString("ChuyenKhoa")
                             };
                             project.Add(Alldatas);
                         }
@@ -568,7 +605,7 @@ namespace CIResearch.Controllers
       List<string> job = null, List<string> householdIncome = null, List<string> personalIncome = null,
       List<string> maritalStatus = null, string mostFrequentlyUsedBrand = "",
       string source = "", List<string> className = null, List<string> education = null,
-      List<string> provinces = null, List<string> qc = null, string qa = "", List<string> Khuvuc = null, List<string> Nganhhang = null)
+      List<string> provinces = null, List<string> qc = null, string qa = "", List<string> Khuvuc = null, List<string> Nganhhang = null, List<string> chuyenKhoa = null)
         {
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
@@ -586,7 +623,7 @@ namespace CIResearch.Controllers
                 return RedirectToAction("Index", "Bacsi");
             }
 
-            var projectList = GetProjectts(stt, code, projectName, year, contactObject, sbjnum, fullname, city, address, street, ward, district, phoneNumber, email, dateOfBirth, age, sex, job, householdIncome, personalIncome, maritalStatus, mostFrequentlyUsedBrand, source, className, education, provinces, qc, qa, Khuvuc, Nganhhang);
+            var projectList = GetProjectts(stt, code, projectName, year, contactObject, sbjnum, fullname, city, address, street, ward, district, phoneNumber, email, dateOfBirth, age, sex, job, householdIncome, personalIncome, maritalStatus, mostFrequentlyUsedBrand, source, className, education, provinces, qc, qa, Khuvuc, Nganhhang, chuyenKhoa);
 
             var userRole = HttpContext.Session.GetString("Role");
             int maxRows;
@@ -762,6 +799,105 @@ namespace CIResearch.Controllers
                     }
                 }
             }
+        }
+
+        // --- DISTINCT FILTER VALUE HELPERS ---
+        private List<string> GetDistinctCodes()
+        {
+            return GetDistinctValuesFromDb("CODE");
+        }
+        private List<string> GetDistinctProjectNames()
+        {
+            return GetDistinctValuesFromDb("PROJECTNAME");
+        }
+        private List<string> GetDistinctYears()
+        {
+            return GetDistinctValuesFromDb("YEAR");
+        }
+        private List<string> GetDistinctCities()
+        {
+            return GetDistinctValuesFromDb("CITY");
+        }
+        private List<string> GetDistinctJobs()
+        {
+            return GetDistinctValuesFromDb("JOB");
+        }
+        private List<string> GetDistinctEducations()
+        {
+            return GetDistinctValuesFromDb("EDUCATION");
+        }
+        private List<string> GetDistinctSexes()
+        {
+            return GetDistinctValuesFromDb("SEX");
+        }
+        private List<string> GetDistinctMaritalStatuses()
+        {
+            return GetDistinctValuesFromDb("MARITALSTATUS");
+        }
+        private List<string> GetDistinctHouseholdIncomes()
+        {
+            return GetDistinctValuesFromDb("HOUSEHOLDINCOME");
+        }
+        private List<string> GetDistinctPersonalIncomes()
+        {
+            return GetDistinctValuesFromDb("PERSONALINCOME");
+        }
+        private List<string> GetDistinctDistricts()
+        {
+            return GetDistinctValuesFromDb("DISTRICT");
+        }
+        private List<string> GetDistinctWards()
+        {
+            return GetDistinctValuesFromDb("WARD");
+        }
+        private List<string> GetDistinctProvinces()
+        {
+            return GetDistinctValuesFromDb("PROVINCES");
+        }
+        private List<string> GetDistinctClasses()
+        {
+            return GetDistinctValuesFromDb("Class");
+        }
+        private List<string> GetDistinctNganhhangs()
+        {
+            return GetDistinctValuesFromDb("Nganhhang");
+        }
+        private List<string> GetDistinctQcs()
+        {
+            return GetDistinctValuesFromDb("QC");
+        }
+        private List<string> GetDistinctQas()
+        {
+            return GetDistinctValuesFromDb("QA");
+        }
+        private List<string> GetDistinctKhuvucs()
+        {
+            return GetDistinctValuesFromDb("KHUVUC");
+        }
+        private List<string> GetDistinctChuyenKhoas()
+        {
+            return GetDistinctValuesFromDb("ChuyenKhoa");
+        }
+        // Helper for all distinct value queries
+        private List<string> GetDistinctValuesFromDb(string column)
+        {
+            var values = new List<string>();
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+                var query = $"SELECT DISTINCT `{column}` FROM all_data_final WHERE `{column}` IS NOT NULL AND `{column}` != '' ORDER BY `{column}`";
+                using (var command = new MySqlCommand(query, connection))
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        var val = reader[0]?.ToString();
+                        if (!string.IsNullOrWhiteSpace(val))
+                            values.Add(val);
+                    }
+                }
+            }
+            return values;
         }
 
 

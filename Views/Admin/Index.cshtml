@@ -33,13 +33,13 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <style>
-       
-
         .table-container {
             border: 1px solid #ddd;
             padding: 10px;
-            max-height: 400px; /* Giới hạn chiều cao nếu bảng quá dài */
-            overflow-y: auto; /* Thêm thanh cuộn dọc nếu bảng quá dài */
+            max-height: 400px;
+            /* Giới hạn chiều cao nếu bảng quá dài */
+            overflow-y: auto;
+            /* Thêm thanh cuộn dọc nếu bảng quá dài */
         }
 
         .table {
@@ -51,13 +51,15 @@
             border: 1px solid #ddd;
         }
 
-        .table th, .table td {
+        .table th,
+        .table td {
             padding: 8px;
             text-align: left;
             border: 1px solid #ddd;
         }
 
-        <style >
+        <style>
+
         /* Thêm CSS tùy chỉnh cho giao diện */
         .admin-page {
             display: flex;
@@ -80,7 +82,8 @@
             margin-top: 20px;
         }
 
-        th, td {
+        th,
+        td {
             border: 1px solid #ddd;
             padding: 8px;
             text-align: left;
@@ -94,7 +97,8 @@
             width: 100%;
             padding: 5px;
             box-sizing: border-box;
-            margin-bottom: 10px; /* Thêm khoảng cách giữa các dropdown */
+            margin-bottom: 10px;
+            /* Thêm khoảng cách giữa các dropdown */
         }
 
         .filter-form {
@@ -147,10 +151,14 @@
 
 
         .selected-options {
-            width: 100%; /* Đặt độ rộng tối đa cho ô hiển thị */
-            overflow: hidden; /* Ẩn phần văn bản bị tràn */
-            text-overflow: ellipsis; /* Hiển thị dấu ... khi văn bản quá dài */
-            white-space: nowrap; /* Ngăn không cho văn bản xuống dòng */
+            width: 100%;
+            /* Đặt độ rộng tối đa cho ô hiển thị */
+            overflow: hidden;
+            /* Ẩn phần văn bản bị tràn */
+            text-overflow: ellipsis;
+            /* Hiển thị dấu ... khi văn bản quá dài */
+            white-space: nowrap;
+            /* Ngăn không cho văn bản xuống dòng */
         }
 
 
@@ -161,9 +169,9 @@
             cursor: pointer;
         }
 
-            .dropdown-options label:hover {
-                background-color: #f0f0f0;
-            }
+        .dropdown-options label:hover {
+            background-color: #f0f0f0;
+        }
     </style>
 
 
@@ -181,14 +189,16 @@
 
     <!-- Custom fonts for this template-->
     <link href="~/trangadmin/accses/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" />
-        @*   <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css"> *@
-    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+    @*   <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css"> *@
+    <link
+        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+        rel="stylesheet">
     <link href="~/trangadmin/accses/css/sb-admin-2.css" rel="stylesheet" />
     <link href="~/trangadmin/accses/css/sb-admin-2.min.css" rel="stylesheet" />
 
 
     <!-- Custom styles for this template-->
-        @*  <link href="css/sb-admin-2.min.css" rel="stylesheet"> *@
+    @*  <link href="css/sb-admin-2.min.css" rel="stylesheet"> *@
 
 </head>
 
@@ -207,577 +217,220 @@
 
 
                     <form method="get" action="@Url.Action("Index", "Admin")" class="filter-form">
-                        <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-
-                            <div class="custom-multi-select">
-                                <div class="select-box" onclick="toggleDropdown(this)">
-                                    <span class="selected-options" data-placeholder="Mã dự án">Mã dự án</span>
-                                    <i class="arrow"></i>
-                                </div>
-                                <div class="dropdown-options" onchange="limitSelection(this, 10)">
-                                     <input type="text" class="search-box" placeholder="Tìm kiếm dự án" oninput="filterOptions(this)">
-                                    @foreach (var code in new List<string>
+                        <div style="display: flex; flex-wrap: wrap; gap: 16px; row-gap: 16px;">
+                            <!-- Hàng 1 -->
+                            <div style="width: 200px;">
+                                <select name="code" id="code" class="form-control" style="width: 100%;">
+                                    <option value="">-- Chọn mã dự án --</option>
+                                    @foreach (var code in (ViewBag.CodeList as List<string>) ?? new List<string>())
                                     {
-                                    "AX1", "AX10", "AX11", "AX12", "AX13", "AX14", "AX15", "AX16", "AX17", "AX18", "AX19",
-                                    "AX2", "AX20", "AX21", "AX22", "AX23", "AX24", "AX25", "AX26", "AX27", "AX28", "AX29",
-                                    "AX3", "AX30", "AX31", "AX32", "AX33", "AX34", "AX35", "AX36", "AX37", "AX38", "AX39",
-                                    "AX4", "AX40", "AX41", "AX42", "AX43", "AX44", "AX45", "AX46", "AX47", "AX48", "AX49",
-                                    "AX5", "AX50", "AX51", "AX52", "AX6", "AX7", "AX8", "AX9", "CI470", "CIR - 1594", "CIR - 1602",
-                                    "CIR - 1607", "CIR #", "CIR 1023", "CIR 1029", "CIR 1046", "CIR 1047", "CIR 1063", "CIR 1084",
-                                    "CIR 1089", "CIR 1091", "CIR 1100", "CIR 1101", "CIR 1111", "CIR 1122", "CIR 1158", "CIR 1177",
-                                    "CIR 1180", "CIR 1181", "CIR 1188", "CIR 1199", "CIR 1212", "CIR 1217", "CIR 1230", "CIR 1243",
-                                    "CIR 1245", "CIR 1250-F121435CJ", "CIR 1253", "CIR 1266", "CIR 1270", "CIR 1281", "CIR 1283",
-                                    "CIR 1295", "CIR 1302", "CIR 1304", "CIR 1309-F122225PMC", "CIR 1314", "CIR 1320", "CIR 1321",
-                                    "CIR 1322", "CIR 1328", "CIR 1329", "CIR 1340", "CIR 1342", "CIR 1359", "CIR 1360", "CIR 1369",
-                                    "CIR 1393", "CIR 1402", "CIR 1409", "CIR 1420", "CIR 1424", "CIR 1426", "CIR 1440", "CIR 1444",
-                                    "CIR 1456", "CIR 1457", "CIR 1478", "CIR 1485", "CIR 1488", "CIR 1494", "CIR 1496", "CIR 1497",
-                                    "CIR 1500", "CIR 1502", "CIR 1506", "CIR 1514", "CIR 1517", "CIR 1518", "CIR 1521", "CIR 1529",
-                                    "CIR 1544", "CIR 1557", "CIR 1566", "CIR 1569", "CIR 1577-1578", "CIR 1580", "CIR 1581", "CIR 1592",
-                                    "CIR 1597", "CIR 1612", "CIR 1613", "CIR 1614", "CIR 1618", "CIR 1629", "CIR 1638", "CIR 1639",
-                                    "CIR 1640", "CIR 1646", "CIR 1649", "CIR 1656", "CIR 1657", "CIR 1667", "CIR 1669", "CIR 1671",
-                                    "CIR 1XXX",  "VPBFC-CI-19-8794"
-                                    })
-                                    {
-                                        <label>
-                                           
-                                            <input type="checkbox" name="code" value="@code" @(ViewBag.Code?.Contains(code) == true ? "checked" : "") /> @code
-                                        </label>
-                                    }
-                                </div>
-                            </div>
-
-
-                            <!-- Project Name Multi-select -->
-                            <div class="custom-multi-select">
-                                <div class="select-box" onclick="toggleDropdown(this)">
-                                    <span class="selected-options" data-placeholder="Tên dự án">Tên dự án</span>
-                                    <i class="arrow"></i>
-                                </div>
-                                <div class="dropdown-options" onchange="limitSelection(this, 10)">
-                                     <input type="text" class="search-box" placeholder="Tìm kiếm dự án" oninput="filterOptions(this)">
-                                    <label><input type="checkbox" name="projectName" value="01-BIG BANG" @(ViewBag.Projectname?.Contains("01-BIG BANG") == true ? "checked" : "") /> 01-BIG BANG</label>
-                                    <label><input type="checkbox" name="projectName" value="01-LC-UNG THƯ PHỔI-FINAL" @(ViewBag.Projectname?.Contains("01-LC-UNG THƯ PHỔI-FINAL") == true ? "checked" : "") /> 01-LC-UNG THƯ PHỔI-FINAL</label>
-                                    <label><input type="checkbox" name="projectName" value="01-REFRESHING CLT (10-2019)" @(ViewBag.Projectname?.Contains("01-REFRESHING CLT (10-2019)") == true ? "checked" : "") /> 01-REFRESHING CLT (10-2019)</label>
-                                    <label><input type="checkbox" name="projectName" value="01-SCAMPI FARMER (FINAL" @(ViewBag.Projectname?.Contains("01-SCAMPI FARMER (FINAL") == true ? "checked" : "") /> 01-SCAMPI FARMER (FINAL</label>
-                                    <label><input type="checkbox" name="projectName" value="01-YOLO (01-2020)" @(ViewBag.Projectname?.Contains("01-YOLO (01-2020)") == true ? "checked" : "") /> 01-YOLO (01-2020)</label>
-                                    <label><input type="checkbox" name="projectName" value="02-BC-UNG THƯ VÚ-FINAL" @(ViewBag.Projectname?.Contains("02-BC-UNG THƯ VÚ-FINAL") == true ? "checked" : "") /> 02-BC-UNG THƯ VÚ-FINAL</label>
-                                    <label><input type="checkbox" name="projectName" value="02-SANTA" @(ViewBag.Projectname?.Contains("02-SANTA") == true ? "checked" : "") /> 02-SANTA</label>
-                                    <label><input type="checkbox" name="projectName" value="03-Coconut Consumer (02-2020)" @(ViewBag.Projectname?.Contains("03-Coconut Consumer (02-2020)") == true ? "checked" : "") /> 03-Coconut Consumer (02-2020)</label>
-                                    <label><input type="checkbox" name="projectName" value="03-CRC-UNG THƯ ĐẠI TRỰC TRÀNG-FINAL" @(ViewBag.Projectname?.Contains("03-CRC-UNG THƯ ĐẠI TRỰC TRÀNG-FINAL") == true ? "checked" : "") /> 03-CRC-UNG THƯ ĐẠI TRỰC TRÀNG-FINAL</label>
-                                    <label><input type="checkbox" name="projectName" value="04-Coconut Audit (02-2020)-Loop" @(ViewBag.Projectname?.Contains("04-Coconut Audit (02-2020)-Loop") == true ? "checked" : "") /> 04-Coconut Audit (02-2020)-Loop</label>
-                                    <label><input type="checkbox" name="projectName" value="05-POS Tracking-Cencus (02-2020)" @(ViewBag.Projectname?.Contains("05-POS Tracking-Cencus (02-2020)") == true ? "checked" : "") /> 05-POS Tracking-Cencus (02-2020)</label>
-                                    <label><input type="checkbox" name="projectName" value="06-COVI LUBRICANT SURVEY-WEEK 1" @(ViewBag.Projectname?.Contains("06-COVI LUBRICANT SURVEY-WEEK 1") == true ? "checked" : "") /> 06-COVI LUBRICANT SURVEY-WEEK 1</label>
-                                    <label><input type="checkbox" name="projectName" value="06-COVI LUBRICANT SURVEY-WEEK 2" @(ViewBag.Projectname?.Contains("06-COVI LUBRICANT SURVEY-WEEK 2") == true ? "checked" : "") /> 06-COVI LUBRICANT SURVEY-WEEK 2</label>
-                                    <label><input type="checkbox" name="projectName" value="06-COVI LUBRICANT SURVEY-WEEK 4" @(ViewBag.Projectname?.Contains("06-COVI LUBRICANT SURVEY-WEEK 4") == true ? "checked" : "") /> 06-COVI LUBRICANT SURVEY-WEEK 4</label>
-                                    <label><input type="checkbox" name="projectName" value="06-COVI LUBRICANT SURVEY-WEEK 5" @(ViewBag.Projectname?.Contains("06-COVI LUBRICANT SURVEY-WEEK 5") == true ? "checked" : "") /> 06-COVI LUBRICANT SURVEY-WEEK 5</label>
-                                    <label><input type="checkbox" name="projectName" value="08-Speed (06-2020)-Final" @(ViewBag.Projectname?.Contains("08-Speed (06-2020)-Final") == true ? "checked" : "") /> 08-Speed (06-2020)-Final</label>
-                                    <label><input type="checkbox" name="projectName" value="09-AFS WORKER (07-2020)" @(ViewBag.Projectname?.Contains("09-AFS WORKER (07-2020)") == true ? "checked" : "") /> 09-AFS WORKER (07-2020)</label>
-                                    <label><input type="checkbox" name="projectName" value="10_CLT Kim Chi - Mar" @(ViewBag.Projectname?.Contains("10_CLT Kim Chi - Mar") == true ? "checked" : "") /> 10_CLT Kim Chi - Mar</label>
-                                    <label><input type="checkbox" name="projectName" value="10_CLT Kim Chi (Hanoi)" @(ViewBag.Projectname?.Contains("10_CLT Kim Chi (Hanoi)") == true ? "checked" : "") /> 10_CLT Kim Chi (Hanoi)</label>
-                                    <label><input type="checkbox" name="projectName" value="101-WIND CENCUS-FINAL" @(ViewBag.Projectname?.Contains("101-WIND CENCUS-FINAL") == true ? "checked" : "") /> 101-WIND CENCUS-FINAL</label>
-                                    <label><input type="checkbox" name="projectName" value="102-WIND U & A-FINAL" @(ViewBag.Projectname?.Contains("102-WIND U & A-FINAL") == true ? "checked" : "") /> 102-WIND U & A-FINAL</label>
-                                    <label><input type="checkbox" name="projectName" value="10-LIBERTY (01-2020)" @(ViewBag.Projectname?.Contains("10-LIBERTY (01-2020)") == true ? "checked" : "") /> 10-LIBERTY (01-2020)</label>
-                                    <label><input type="checkbox" name="projectName" value="11-MAMMOGRAM (08-2021)" @(ViewBag.Projectname?.Contains("11-MAMMOGRAM (08-2021)") == true ? "checked" : "") /> 11-MAMMOGRAM (08-2021)</label>
-                                    <label><input type="checkbox" name="projectName" value="11-TRANSFORMER (08-2020)" @(ViewBag.Projectname?.Contains("11-TRANSFORMER (08-2020)") == true ? "checked" : "") /> 11-TRANSFORMER (08-2020)</label>
-                                    <label><input type="checkbox" name="projectName" value="12-GOUT (09-2021)-FINAL" @(ViewBag.Projectname?.Contains("12-GOUT (09-2021)-FINAL") == true ? "checked" : "") /> 12-GOUT (09-2021)-FINAL</label>
-                                    <label><input type="checkbox" name="projectName" value="13-CAR TIRE (10-2020)-FINAL" @(ViewBag.Projectname?.Contains("13-CAR TIRE (10-2020)-FINAL") == true ? "checked" : "") /> 13-CAR TIRE (10-2020)-FINAL</label>
-                                    <label><input type="checkbox" name="projectName" value="16-ALASKA (12-2020)" @(ViewBag.Projectname?.Contains("16-ALASKA (12-2020)") == true ? "checked" : "") /> 16-ALASKA (12-2020)</label>
-                                    <label><input type="checkbox" name="projectName" value="18-VACCINES (12-2020)-FINAL" @(ViewBag.Projectname?.Contains("18-VACCINES (12-2020)-FINAL") == true ? "checked" : "") /> 18-VACCINES (12-2020)-FINAL</label>
-                                    <label><input type="checkbox" name="projectName" value="19-IGNITE (01-2021)-FINAL" @(ViewBag.Projectname?.Contains("19-IGNITE (01-2021)-FINAL") == true ? "checked" : "") /> 19-IGNITE (01-2021)-FINAL</label>
-                                    <label><input type="checkbox" name="projectName" value="2_Optics" @(ViewBag.Projectname?.Contains("2_Optics") == true ? "checked" : "") /> 2_Optics</label>
-                                    <label><input type="checkbox" name="projectName" value="20-VENUS (01-2021)-FINAL" @(ViewBag.Projectname?.Contains("20-VENUS (01-2021)-FINAL") == true ? "checked" : "") /> 20-VENUS (01-2021)-FINAL</label>
-                                    <label><input type="checkbox" name="projectName" value="21_ Travelling - LIVE" @(ViewBag.Projectname?.Contains("21_ Travelling - LIVE") == true ? "checked" : "") /> 21_ Travelling - LIVE</label>
-                                    <label><input type="checkbox" name="projectName" value="22-PEDIATRICIANS (04-2021)" @(ViewBag.Projectname?.Contains("22-PEDIATRICIANS (04-2021)") == true ? "checked" : "") /> 22-PEDIATRICIANS (04-2021)</label>
-                                    <label><input type="checkbox" name="projectName" value="23_WWP (T07) - LIVE" @(ViewBag.Projectname?.Contains("23_WWP (T07) - LIVE") == true ? "checked" : "") /> 23_WWP (T07) - LIVE</label>
-                                    <label><input type="checkbox" name="projectName" value="23-DENKI (05-2021)-FINAL" @(ViewBag.Projectname?.Contains("23-DENKI (05-2021)-FINAL") == true ? "checked" : "") /> 23-DENKI (05-2021)-FINAL</label>
-                                    <label><input type="checkbox" name="projectName" value="24-MARLIN 20 (05-2021)-FINAL" @(ViewBag.Projectname?.Contains("24-MARLIN 20 (05-2021)-FINAL") == true ? "checked" : "") /> 24-MARLIN 20 (05-2021)-FINAL</label>
-                                    <label><input type="checkbox" name="projectName" value="25_JDELI - LIVE" @(ViewBag.Projectname?.Contains("25_JDELI - LIVE") == true ? "checked" : "") /> 25_JDELI - LIVE</label>
-                                    <label><input type="checkbox" name="projectName" value="3CB - DINH DƯỠNG TĨNH MẠCH" @(ViewBag.Projectname?.Contains("3CB - DINH DƯỠNG TĨNH MẠCH") == true ? "checked" : "") /> 3CB - DINH DƯỠNG TĨNH MẠCH</label>
-                                    <label><input type="checkbox" name="projectName" value="5_ Kim Chi-Nov-21" @(ViewBag.Projectname?.Contains("5_ Kim Chi-Nov-21") == true ? "checked" : "") /> 5_ Kim Chi-Nov-21</label>
-                                    <label><input type="checkbox" name="projectName" value="7_HUT HUNK" @(ViewBag.Projectname?.Contains("7_HUT HUNK") == true ? "checked" : "") /> 7_HUT HUNK</label>
-                                    <label><input type="checkbox" name="projectName" value="9_Piscis" @(ViewBag.Projectname?.Contains("9_Piscis") == true ? "checked" : "") /> 9_Piscis</label>
-                                    <label><input type="checkbox" name="projectName" value="AIC - LIVE - 11Dec2021" @(ViewBag.Projectname?.Contains("AIC - LIVE - 11Dec2021") == true ? "checked" : "") /> AIC - LIVE - 11Dec2021</label>
-                                    <label><input type="checkbox" name="projectName" value="AMTP" @(ViewBag.Projectname?.Contains("AMTP") == true ? "checked" : "") /> AMTP</label>
-                                    <label><input type="checkbox" name="projectName" value="ATHENA" @(ViewBag.Projectname?.Contains("ATHENA") == true ? "checked" : "") /> ATHENA</label>
-                                    <label><input type="checkbox" name="projectName" value="Banking" @(ViewBag.Projectname?.Contains("Banking") == true ? "checked" : "") /> Banking</label>
-                                    <label><input type="checkbox" name="projectName" value="Barley" @(ViewBag.Projectname?.Contains("Barley") == true ? "checked" : "") /> Barley</label>
-                                    <label><input type="checkbox" name="projectName" value="Battery" @(ViewBag.Projectname?.Contains("Battery") == true ? "checked" : "") /> Battery</label>
-                                    <label><input type="checkbox" name="projectName" value="BETA" @(ViewBag.Projectname?.Contains("BETA") == true ? "checked" : "") /> BETA</label>
-                                    <label><input type="checkbox" name="projectName" value="BIG BANG" @(ViewBag.Projectname?.Contains("BIG BANG") == true ? "checked" : "") /> BIG BANG</label>
-                                    <label><input type="checkbox" name="projectName" value="BIG BANG 2" @(ViewBag.Projectname?.Contains("BIG BANG 2") == true ? "checked" : "") /> BIG BANG 2</label>
-                                    <label><input type="checkbox" name="projectName" value="Blue Star" @(ViewBag.Projectname?.Contains("Blue Star") == true ? "checked" : "") /> Blue Star</label>
-                                    <label><input type="checkbox" name="projectName" value="C110719-Luxury-Final" @(ViewBag.Projectname?.Contains("C110719-Luxury-Final") == true ? "checked" : "") /> C110719-Luxury-Final</label>
-                                    <label><input type="checkbox" name="projectName" value="C190719-Finish-Jul-19-Final" @(ViewBag.Projectname?.Contains("C190719-Finish-Jul-19-Final") == true ? "checked" : "") /> C190719-Finish-Jul-19-Final</label>
-                                    <label><input type="checkbox" name="projectName" value="C190815-FOREST-Aug-19-Final" @(ViewBag.Projectname?.Contains("C190815-FOREST-Aug-19-Final") == true ? "checked" : "") /> C190815-FOREST-Aug-19-Final</label>
-                                    <label><input type="checkbox" name="projectName" value="Car Repair" @(ViewBag.Projectname?.Contains("Car Repair") == true ? "checked" : "") /> Car Repair</label>
-                                    <label><input type="checkbox" name="projectName" value="Car Tire 2" @(ViewBag.Projectname?.Contains("Car Tire 2") == true ? "checked" : "") /> Car Tire 2</label>
-                                    <label><input type="checkbox" name="projectName" value="CCP" @(ViewBag.Projectname?.Contains("CCP") == true ? "checked" : "") /> CCP</label>
-                                    <label><input type="checkbox" name="projectName" value="Cerlebrity" @(ViewBag.Projectname?.Contains("Cerlebrity") == true ? "checked" : "") /> Cerlebrity</label>
-                                    <label><input type="checkbox" name="projectName" value="CIR - 1602 - 3X" @(ViewBag.Projectname?.Contains("CIR - 1602 - 3X") == true ? "checked" : "") /> CIR - 1602 - 3X</label>
-                                    <label><input type="checkbox" name="projectName" value="CIR - 1607 - CLM" @(ViewBag.Projectname?.Contains("CIR - 1607 - CLM") == true ? "checked" : "") /> CIR - 1607 - CLM</label>
-                                    <label><input type="checkbox" name="projectName" value="CIR 1556 - NCL" @(ViewBag.Projectname?.Contains("CIR 1556 - NCL") == true ? "checked" : "") /> CIR 1556 - NCL</label>
-                                    <label><input type="checkbox" name="projectName" value="CIR 1569 - CRYSTAL" @(ViewBag.Projectname?.Contains("CIR 1569 - CRYSTAL") == true ? "checked" : "") /> CIR 1569 - CRYSTAL</label>
-                                    <label><input type="checkbox" name="projectName" value="CIR 1577-1578 - COLINA 2" @(ViewBag.Projectname?.Contains("CIR 1577-1578 - COLINA 2") == true ? "checked" : "") /> CIR 1577-1578 - COLINA 2</label>
-                                    <label><input type="checkbox" name="projectName" value="CLT" @(ViewBag.Projectname?.Contains("CLT") == true ? "checked" : "") /> CLT</label>
-                                    <label><input type="checkbox" name="projectName" value="CLT KIM CHI" @(ViewBag.Projectname?.Contains("CLT KIM CHI") == true ? "checked" : "") /> CLT KIM CHI</label>
-                                    <label><input type="checkbox" name="projectName" value="CNS" @(ViewBag.Projectname?.Contains("CNS") == true ? "checked" : "") /> CNS</label>
-                                    <label><input type="checkbox" name="projectName" value="COCONUT CONSUMMER" @(ViewBag.Projectname?.Contains("COCONUT CONSUMMER") == true ? "checked" : "") /> COCONUT CONSUMMER</label>
-                                    <label><input type="checkbox" name="projectName" value="Colina" @(ViewBag.Projectname?.Contains("Colina") == true ? "checked" : "") /> Colina</label>
-                                    <label><input type="checkbox" name="projectName" value="CORN-LIVE" @(ViewBag.Projectname?.Contains("CORN-LIVE") == true ? "checked" : "") /> CORN-LIVE</label>
-                                    <label><input type="checkbox" name="projectName" value="Crop" @(ViewBag.Projectname?.Contains("Crop") == true ? "checked" : "") /> Crop</label>
-                                    <label><input type="checkbox" name="projectName" value="Cvlife-Dec" @(ViewBag.Projectname?.Contains("Cvlife-Dec") == true ? "checked" : "") /> Cvlife-Dec</label>
-                                    <label><input type="checkbox" name="projectName" value="D&D-Bắp Không hình" @(ViewBag.Projectname?.Contains("D&D-Bắp Không hình") == true ? "checked" : "") /> D&D-Bắp Không hình</label>
-                                    <label><input type="checkbox" name="projectName" value="D&D-Cà Chua không hình" @(ViewBag.Projectname?.Contains("D&D-Cà Chua không hình") == true ? "checked" : "") /> D&D-Cà Chua không hình</label>
-                                    <label><input type="checkbox" name="projectName" value="DAISY" @(ViewBag.Projectname?.Contains("DAISY") == true ? "checked" : "") /> DAISY</label>
-                                    <label><input type="checkbox" name="projectName" value="DENKI" @(ViewBag.Projectname?.Contains("DENKI") == true ? "checked" : "") /> DENKI</label>
-                                    <label><input type="checkbox" name="projectName" value="Diabetes" @(ViewBag.Projectname?.Contains("Diabetes") == true ? "checked" : "") /> Diabetes</label>
-                                    <label><input type="checkbox" name="projectName" value="DIAMOND" @(ViewBag.Projectname?.Contains("DIAMOND") == true ? "checked" : "") /> DIAMOND</label>
-                                    <label><input type="checkbox" name="projectName" value="DIPLOMAT" @(ViewBag.Projectname?.Contains("DIPLOMAT") == true ? "checked" : "") /> DIPLOMAT</label>
-                                    <label><input type="checkbox" name="projectName" value="DOLPHIN" @(ViewBag.Projectname?.Contains("DOLPHIN") == true ? "checked" : "") /> DOLPHIN</label>
-                                    <label><input type="checkbox" name="projectName" value="DOLPHIN Hộ gia đình" @(ViewBag.Projectname?.Contains("DOLPHIN Hộ gia đình") == true ? "checked" : "") /> DOLPHIN Hộ gia đình</label>
-                                    <label><input type="checkbox" name="projectName" value="DOTA" @(ViewBag.Projectname?.Contains("DOTA") == true ? "checked" : "") /> DOTA</label>
-                                    <label><input type="checkbox" name="projectName" value="Dragon" @(ViewBag.Projectname?.Contains("Dragon") == true ? "checked" : "") /> Dragon</label>
-                                    <label><input type="checkbox" name="projectName" value="DRAYSAP" @(ViewBag.Projectname?.Contains("DRAYSAP") == true ? "checked" : "") /> DRAYSAP</label>
-                                    <label><input type="checkbox" name="projectName" value="EPD Vietnam HCP" @(ViewBag.Projectname?.Contains("EPD Vietnam HCP") == true ? "checked" : "") /> EPD Vietnam HCP</label>
-                                    <label><input type="checkbox" name="projectName" value="ESPRESSO" @(ViewBag.Projectname?.Contains("ESPRESSO") == true ? "checked" : "") /> ESPRESSO</label>
-                                    <label><input type="checkbox" name="projectName" value="EXCITE" @(ViewBag.Projectname?.Contains("EXCITE") == true ? "checked" : "") /> EXCITE</label>
-                                    <label><input type="checkbox" name="projectName" value="EXPLORE" @(ViewBag.Projectname?.Contains("EXPLORE") == true ? "checked" : "") /> EXPLORE</label>
-                                    <label><input type="checkbox" name="projectName" value="EXPRESS" @(ViewBag.Projectname?.Contains("EXPRESS") == true ? "checked" : "") /> EXPRESS</label>
-                                    <label><input type="checkbox" name="projectName" value="F1 - APOLLO" @(ViewBag.Projectname?.Contains("F1 - APOLLO") == true ? "checked" : "") /> F1 - APOLLO</label>
-                                    <label><input type="checkbox" name="projectName" value="F1 - CI" @(ViewBag.Projectname?.Contains("F1 - CI") == true ? "checked" : "") /> F1 - CI</label>
-                                    <label><input type="checkbox" name="projectName" value="F1xGOJEK (T06)" @(ViewBag.Projectname?.Contains("F1xGOJEK (T06)") == true ? "checked" : "") /> F1xGOJEK (T06)</label>
-                                    <label><input type="checkbox" name="projectName" value="Farmie" @(ViewBag.Projectname?.Contains("Farmie") == true ? "checked" : "") /> Farmie</label>
-                                    <label><input type="checkbox" name="projectName" value="FINAL-DENKI 2 (11-2021)" @(ViewBag.Projectname?.Contains("FINAL-DENKI 2 (11-2021)") == true ? "checked" : "") /> FINAL-DENKI 2 (11-2021)</label>
-                                    <label><input type="checkbox" name="projectName" value="FINE FRAGRANCE" @(ViewBag.Projectname?.Contains("FINE FRAGRANCE") == true ? "checked" : "") /> FINE FRAGRANCE</label>
-                                    <label><input type="checkbox" name="projectName" value="Fire" @(ViewBag.Projectname?.Contains("Fire") == true ? "checked" : "") /> Fire</label>
-                                    <label><input type="checkbox" name="projectName" value="Fishing" @(ViewBag.Projectname?.Contains("Fishing") == true ? "checked" : "") /> Fishing</label>
-                                    <label><input type="checkbox" name="projectName" value="FOX" @(ViewBag.Projectname?.Contains("FOX") == true ? "checked" : "") /> FOX</label>
-                                    <label><input type="checkbox" name="projectName" value="Galaxy" @(ViewBag.Projectname?.Contains("Galaxy") == true ? "checked" : "") /> Galaxy</label>
-                                    <label><input type="checkbox" name="projectName" value="GAMING #101" @(ViewBag.Projectname?.Contains("GAMING #101") == true ? "checked" : "") /> GAMING #101</label>
-                                    <label><input type="checkbox" name="projectName" value="GMA_HC" @(ViewBag.Projectname?.Contains("GMA_HC") == true ? "checked" : "") /> GMA_HC</label>
-                                    <label><input type="checkbox" name="projectName" value="Golden Star" @(ViewBag.Projectname?.Contains("Golden Star") == true ? "checked" : "") /> Golden Star</label>
-                                    <label><input type="checkbox" name="projectName" value="GREEN LEAF" @(ViewBag.Projectname?.Contains("GREEN LEAF") == true ? "checked" : "") /> GREEN LEAF</label>
-                                    <label><input type="checkbox" name="projectName" value="HBL" @(ViewBag.Projectname?.Contains("HBL") == true ? "checked" : "") /> HBL</label>
-                                    <label><input type="checkbox" name="projectName" value="HCPs Tracking study - IMF - LIVE" @(ViewBag.Projectname?.Contains("HCPs Tracking study - IMF - LIVE") == true ? "checked" : "") /> HCPs Tracking study - IMF - LIVE</label>
-                                    <label><input type="checkbox" name="projectName" value="HEALTH" @(ViewBag.Projectname?.Contains("HEALTH") == true ? "checked" : "") /> HEALTH</label>
-                                    <label><input type="checkbox" name="projectName" value="Horse" @(ViewBag.Projectname?.Contains("Horse") == true ? "checked" : "") /> Horse</label>
-                                    <label><input type="checkbox" name="projectName" value="HPC" @(ViewBag.Projectname?.Contains("HPC") == true ? "checked" : "") /> HPC</label>
-                                    <label><input type="checkbox" name="projectName" value="HPCs - LIVE - CNS" @(ViewBag.Projectname?.Contains("HPCs - LIVE - CNS") == true ? "checked" : "") /> HPCs - LIVE - CNS</label>
-                                    <label><input type="checkbox" name="projectName" value="HPCs tracking - IMF (T08)" @(ViewBag.Projectname?.Contains("HPCs tracking - IMF (T08)") == true ? "checked" : "") /> HPCs tracking - IMF (T08)</label>
-                                    <label><input type="checkbox" name="projectName" value="HPCs tracking study- ANS - LIVE" @(ViewBag.Projectname?.Contains("HPCs tracking study- ANS - LIVE") == true ? "checked" : "") /> HPCs tracking study- ANS - LIVE</label>
-                                    <label><input type="checkbox" name="projectName" value="HPCs tracking study- CNS - LIVE" @(ViewBag.Projectname?.Contains("HPCs tracking study- CNS - LIVE") == true ? "checked" : "") /> HPCs tracking study- CNS - LIVE</label>
-                                    <label><input type="checkbox" name="projectName" value="HPCs tracking study- DIABETES - LIVE" @(ViewBag.Projectname?.Contains("HPCs tracking study- DIABETES - LIVE") == true ? "checked" : "") /> HPCs tracking study- DIABETES - LIVE</label>
-                                    <label><input type="checkbox" name="projectName" value="HPCs tracking study- IMF" @(ViewBag.Projectname?.Contains("HPCs tracking study- IMF") == true ? "checked" : "") /> HPCs tracking study- IMF</label>
-                                    <label><input type="checkbox" name="projectName" value="HPV - Group 3 - LIVE" @(ViewBag.Projectname?.Contains("HPV - Group 3 - LIVE") == true ? "checked" : "") /> HPV - Group 3 - LIVE</label>
-                                    <label><input type="checkbox" name="projectName" value="HPV_Group 1_LIVE" @(ViewBag.Projectname?.Contains("HPV_Group 1_LIVE") == true ? "checked" : "") /> HPV_Group 1_LIVE</label>
-                                    <label><input type="checkbox" name="projectName" value="HPV_Group 2_LIVE" @(ViewBag.Projectname?.Contains("HPV_Group 2_LIVE") == true ? "checked" : "") /> HPV_Group 2_LIVE</label>
-                                    <label><input type="checkbox" name="projectName" value="IMF" @(ViewBag.Projectname?.Contains("IMF") == true ? "checked" : "") /> IMF</label>
-                                    <label><input type="checkbox" name="projectName" value="INSTA" @(ViewBag.Projectname?.Contains("INSTA") == true ? "checked" : "") /> INSTA</label>
-                                    <label><input type="checkbox" name="projectName" value="IOVIA" @(ViewBag.Projectname?.Contains("IOVIA") == true ? "checked" : "") /> IOVIA</label>
-                                    <label><input type="checkbox" name="projectName" value="IQVIA - 1. CHARLIE" @(ViewBag.Projectname?.Contains("IQVIA - 1. CHARLIE") == true ? "checked" : "") /> IQVIA - 1. CHARLIE</label>
-                                    <label><input type="checkbox" name="projectName" value="JASMINE 3" @(ViewBag.Projectname?.Contains("JASMINE 3") == true ? "checked" : "") /> JASMINE 3</label>
-                                    <label><input type="checkbox" name="projectName" value="Joyful" @(ViewBag.Projectname?.Contains("Joyful") == true ? "checked" : "") /> Joyful</label>
-                                    <label><input type="checkbox" name="projectName" value="JUBILEE" @(ViewBag.Projectname?.Contains("JUBILEE") == true ? "checked" : "") /> JUBILEE</label>
-                                    <label><input type="checkbox" name="projectName" value="KETCHUP" @(ViewBag.Projectname?.Contains("KETCHUP") == true ? "checked" : "") /> KETCHUP</label>
-                                    <label><input type="checkbox" name="projectName" value="KITES Khách hàng cá nhân" @(ViewBag.Projectname?.Contains("KITES Khách hàng cá nhân") == true ? "checked" : "") /> KITES Khách hàng cá nhân</label>
-                                    <label><input type="checkbox" name="projectName" value="KOI" @(ViewBag.Projectname?.Contains("KOI") == true ? "checked" : "") /> KOI</label>
-                                    <label><input type="checkbox" name="projectName" value="KYE_W2" @(ViewBag.Projectname?.Contains("KYE_W2") == true ? "checked" : "") /> KYE_W2</label>
-                                    <label><input type="checkbox" name="projectName" value="La Brea" @(ViewBag.Projectname?.Contains("La Brea") == true ? "checked" : "") /> La Brea</label>
-                                    <label><input type="checkbox" name="projectName" value="LIBERTY" @(ViewBag.Projectname?.Contains("LIBERTY") == true ? "checked" : "") /> LIBERTY</label>
-                                    <label><input type="checkbox" name="projectName" value="LILY Người tiêu dùng" @(ViewBag.Projectname?.Contains("LILY Người tiêu dùng") == true ? "checked" : "") /> LILY Người tiêu dùng</label>
-                                    <label><input type="checkbox" name="projectName" value="Live Links" @(ViewBag.Projectname?.Contains("Live Links") == true ? "checked" : "") /> Live Links</label>
-                                    <label><input type="checkbox" name="projectName" value="Lotus" @(ViewBag.Projectname?.Contains("Lotus") == true ? "checked" : "") /> Lotus</label>
-                                    <label><input type="checkbox" name="projectName" value="Lucky" @(ViewBag.Projectname?.Contains("Lucky") == true ? "checked" : "") /> Lucky</label>
-                                    <label><input type="checkbox" name="projectName" value="LUXURY" @(ViewBag.Projectname?.Contains("LUXURY") == true ? "checked" : "") /> LUXURY</label>
-                                    <label><input type="checkbox" name="projectName" value="Mango" @(ViewBag.Projectname?.Contains("Mango") == true ? "checked" : "") /> Mango</label>
-                                    <label><input type="checkbox" name="projectName" value="Medi Test" @(ViewBag.Projectname?.Contains("Medi Test") == true ? "checked" : "") /> Medi Test</label>
-                                    <label><input type="checkbox" name="projectName" value="MEDIA (10-2021)-FINAL" @(ViewBag.Projectname?.Contains("MEDIA (10-2021)-FINAL") == true ? "checked" : "") /> MEDIA (10-2021)-FINAL</label>
-                                    <label><input type="checkbox" name="projectName" value="MERCI" @(ViewBag.Projectname?.Contains("MERCI") == true ? "checked" : "") /> MERCI</label>
-                                    <label><input type="checkbox" name="projectName" value="Milk" @(ViewBag.Projectname?.Contains("Milk") == true ? "checked" : "") /> Milk</label>
-                                    <label><input type="checkbox" name="projectName" value="MINT" @(ViewBag.Projectname?.Contains("MINT") == true ? "checked" : "") /> MINT</label>
-                                    <label><input type="checkbox" name="projectName" value="MODERNI" @(ViewBag.Projectname?.Contains("MODERNI") == true ? "checked" : "") /> MODERNI</label>
-                                    <label><input type="checkbox" name="projectName" value="MOLA 2" @(ViewBag.Projectname?.Contains("MOLA 2") == true ? "checked" : "") /> MOLA 2</label>
-                                    <label><input type="checkbox" name="projectName" value="Motorbikes Study" @(ViewBag.Projectname?.Contains("Motorbikes Study") == true ? "checked" : "") /> Motorbikes Study</label>
-                                    <label><input type="checkbox" name="projectName" value="MPCO" @(ViewBag.Projectname?.Contains("MPCO") == true ? "checked" : "") /> MPCO</label>
-                                    <label><input type="checkbox" name="projectName" value="MST" @(ViewBag.Projectname?.Contains("MST") == true ? "checked" : "") /> MST</label>
-                                    <label><input type="checkbox" name="projectName" value="MST(T11)" @(ViewBag.Projectname?.Contains("MST(T11)") == true ? "checked" : "") /> MST(T11)</label>
-                                    <label><input type="checkbox" name="projectName" value="NAVY" @(ViewBag.Projectname?.Contains("NAVY") == true ? "checked" : "") /> NAVY</label>
-                                    <label><input type="checkbox" name="projectName" value="NEMO" @(ViewBag.Projectname?.Contains("NEMO") == true ? "checked" : "") /> NEMO</label>
-                                    <label><input type="checkbox" name="projectName" value="NEO" @(ViewBag.Projectname?.Contains("NEO") == true ? "checked" : "") /> NEO</label>
-                                    <label><input type="checkbox" name="projectName" value="NTO" @(ViewBag.Projectname?.Contains("NTO") == true ? "checked" : "") /> NTO</label>
-                                    <label><input type="checkbox" name="projectName" value="OVERSEA (10-2021)-FINAL" @(ViewBag.Projectname?.Contains("OVERSEA (10-2021)-FINAL") == true ? "checked" : "") /> OVERSEA (10-2021)-FINAL</label>
-                                    <label><input type="checkbox" name="projectName" value="PAL" @(ViewBag.Projectname?.Contains("PAL") == true ? "checked" : "") /> PAL</label>
-                                    <label><input type="checkbox" name="projectName" value="PCO" @(ViewBag.Projectname?.Contains("PCO") == true ? "checked" : "") /> PCO</label>
-                                    <label><input type="checkbox" name="projectName" value="PCO CENSUS" @(ViewBag.Projectname?.Contains("PCO CENSUS") == true ? "checked" : "") /> PCO CENSUS</label>
-                                    <label><input type="checkbox" name="projectName" value="Pekochan" @(ViewBag.Projectname?.Contains("Pekochan") == true ? "checked" : "") /> Pekochan</label>
-                                    <label><input type="checkbox" name="projectName" value="PIG" @(ViewBag.Projectname?.Contains("PIG") == true ? "checked" : "") /> PIG</label>
-                                    <label><input type="checkbox" name="projectName" value="Piscis 2 LIVE" @(ViewBag.Projectname?.Contains("Piscis 2 LIVE") == true ? "checked" : "") /> Piscis 2 LIVE</label>
-                                    <label><input type="checkbox" name="projectName" value="Platinum" @(ViewBag.Projectname?.Contains("Platinum") == true ? "checked" : "") /> Platinum</label>
-                                    <label><input type="checkbox" name="projectName" value="PMC_T10" @(ViewBag.Projectname?.Contains("PMC_T10") == true ? "checked" : "") /> PMC_T10</label>
-                                    <label><input type="checkbox" name="projectName" value="PMIC" @(ViewBag.Projectname?.Contains("PMIC") == true ? "checked" : "") /> PMIC</label>
-                                    <label><input type="checkbox" name="projectName" value="PNC" @(ViewBag.Projectname?.Contains("PNC") == true ? "checked" : "") /> PNC</label>
-                                    <label><input type="checkbox" name="projectName" value="POKA" @(ViewBag.Projectname?.Contains("POKA") == true ? "checked" : "") /> POKA</label>
-                                    <label><input type="checkbox" name="projectName" value="POWER" @(ViewBag.Projectname?.Contains("POWER") == true ? "checked" : "") /> POWER</label>
-                                    <label><input type="checkbox" name="projectName" value="Project Group" @(ViewBag.Projectname?.Contains("Project Group") == true ? "checked" : "") /> Project Group</label>
-                                    <label><input type="checkbox" name="projectName" value="QUEEN Người không sử dụng" @(ViewBag.Projectname?.Contains("QUEEN Người không sử dụng") == true ? "checked" : "") /> QUEEN Người không sử dụng</label>
-                                    <label><input type="checkbox" name="projectName" value="QUEEN Người sử dụng" @(ViewBag.Projectname?.Contains("QUEEN Người sử dụng") == true ? "checked" : "") /> QUEEN Người sử dụng</label>
-                                    <label><input type="checkbox" name="projectName" value="RAIBOW_Khách hàng cá nhân" @(ViewBag.Projectname?.Contains("RAIBOW_Khách hàng cá nhân") == true ? "checked" : "") /> RAIBOW_Khách hàng cá nhân</label>
-                                    <label><input type="checkbox" name="projectName" value="RECALL-DENKI 2 (01-2022)-FINAL" @(ViewBag.Projectname?.Contains("RECALL-DENKI 2 (01-2022)-FINAL") == true ? "checked" : "") /> RECALL-DENKI 2 (01-2022)-FINAL</label>
-                                    <label><input type="checkbox" name="projectName" value="Reed Tradex" @(ViewBag.Projectname?.Contains("Reed Tradex") == true ? "checked" : "") /> Reed Tradex</label>
-                                    <label><input type="checkbox" name="projectName" value="RIB-CLT" @(ViewBag.Projectname?.Contains("RIB-CLT") == true ? "checked" : "") /> RIB-CLT</label>
-                                    <label><input type="checkbox" name="projectName" value="RICH Đã Mua" @(ViewBag.Projectname?.Contains("RICH Đã Mua") == true ? "checked" : "") /> RICH Đã Mua</label>
-                                    <label><input type="checkbox" name="projectName" value="RICH Dự Định Mua" @(ViewBag.Projectname?.Contains("RICH Dự Định Mua") == true ? "checked" : "") /> RICH Dự Định Mua</label>
-                                    <label><input type="checkbox" name="projectName" value="Rome" @(ViewBag.Projectname?.Contains("Rome") == true ? "checked" : "") /> Rome</label>
-                                    <label><input type="checkbox" name="projectName" value="Rose" @(ViewBag.Projectname?.Contains("Rose") == true ? "checked" : "") /> Rose</label>
-                                    <label><input type="checkbox" name="projectName" value="SEA SIDE" @(ViewBag.Projectname?.Contains("SEA SIDE") == true ? "checked" : "") /> SEA SIDE</label>
-                                    <label><input type="checkbox" name="projectName" value="SHARK" @(ViewBag.Projectname?.Contains("SHARK") == true ? "checked" : "") /> SHARK</label>
-                                    <label><input type="checkbox" name="projectName" value="Shark 5" @(ViewBag.Projectname?.Contains("Shark 5") == true ? "checked" : "") /> Shark 5</label>
-                                    <label><input type="checkbox" name="projectName" value="SHARK 6" @(ViewBag.Projectname?.Contains("SHARK 6") == true ? "checked" : "") /> SHARK 6</label>
-                                    <label><input type="checkbox" name="projectName" value="SHARK 8" @(ViewBag.Projectname?.Contains("SHARK 8") == true ? "checked" : "") /> SHARK 8</label>
-                                    <label><input type="checkbox" name="projectName" value="SHARON" @(ViewBag.Projectname?.Contains("SHARON") == true ? "checked" : "") /> SHARON</label>
-                                    <label><input type="checkbox" name="projectName" value="SHEERAN-Preventive HCP - LIVE" @(ViewBag.Projectname?.Contains("SHEERAN-Preventive HCP - LIVE") == true ? "checked" : "") /> SHEERAN-Preventive HCP - LIVE</label>
-                                    <label><input type="checkbox" name="projectName" value="SHEERAN-Treated HCP - LIVE" @(ViewBag.Projectname?.Contains("SHEERAN-Treated HCP - LIVE") == true ? "checked" : "") /> SHEERAN-Treated HCP - LIVE</label>
-                                    <label><input type="checkbox" name="projectName" value="Siêu thị(T09)" @(ViewBag.Projectname?.Contains("Siêu thị(T09)") == true ? "checked" : "") /> Siêu thị(T09)</label>
-                                    <label><input type="checkbox" name="projectName" value="SKY SEARCH 6" @(ViewBag.Projectname?.Contains("SKY SEARCH 6") == true ? "checked" : "") /> SKY SEARCH 6</label>
-                                    <label><input type="checkbox" name="projectName" value="skysearch" @(ViewBag.Projectname?.Contains("skysearch") == true ? "checked" : "") /> skysearch</label>
-                                    <label><input type="checkbox" name="projectName" value="Smart" @(ViewBag.Projectname?.Contains("Smart") == true ? "checked" : "") /> Smart</label>
-                                    <label><input type="checkbox" name="projectName" value="Spaceship" @(ViewBag.Projectname?.Contains("Spaceship") == true ? "checked" : "") /> Spaceship</label>
-                                    <label><input type="checkbox" name="projectName" value="Super" @(ViewBag.Projectname?.Contains("Super") == true ? "checked" : "") /> Super</label>
-                                    <label><input type="checkbox" name="projectName" value="Sweet" @(ViewBag.Projectname?.Contains("Sweet") == true ? "checked" : "") /> Sweet</label>
-                                    <label><input type="checkbox" name="projectName" value="TADA" @(ViewBag.Projectname?.Contains("TADA") == true ? "checked" : "") /> TADA</label>
-                                    <label><input type="checkbox" name="projectName" value="Tea" @(ViewBag.Projectname?.Contains("Tea") == true ? "checked" : "") /> Tea</label>
-                                    <label><input type="checkbox" name="projectName" value="TEST PREP (10-2021)-FINAL" @(ViewBag.Projectname?.Contains("TEST PREP (10-2021)-FINAL") == true ? "checked" : "") /> TEST PREP (10-2021)-FINAL</label>
-                                    <label><input type="checkbox" name="projectName" value="Tourisum" @(ViewBag.Projectname?.Contains("Tourisum") == true ? "checked" : "") /> Tourisum</label>
-                                    <label><input type="checkbox" name="projectName" value="TUNA" @(ViewBag.Projectname?.Contains("TUNA") == true ? "checked" : "") /> TUNA</label>
-                                    <label><input type="checkbox" name="projectName" value="VARICELLA VACCINE (07-2021)" @(ViewBag.Projectname?.Contains("VARICELLA VACCINE (07-2021)") == true ? "checked" : "") /> VARICELLA VACCINE (07-2021)</label>
-                                    <label><input type="checkbox" name="projectName" value="VENUS" @(ViewBag.Projectname?.Contains("VENUS") == true ? "checked" : "") /> VENUS</label>
-                                    <label><input type="checkbox" name="projectName" value="VIOLET" @(ViewBag.Projectname?.Contains("VIOLET") == true ? "checked" : "") /> VIOLET</label>
-                                    <label><input type="checkbox" name="projectName" value="VITAL" @(ViewBag.Projectname?.Contains("VITAL") == true ? "checked" : "") /> VITAL</label>
-                                    <label><input type="checkbox" name="projectName" value="VJA analysis" @(ViewBag.Projectname?.Contains("VJA analysis") == true ? "checked" : "") /> VJA analysis</label>
-                                    <label><input type="checkbox" name="projectName" value="VNM - SBNL" @(ViewBag.Projectname?.Contains("VNM - SBNL") == true ? "checked" : "") /> VNM - SBNL</label>
-                                    <label><input type="checkbox" name="projectName" value="VNM - SBTE" @(ViewBag.Projectname?.Contains("VNM - SBTE") == true ? "checked" : "") /> VNM - SBTE</label>
-                                    <label><input type="checkbox" name="projectName" value="VOLTAIC" @(ViewBag.Projectname?.Contains("VOLTAIC") == true ? "checked" : "") /> VOLTAIC</label>
-                                    <label><input type="checkbox" name="projectName" value="WAKE UP 247" @(ViewBag.Projectname?.Contains("WAKE UP 247") == true ? "checked" : "") /> WAKE UP 247</label>
-                                    <label><input type="checkbox" name="projectName" value="Webka" @(ViewBag.Projectname?.Contains("Webka") == true ? "checked" : "") /> Webka</label>
-                                    <label><input type="checkbox" name="projectName" value="WELLTRACK - PHARMACIST" @(ViewBag.Projectname?.Contains("WELLTRACK - PHARMACIST") == true ? "checked" : "") /> WELLTRACK - PHARMACIST</label>
-                                    <label><input type="checkbox" name="projectName" value="WELLTRACK-HCPs" @(ViewBag.Projectname?.Contains("WELLTRACK-HCPs") == true ? "checked" : "") /> WELLTRACK-HCPs</label>
-                                    <label><input type="checkbox" name="projectName" value="Whale" @(ViewBag.Projectname?.Contains("Whale") == true ? "checked" : "") /> Whale</label>
-                                    <label><input type="checkbox" name="projectName" value="Goodnight" @(ViewBag.Projectname?.Contains("Goodnight") == true ? "checked" : "") /> Goodnight</label>
-                                    <label><input type="checkbox" name="projectName" value="Centrum - Consumer" @(ViewBag.Projectname?.Contains("Centrum - Consumer") == true ? "checked" : "") /> Centrum - Consumer</label>
-                                    <label><input type="checkbox" name="projectName" value="EXPLORER" @(ViewBag.Projectname?.Contains("EXPLORER") == true ? "checked" : "") /> EXPLORER</label>
-                                    <label><input type="checkbox" name="projectName" value="F1 - Nemo Census" @(ViewBag.Projectname?.Contains("F1 - Nemo Census") == true ? "checked" : "") /> F1 - Nemo Census</label>
-                                    <label><input type="checkbox" name="projectName" value="HCB" @(ViewBag.Projectname?.Contains("HCB") == true ? "checked" : "") /> HCB</label>
-                                    <label><input type="checkbox" name="projectName" value="IQVIA - Centrum Phamacist" @(ViewBag.Projectname?.Contains("IQVIA - Centrum Phamacist") == true ? "checked" : "") /> IQVIA - Centrum Phamacist</label>
-                                    <label><input type="checkbox" name="projectName" value="Juicy" @(ViewBag.Projectname?.Contains("Juicy") == true ? "checked" : "") /> Juicy</label>
-                                    <label><input type="checkbox" name="projectName" value="KALE Tracking" @(ViewBag.Projectname?.Contains("KALE Tracking") == true ? "checked" : "") /> KALE Tracking</label>
-                                    <label><input type="checkbox" name="projectName" value="Luxury 6" @(ViewBag.Projectname?.Contains("Luxury 6") == true ? "checked" : "") /> Luxury 6</label>
-                                    <label><input type="checkbox" name="projectName" value="NICE" @(ViewBag.Projectname?.Contains("NICE") == true ? "checked" : "") /> NICE</label>
-                                    <label><input type="checkbox" name="projectName" value="PILL" @(ViewBag.Projectname?.Contains("PILL") == true ? "checked" : "") /> PILL</label>
-                                    <label><input type="checkbox" name="projectName" value="Prosper" @(ViewBag.Projectname?.Contains("Prosper") == true ? "checked" : "") /> Prosper</label>
-                                    <label><input type="checkbox" name="projectName" value="Store Audit" @(ViewBag.Projectname?.Contains("Store Audit") == true ? "checked" : "") /> Store Audit</label>
-                                    <label><input type="checkbox" name="projectName" value="VAPI - Consumers" @(ViewBag.Projectname?.Contains("VAPI - Consumers") == true ? "checked" : "") /> VAPI - Consumers</label>
-                                    <label><input type="checkbox" name="projectName" value="VAPI - HCPs" @(ViewBag.Projectname?.Contains("VAPI - HCPs") == true ? "checked" : "") /> VAPI - HCPs</label>
-                                    <label><input type="checkbox" name="projectName" value="Vista" @(ViewBag.Projectname?.Contains("Vista") == true ? "checked" : "") /> Vista</label>
-                                    <label><input type="checkbox" name="projectName" value="Vivo" @(ViewBag.Projectname?.Contains("Vivo") == true ? "checked" : "") /> Vivo</label>
-                                    <label><input type="checkbox" name="projectName" value="Glucose - Consumer" @(ViewBag.Projectname?.Contains("Glucose - Consumer") == true ? "checked" : "") /> Glucose - Consumer</label>
-
-                                </div>
-                            </div>
-
-                            <!-- Year Multi-select đây là số năm , của dự án -->
-                            <!-- Year Multi-select -->
-                            <div class="custom-multi-select">
-                                <div class="select-box" onclick="toggleDropdown(this)">
-                                    <span class="selected-options" data-placeholder="Năm">Năm</span>
-                                    <i class="arrow"></i>
-                                </div>
-                                <div class="dropdown-options" onchange="limitSelection(this, 5)">
-                                     <input type="text" class="search-box" placeholder="Tìm kiếm năm" oninput="filterOptions(this)">
-                                    <label><input type="checkbox" name="year" value="2011" @(ViewBag.Year?.Contains("2011") == true ? "checked" : "") /> 2011</label>
-                                    <label><input type="checkbox" name="year" value="2012" @(ViewBag.Year?.Contains("2012") == true ? "checked" : "") /> 2012</label>
-                                    <label><input type="checkbox" name="year" value="2013" @(ViewBag.Year?.Contains("2013") == true ? "checked" : "") /> 2013</label>
-                                    <label><input type="checkbox" name="year" value="2014" @(ViewBag.Year?.Contains("2014") == true ? "checked" : "") /> 2014</label>
-                                    <label><input type="checkbox" name="year" value="2015" @(ViewBag.Year?.Contains("2015") == true ? "checked" : "") /> 2015</label>
-                                    <label><input type="checkbox" name="year" value="2016" @(ViewBag.Year?.Contains("2016") == true ? "checked" : "") /> 2016</label>
-                                    <label><input type="checkbox" name="year" value="2017" @(ViewBag.Year?.Contains("2017") == true ? "checked" : "") /> 2017</label>
-                                    <label><input type="checkbox" name="year" value="2018" @(ViewBag.Year?.Contains("2018") == true ? "checked" : "") /> 2018</label>
-                                    <label><input type="checkbox" name="year" value="2019" @(ViewBag.Year?.Contains("2019") == true ? "checked" : "") /> 2019</label>
-                                    <label><input type="checkbox" name="year" value="2020" @(ViewBag.Year?.Contains("2020") == true ? "checked" : "") /> 2020</label>
-                                    <label><input type="checkbox" name="year" value="2021" @(ViewBag.Year?.Contains("2021") == true ? "checked" : "") /> 2021</label>
-                                    <label><input type="checkbox" name="year" value="2022" @(ViewBag.Year?.Contains("2022") == true ? "checked" : "") /> 2022</label>
-                                    <label><input type="checkbox" name="year" value="2023" @(ViewBag.Year?.Contains("2023") == true ? "checked" : "") /> 2023</label>
-                                    <label><input type="checkbox" name="year" value="2024" @(ViewBag.Year?.Contains("2024") == true ? "checked" : "") /> 2024</label>
-                                </div>
-                            </div>
-
-                            <div class="custom-multi-select">
-                                <div class="select-box" onclick="toggleDropdown(this)">
-                                    <span class="selected-options" data-placeholder="Chọn vùng miền">Chọn vùng miền</span>
-                                    <i class="arrow"></i>
-                                </div>
-                                <div class="dropdown-options" onchange="limitSelection(this, 10)">
-                                    <label><input type="checkbox" name="region" value="Các tỉnh miền Bắc" onclick="Bac()" /> Các tỉnh miền Bắc</label>
-                                    <label><input type="checkbox" name="region" value="Các tỉnh miền Trung" onclick="Trung()" /> Các tỉnh miền Trung</label>
-                                    <label><input type="checkbox" name="region" value="Các tỉnh miền Nam" onclick="Nam()" /> Các tỉnh miền Nam</label>
-                                </div>
-                            </div>
-
-
-                            <div class="custom-multi-select">
-                                <div class="select-box" onclick="toggleDropdown(this)">
-                                    <span class="selected-options" data-placeholder="Chọn tỉnh">Chọn tỉnh</span>
-                                    <i class="arrow"></i>
-                                </div>
-                                <div class="dropdown-options" onchange="limitSelection(this, 10)">
-                                   <input type="text" class="search-box" placeholder="Tìm kiếm thành phố" oninput="filterOptions(this)">
-
-
-                                    <label><input type="checkbox" name="city" id="idAnGiang" value="An Giang" @(ViewBag.City?.Contains("An Giang") == true ? "checked" : "") /> An Giang</label>
-                                    <label><input type="checkbox" name="city" id="idBaRiaVungTau" value="Bà Rịa Vũng Tàu" @(ViewBag.City?.Contains("Bà Rịa Vũng Tàu") == true ? "checked" : "") /> Bà Rịa Vũng Tàu</label>
-                                    <label><input type="checkbox" name="city" id="idBacGiang" value="Bắc Giang" @(ViewBag.City?.Contains("Bắc Giang") == true ? "checked" : "") /> Bắc Giang</label>
-                                    <label><input type="checkbox" name="city" id="idBacKan" value="Bắc Kạn" @(ViewBag.City?.Contains("Bắc Kạn") == true ? "checked" : "") /> Bắc Kạn</label>
-                                    <label><input type="checkbox" name="city" id="idBacLieu" value="Bạc Liêu" @(ViewBag.City?.Contains("Bạc Liêu") == true ? "checked" : "") /> Bạc Liêu</label>
-                                    <label><input type="checkbox" name="city" id="idBacNinh" value="Bắc Ninh" @(ViewBag.City?.Contains("Bắc Ninh") == true ? "checked" : "") /> Bắc Ninh</label>
-                                    <label><input type="checkbox" name="city" id="idBenTre" value="Bến Tre" @(ViewBag.City?.Contains("Bến Tre") == true ? "checked" : "") /> Bến Tre</label>
-                                    <label><input type="checkbox" name="city" id="idBinhDinh" value="Bình Định" @(ViewBag.City?.Contains("Bình Định") == true ? "checked" : "") /> Bình Định</label>
-                                    <label><input type="checkbox" name="city" id="idBinhDuong" value="Bình Dương" @(ViewBag.City?.Contains("Bình Dương") == true ? "checked" : "") /> Bình Dương</label>
-                                    <label><input type="checkbox" name="city" id="idBinhPhuoc" value="Bình Phước" @(ViewBag.City?.Contains("Bình Phước") == true ? "checked" : "") /> Bình Phước</label>
-                                    <label><input type="checkbox" name="city" id="idBinhThuan" value="Bình Thuận" @(ViewBag.City?.Contains("Bình Thuận") == true ? "checked" : "") /> Bình Thuận</label>
-                                    <label><input type="checkbox" name="city" id="idCaMau" value="Cà Mau" @(ViewBag.City?.Contains("Cà Mau") == true ? "checked" : "") /> Cà Mau</label>
-                                    <label><input type="checkbox" name="city" id="idCanTho" value="Cần Thơ" @(ViewBag.City?.Contains("Cần Thơ") == true ? "checked" : "") /> Cần Thơ</label>
-                                    <label><input type="checkbox" name="city" id="idCaoBang" value="Cao Bằng" @(ViewBag.City?.Contains("Cao Bằng") == true ? "checked" : "") /> Cao Bằng</label>
-                                    <label><input type="checkbox" name="city" id="idDaNang" value="Đà Nẵng" @(ViewBag.City?.Contains("Đà Nẵng") == true ? "checked" : "") /> Đà Nẵng</label>
-                                    <label><input type="checkbox" name="city" id="idDakLak" value="Đắk Lắk" @(ViewBag.City?.Contains("Đắk Lắk") == true ? "checked" : "") /> Đắk Lắk</label>
-                                    <label><input type="checkbox" name="city" id="idDakNong" value="Đắk Nông" @(ViewBag.City?.Contains("Đắk Nông") == true ? "checked" : "") /> Đắk Nông</label>
-                                    <label><input type="checkbox" name="city" id="idDienBien" value="Điện Biên" @(ViewBag.City?.Contains("Điện Biên") == true ? "checked" : "") /> Điện Biên</label>
-                                    <label><input type="checkbox" name="city" id="idDongNai" value="Đồng Nai" @(ViewBag.City?.Contains("Đồng Nai") == true ? "checked" : "") /> Đồng Nai</label>
-                                    <label><input type="checkbox" name="city" id="idDongThap" value="Đồng Tháp" @(ViewBag.City?.Contains("Đồng Tháp") == true ? "checked" : "") /> Đồng Tháp</label>
-                                    <label><input type="checkbox" name="city" id="idGiaLai" value="Gia Lai" @(ViewBag.City?.Contains("Gia Lai") == true ? "checked" : "") /> Gia Lai</label>
-                                    <label><input type="checkbox" name="city" id="idHaGiang" value="Hà Giang" @(ViewBag.City?.Contains("Hà Giang") == true ? "checked" : "") /> Hà Giang</label>
-                                    <label><input type="checkbox" name="city" id="idHaNam" value="Hà Nam" @(ViewBag.City?.Contains("Hà Nam") == true ? "checked" : "") /> Hà Nam</label>
-                                    <label><input type="checkbox" name="city" id="idHaNoi" value="Hà Nội" @(ViewBag.City?.Contains("Hà Nội") == true ? "checked" : "") /> Hà Nội</label>
-                                    <label><input type="checkbox" name="city" id="idHaTinh" value="Hà Tĩnh" @(ViewBag.City?.Contains("Hà Tĩnh") == true ? "checked" : "") /> Hà Tĩnh</label>
-                                    <label><input type="checkbox" name="city" id="idHaiDuong" value="Hải Dương" @(ViewBag.City?.Contains("Hải Dương") == true ? "checked" : "") /> Hải Dương</label>
-                                    <label><input type="checkbox" name="city" id="idHaiPhong" value="Hải Phòng" @(ViewBag.City?.Contains("Hải Phòng") == true ? "checked" : "") /> Hải Phòng</label>
-                                    <label><input type="checkbox" name="city" id="idHauGiang" value="Hậu Giang" @(ViewBag.City?.Contains("Hậu Giang") == true ? "checked" : "") /> Hậu Giang</label>
-                                    <label><input type="checkbox" name="city" id="idHoChiMinh" value="Hồ Chí Minh" @(ViewBag.City?.Contains("Hồ Chí Minh") == true ? "checked" : "") /> Hồ Chí Minh</label>
-                                    <label><input type="checkbox" name="city" id="idHoaBinh" value="Hòa Bình" @(ViewBag.City?.Contains("Hòa Bình") == true ? "checked" : "") /> Hòa Bình</label>
-                                    <label><input type="checkbox" name="city" id="idHungYen" value="Hưng Yên" @(ViewBag.City?.Contains("Hưng Yên") == true ? "checked" : "") /> Hưng Yên</label>
-                                    <label><input type="checkbox" name="city" id="idKhac" value="Khác" @(ViewBag.City?.Contains("Khác") == true ? "checked" : "") /> Khác</label>
-                                    <label><input type="checkbox" name="city" id="idKhanhHoa" value="Khánh Hòa" @(ViewBag.City?.Contains("Khánh Hòa") == true ? "checked" : "") /> Khánh Hòa</label>
-                                    <label><input type="checkbox" name="city" id="idKienGiang" value="Kiên Giang" @(ViewBag.City?.Contains("Kiên Giang") == true ? "checked" : "") /> Kiên Giang</label>
-                                    <label><input type="checkbox" name="city" id="idKonTum" value="Kon Tum" @(ViewBag.City?.Contains("Kon Tum") == true ? "checked" : "") /> Kon Tum</label>
-                                    <label><input type="checkbox" name="city" id="idLaiChau" value="Lai Châu" @(ViewBag.City?.Contains("Lai Châu") == true ? "checked" : "") /> Lai Châu</label>
-                                    <label><input type="checkbox" name="city" id="idLamDong" value="Lâm Đồng" @(ViewBag.City?.Contains("Lâm Đồng") == true ? "checked" : "") /> Lâm Đồng</label>
-                                    <label><input type="checkbox" name="city" id="idLangSon" value="Lạng Sơn" @(ViewBag.City?.Contains("Lạng Sơn") == true ? "checked" : "") /> Lạng Sơn</label>
-                                    <label><input type="checkbox" name="city" id="idLaoCai" value="Lào Cai" @(ViewBag.City?.Contains("Lào Cai") == true ? "checked" : "") /> Lào Cai</label>
-                                    <label><input type="checkbox" name="city" id="idLongAn" value="Long An" @(ViewBag.City?.Contains("Long An") == true ? "checked" : "") /> Long An</label>
-                                    <label><input type="checkbox" name="city" id="idNamDinh" value="Nam Định" @(ViewBag.City?.Contains("Nam Định") == true ? "checked" : "") /> Nam Định</label>
-                                    <label><input type="checkbox" name="city" id="idNgheAn" value="Nghệ An" @(ViewBag.City?.Contains("Nghệ An") == true ? "checked" : "") /> Nghệ An</label>
-                                    <label><input type="checkbox" name="city" id="idNinhBinh" value="Ninh Bình" @(ViewBag.City?.Contains("Ninh Bình") == true ? "checked" : "") /> Ninh Bình</label>
-                                    <label><input type="checkbox" name="city" id="idNinhThuan" value="Ninh Thuận" @(ViewBag.City?.Contains("Ninh Thuận") == true ? "checked" : "") /> Ninh Thuận</label>
-                                    <label><input type="checkbox" name="city" id="idPhuTho" value="Phú Thọ" @(ViewBag.City?.Contains("Phú Thọ") == true ? "checked" : "") /> Phú Thọ</label>
-                                    <label><input type="checkbox" name="city" id="idPhuYen" value="Phú Yên" @(ViewBag.City?.Contains("Phú Yên") == true ? "checked" : "") /> Phú Yên</label>
-                                    <label><input type="checkbox" name="city" id="idQuangBinh" value="Quảng Bình" @(ViewBag.City?.Contains("Quảng Bình") == true ? "checked" : "") /> Quảng Bình</label>
-                                    <label><input type="checkbox" name="city" id="idQuangNam" value="Quảng Nam" @(ViewBag.City?.Contains("Quảng Nam") == true ? "checked" : "") /> Quảng Nam</label>
-                                    <label><input type="checkbox" name="city" id="idQuangNgai" value="Quảng Ngãi" @(ViewBag.City?.Contains("Quảng Ngãi") == true ? "checked" : "") /> Quảng Ngãi</label>
-                                    <label><input type="checkbox" name="city" id="idQuangNinh" value="Quảng Ninh" @(ViewBag.City?.Contains("Quảng Ninh") == true ? "checked" : "") /> Quảng Ninh</label>
-                                    <label><input type="checkbox" name="city" id="idQuangTri" value="Quảng Trị" @(ViewBag.City?.Contains("Quảng Trị") == true ? "checked" : "") /> Quảng Trị</label>
-                                    <label><input type="checkbox" name="city" id="idSocTrang" value="Sóc Trăng" @(ViewBag.City?.Contains("Sóc Trăng") == true ? "checked" : "") /> Sóc Trăng</label>
-                                    <label><input type="checkbox" name="city" id="idSonLa" value="Sơn La" @(ViewBag.City?.Contains("Sơn La") == true ? "checked" : "") /> Sơn La</label>
-                                    <label><input type="checkbox" name="city" id="idTayNinh" value="Tây Ninh" @(ViewBag.City?.Contains("Tây Ninh") == true ? "checked" : "") /> Tây Ninh</label>
-                                    <label><input type="checkbox" name="city" id="idThaiBinh" value="Thái Bình" @(ViewBag.City?.Contains("Thái Bình") == true ? "checked" : "") /> Thái Bình</label>
-                                    <label><input type="checkbox" name="city" id="idThaiNguyen" value="Thái Nguyên" @(ViewBag.City?.Contains("Thái Nguyên") == true ? "checked" : "") /> Thái Nguyên</label>
-                                    <label><input type="checkbox" name="city" id="idThanhHoa" value="Thanh Hóa" @(ViewBag.City?.Contains("Thanh Hóa") == true ? "checked" : "") /> Thanh Hóa</label>
-                                    <label><input type="checkbox" name="city" id="idThuaThienHue" value="Thừa Thiên Huế" @(ViewBag.City?.Contains("Thừa Thiên Huế") == true ? "checked" : "") /> Thừa Thiên Huế</label>
-                                    <label><input type="checkbox" name="city" id="idTienGiang" value="Tiền Giang" @(ViewBag.City?.Contains("Tiền Giang") == true ? "checked" : "") /> Tiền Giang</label>
-                                    <label><input type="checkbox" name="city" id="idTraVinh" value="Trà Vinh" @(ViewBag.City?.Contains("Trà Vinh") == true ? "checked" : "") /> Trà Vinh</label>
-                                    <label><input type="checkbox" name="city" id="idTuyenQuang" value="Tuyên Quang" @(ViewBag.City?.Contains("Tuyên Quang") == true ? "checked" : "") /> Tuyên Quang</label>
-                                    <label><input type="checkbox" name="city" id="idVinhLong" value="Vĩnh Long" @(ViewBag.City?.Contains("Vĩnh Long") == true ? "checked" : "") /> Vĩnh Long</label>
-                                    <label><input type="checkbox" name="city" id="idVinhPhuc" value="Vĩnh Phúc" @(ViewBag.City?.Contains("Vĩnh Phúc") == true ? "checked" : "") /> Vĩnh Phúc</label>
-                                    <label><input type="checkbox" name="city" id="idYenBai" value="Yên Bái" @(ViewBag.City?.Contains("Yên Bái") == true ? "checked" : "") /> Yên Bái</label>
-
-                                </div>
-                            </div>
-
-                            <!-- Sex Multi-select -->
-                            <div class="custom-multi-select">
-                                <div class="select-box" onclick="toggleDropdown(this)">
-                                    <span class="selected-options" data-placeholder="Chọn giới tính">Chọn giới tính</span>
-                                    <i class="arrow"></i>
-                                </div>
-                                <div class="dropdown-options" onchange="limitSelection(this, 10)">
-                                    <label><input type="checkbox" name="sex" value="Nam" @(ViewBag.Sex?.Contains("Nam") == true ? "checked" : "") /> Nam</label>
-                                    <label><input type="checkbox" name="sex" value="Nữ" @(ViewBag.Sex?.Contains("Nữ") == true ? "checked" : "") /> Nữ</label>
-                                    <label><input type="checkbox" name="sex" value="Không xác định" @(ViewBag.Sex?.Contains("Không xác định") == true ? "checked" : "") /> Không xác định</label>
-                                </div>
-                            </div>
-
-                            <!-- Age Multi-select -->
-                            <div class="custom-multi-select">
-                                <div class="select-box" onclick="toggleDropdown(this)">
-                                    <span class="selected-options" data-placeholder="Chọn tuổi">Chọn tuổi</span>
-                                    <i class="arrow"></i>
-                                </div>
-
-                                <div class="dropdown-options">
-                                     <input type="text" class="search-box" placeholder="Tìm kiếm tuổi" oninput="filterOptions(this)">
-                                    @for (int startAge = 10; startAge <= 80; startAge += 6)
-                                    {
-                                    // Hiển thị nhóm tuổi (ví dụ: từ 10-15)
-                                        <label>
-                                            <input type="checkbox" class="age-group-checkbox"
-                                                   data-start-age="@startAge"
-                                                   data-end-age="@Math.Min(startAge + 5, 80)"
-                                                   onclick="toggleAgeSelection(this)"
-                                            @(ViewBag.Age?.Contains(startAge.ToString()) == true ? "checked" : "") />
-                                            Từ @startAge đến @Math.Min(startAge + 5, 80) tuổi
-                                        </label>
-                                        <!-- Các checkbox con cho từng tuổi trong nhóm -->
-                                        @for (int age = startAge; age <= Math.Min(startAge + 5, 80); age++)
+                                        if (ViewBag.Code?.Contains(code) == true)
                                         {
-                                            <label>
-                                                <input type="checkbox" name="age" value="@age"
-                                                @(ViewBag.Age?.Contains(age.ToString()) == true ? "checked" : "") />
-                                                @age tuổi
-                                            </label>
+                                            <option value="@code" selected>@code</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@code">@code</option>
                                         }
                                     }
-                                </div>
+                                </select>
                             </div>
-
-                            <!-- Nghề nghiệp -->
-                            <div class="custom-multi-select">
-                                <div class="select-box" onclick="toggleDropdown(this)">
-                                    <span class="selected-options" data-placeholder="Chọn nghề nghiệp">Chọn nghề nghiệp</span>
-                                    <i class="arrow"></i>
-                                </div>
-                                <div class="dropdown-options" onchange="limitSelection(this, 10)">
-                                     <input type="text" class="search-box" placeholder="Tìm kiếm nghề nghiệp" oninput="filterOptions(this)">
-                                    <label><input type="checkbox" name="job" value="Bác Sĩ" @(ViewBag.Job?.Contains("Bác Sĩ") == true ? "checked" : "") /> Bác Sĩ</label>
-                                    <label><input type="checkbox" name="job" value="Bảo Mẫu" @(ViewBag.Job?.Contains("Bảo Mẫu") == true ? "checked" : "") /> Bảo Mẫu</label>
-                                    <label><input type="checkbox" name="job" value="Bảo Trì/Bảo Dưỡng" @(ViewBag.Job?.Contains("Bảo Trì/Bảo Dưỡng") == true ? "checked" : "") /> Bảo Trì/Bảo Dưỡng</label>
-                                    <label><input type="checkbox" name="job" value="Bảo Vệ" @(ViewBag.Job?.Contains("Bảo Vệ") == true ? "checked" : "") /> Bảo Vệ</label>
-
-                                    <label><input type="checkbox" name="job" value="Chủ Cửa Hàng/Doanh Nghiệp/Quản Lý" @(ViewBag.Job?.Contains("Chủ Cửa Hàng/Doanh Nghiệp/Quản Lý") == true ? "checked" : "") /> Chủ Cửa Hàng/Doanh Nghiệp/Quản Lý</label>
-                                    <label><input type="checkbox" name="job" value="Công chức Nhà nước" @(ViewBag.Job?.Contains("Công chức Nhà nước") == true ? "checked" : "") /> Công chức Nhà nước</label>
-                                    <label><input type="checkbox" name="job" value="Công Nhân" @(ViewBag.Job?.Contains("Công Nhân") == true ? "checked" : "") /> Công Nhân</label>
-                                    <label><input type="checkbox" name="job" value="Đã Nghỉ Hưu/Thất Nghiệp" @(ViewBag.Job?.Contains("Đã Nghỉ Hưu/Thất Nghiệp") == true ? "checked" : "") /> Đã Nghỉ Hưu/Thất Nghiệp</label>
-                                    <label><input type="checkbox" name="job" value="Đầu Bếp" @(ViewBag.Job?.Contains("Đầu Bếp") == true ? "checked" : "") /> Đầu Bếp</label>
-                                    <label><input type="checkbox" name="job" value="Điều Dưỡng" @(ViewBag.Job?.Contains("Điều Dưỡng") == true ? "checked" : "") /> Điều Dưỡng</label>
-                                    <label><input type="checkbox" name="job" value="Dược Sĩ" @(ViewBag.Job?.Contains("Dược Sĩ") == true ? "checked" : "") /> Dược Sĩ</label>
-                                    <label><input type="checkbox" name="job" value="Giáo Viên" @(ViewBag.Job?.Contains("Giáo Viên") == true ? "checked" : "") /> Giáo Viên</label>
-                                    <label><input type="checkbox" name="job" value="Hộ Sinh" @(ViewBag.Job?.Contains("Hộ Sinh") == true ? "checked" : "") /> Hộ Sinh</label>
-                                    <label><input type="checkbox" name="job" value="Học Sinh/Sinh Viên" @(ViewBag.Job?.Contains("Học Sinh/Sinh Viên") == true ? "checked" : "") /> Học Sinh/Sinh Viên</label>
-                                    <label><input type="checkbox" name="job" value="Kế Toán" @(ViewBag.Job?.Contains("Kế Toán") == true ? "checked" : "") /> Kế Toán</label>
-
-                                    <label><input type="checkbox" name="job" value="Kinh Doanh" @(ViewBag.Job?.Contains("Kinh Doanh") == true ? "checked" : "") /> Kinh Doanh</label>
-                                    <label><input type="checkbox" name="job" value="Kỹ Sư/Kiến Trúc" @(ViewBag.Job?.Contains("Kỹ Sư/Kiến Trúc") == true ? "checked" : "") /> Kỹ Sư/Kiến Trúc</label>
-                                    <label><input type="checkbox" name="job" value="Làm Việc Tự Do" @(ViewBag.Job?.Contains("Làm Việc Tự Do") == true ? "checked" : "") /> Làm Việc Tự Do</label>
-                                    <label><input type="checkbox" name="job" value="Marketing" @(ViewBag.Job?.Contains("Marketing") == true ? "checked" : "") /> Marketing</label>
-                                    <label><input type="checkbox" name="job" value="Nhân Viên IT" @(ViewBag.Job?.Contains("Nhân Viên IT") == true ? "checked" : "") /> Nhân Viên IT</label>
-                                    <label><input type="checkbox" name="job" value="Nhân Viên Kỹ Thuật" @(ViewBag.Job?.Contains("Nhân Viên Kỹ Thuật") == true ? "checked" : "") /> Nhân Viên Kỹ Thuật</label>
-                                    <label><input type="checkbox" name="job" value="Nhân Viên Quan Chức" @(ViewBag.Job?.Contains("Nhân Viên Quan Chức") == true ? "checked" : "") /> Nhân Viên Quan Chức</label>
-                                    <label><input type="checkbox" name="job" value="Nhân Viên Sản Xuất" @(ViewBag.Job?.Contains("Nhân Viên Sản Xuất") == true ? "checked" : "") /> Nhân Viên Sản Xuất</label>
-                                    <label><input type="checkbox" name="job" value="Nhân Viên Vận Chuyển" @(ViewBag.Job?.Contains("Nhân Viên Vận Chuyển") == true ? "checked" : "") /> Nhân Viên Vận Chuyển</label>
-                                    <label><input type="checkbox" name="job" value="Nhân Viên Văn Phòng" @(ViewBag.Job?.Contains("Nhân Viên Văn Phòng") == true ? "checked" : "") /> Nhân Viên Văn Phòng</label>
-                                    <label><input type="checkbox" name="job" value="Nội Trợ" @(ViewBag.Job?.Contains("Nội Trợ") == true ? "checked" : "") /> Nội Trợ</label>
-                                    <label><input type="checkbox" name="job" value="Nông/Lâm Nghiệp" @(ViewBag.Job?.Contains("Nông/Lâm Nghiệp") == true ? "checked" : "") /> Nông/Lâm Nghiệp</label>
-                                    <label><input type="checkbox" name="job" value="Quản Lý" @(ViewBag.Job?.Contains("Quản Lý") == true ? "checked" : "") /> Quản Lý</label>
-                                    <label><input type="checkbox" name="job" value="Tài Xế" @(ViewBag.Job?.Contains("Tài Xế") == true ? "checked" : "") /> Tài Xế</label>
-                                    <label><input type="checkbox" name="job" value="Thiết Kế" @(ViewBag.Job?.Contains("Thiết Kế") == true ? "checked" : "") /> Thiết Kế</label>
-                                    <label><input type="checkbox" name="job" value="Thợ Làm Tóc" @(ViewBag.Job?.Contains("Thợ Làm Tóc") == true ? "checked" : "") /> Thợ Làm Tóc</label>
-                                    <label><input type="checkbox" name="job" value="Thợ Makeup" @(ViewBag.Job?.Contains("Thợ Makeup") == true ? "checked" : "") /> Thợ Makeup</label>
-                                    <label><input type="checkbox" name="job" value="Thợ May" @(ViewBag.Job?.Contains("Thợ May") == true ? "checked" : "") /> Thợ May</label>
-                                    <label><input type="checkbox" name="job" value="Thợ Sửa Chữa Xe" @(ViewBag.Job?.Contains("Thợ Sửa Chữa Xe") == true ? "checked" : "") /> Thợ Sửa Chữa Xe</label>
-                                    <label><input type="checkbox" name="job" value="Tiêm Chủng Vacxin" @(ViewBag.Job?.Contains("Tiêm Chủng Vacxin") == true ? "checked" : "") /> Tiêm Chủng Vacxin</label>
-                                    <label><input type="checkbox" name="job" value="Xây Dựng" @(ViewBag.Job?.Contains("Xây Dựng") == true ? "checked" : "") /> Xây Dựng</label>
-                                    <label><input type="checkbox" name="job" value="Y Tá" @(ViewBag.Job?.Contains("Y Tá") == true ? "checked" : "") /> Y Tá</label>
-                                    <label><input type="checkbox" name="job" value="Các Ngành Nghề Khác" @(ViewBag.Job?.Contains("Các Ngành Nghề Khác") == true ? "checked" : "") /> Các Ngành Nghề Khác</label>
-                                </div>
+                            <div style="width: 200px;">
+                                <select name="projectName" id="projectName" class="form-control" style="width: 100%;">
+                                    <option value="">-- Chọn tên dự án --</option>
+                                    @foreach (var pn in (ViewBag.ProjectNameList as List<string>) ?? new List<string>())
+                                    {
+                                        if (ViewBag.Projectname?.Contains(pn) == true)
+                                        {
+                                            <option value="@pn" selected>@pn</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@pn">@pn</option>
+                                        }
+                                    }
+                                </select>
                             </div>
-
-
-                            <!-- Sex Multi-select -->
-                            <div class="custom-multi-select">
-                                <div class="select-box" onclick="toggleDropdown(this)">
-                                    <span class="selected-options" data-placeholder="Tình trạng hôn nhân">Tình trạng hôn nhân</span>
-                                    <i class="arrow"></i>
-                                </div>
-                                <div class="dropdown-options" onchange="limitSelection(this, 10)">
-                                    <label><input type="checkbox" name="maritalStatus" value="Đã kết hôn" @(ViewBag.MaritalStatus?.Contains("Đã kết hôn") == true ? "checked" : "") /> Đã kết hôn</label>
-                                    <label><input type="checkbox" name="maritalStatus" value="Đã ly hôn" @(ViewBag.MaritalStatus?.Contains("Đã ly hôn") == true ? "checked" : "") /> Đã ly hôn</label>
-                                    <label><input type="checkbox" name="maritalStatus" value="Độc thân" @(ViewBag.MaritalStatus?.Contains("Độc thân") == true ? "checked" : "") /> Độc thân</label>
-                                    <label><input type="checkbox" name="maritalStatus" value="Không xác định" @(ViewBag.MaritalStatus?.Contains("Không xác định") == true ? "checked" : "") /> Không xác định</label>
-                                </div>
+                            <div style="width: 200px;">
+                                <select name="year" id="year" class="form-control" style="width: 100%;">
+                                    <option value="">-- Chọn năm --</option>
+                                    @foreach (var year in (ViewBag.YearList as List<string>) ?? new List<string>())
+                                    {
+                                        if (ViewBag.Year?.Contains(year) == true)
+                                        {
+                                            <option value="@year" selected>@year</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@year">@year</option>
+                                        }
+                                    }
+                                </select>
                             </div>
-
-                            <div class="custom-multi-select">
-                                <div class="select-box" onclick="toggleDropdown(this)">
-                                    <span class="selected-options" data-placeholder="Thành phần kinh tế">Thành phần kinh tế</span>
-                                    <i class="arrow"></i>
-                                </div>
-                                <div class="dropdown-options" onchange="limitSelection(this, 10)">
-                                    <label><input type="checkbox" name="className" value="A" @(ViewBag.Classname?.Contains("A") == true ? "checked" : "") /> A</label>
-                                    <label><input type="checkbox" name="className" value="B" @(ViewBag.Classname?.Contains("B") == true ? "checked" : "") /> B</label>
-                                    <label><input type="checkbox" name="className" value="C" @(ViewBag.Classname?.Contains("C") == true ? "checked" : "") /> C</label>
-                                    <label><input type="checkbox" name="className" value="D" @(ViewBag.Classname?.Contains("D") == true ? "checked" : "") /> D</label>
-                                    <label><input type="checkbox" name="className" value="E" @(ViewBag.Classname?.Contains("E") == true ? "checked" : "") /> E</label>
-                                    <label><input type="checkbox" name="className" value="F" @(ViewBag.Classname?.Contains("F") == true ? "checked" : "") /> F</label>
-                                    <label><input type="checkbox" name="className" value="G" @(ViewBag.Classname?.Contains("G") == true ? "checked" : "") /> G</label>
-                                    <label><input type="checkbox" name="className" value="H" @(ViewBag.Classname?.Contains("H") == true ? "checked" : "") /> H</label>
-                                </div>
+                            <div style="width: 200px;">
+                                <select name="khuvuc" id="khuvuc" class="form-control" style="width: 100%;">
+                                    <option value="">-- Chọn vùng miền --</option>
+                                    @foreach (var kv in (ViewBag.KhuvucList as List<string>) ?? new List<string>())
+                                    {
+                                        if (ViewBag.Khuvuc?.Contains(kv) == true)
+                                        {
+                                            <option value="@kv" selected>@kv</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@kv">@kv</option>
+                                        }
+                                    }
+                                </select>
                             </div>
-
-                            <div class="custom-multi-select">
-                                <div class="select-box" onclick="toggleDropdown(this)">
-                                    <span class="selected-options" data-placeholder="Ngành hàng"> Ngành hàng</span>
-                                    <i class="arrow"></i>
-                                </div>
-                                <div class="dropdown-options" onchange="limitSelection(this, 10)">
-                                     <input type="text" class="search-box" placeholder="Tìm kiếm ngành hàng" oninput="filterOptions(this)">
-                                    <label><input type="checkbox" name="Nganhhang" value="Bất Động Sản" @(ViewBag.Nganhhang?.Contains("Bất Động Sản") == true ? "checked" : "") /> Bất Động Sản</label>
-                                    <label><input type="checkbox" name="Nganhhang" value="Ca Sỹ" @(ViewBag.Nganhhang?.Contains("Ca Sỹ") == true ? "checked" : "") /> Ca Sỹ</label>
-                                    <label><input type="checkbox" name="Nganhhang" value="Công Nghiệp Thuốc Lá" @(ViewBag.Nganhhang?.Contains("Công Nghiệp Thuốc Lá") == true ? "checked" : "") /> Công Nghiệp Thuốc Lá</label>
-                                    <label><input type="checkbox" name="Nganhhang" value="Dịch Vụ Xe" @(ViewBag.Nganhhang?.Contains("Dịch Vụ Xe") == true ? "checked" : "") /> Dịch Vụ Xe</label>
-                                    <label><input type="checkbox" name="Nganhhang" value="Điện Tử" @(ViewBag.Nganhhang?.Contains("Điện Tử") == true ? "checked" : "") /> Điện Tử</label>
-                                    <label><input type="checkbox" name="Nganhhang" value="Du Lịch" @(ViewBag.Nganhhang?.Contains("Du Lịch") == true ? "checked" : "") /> Du Lịch</label>
-                                    <label><input type="checkbox" name="Nganhhang" value="F&B" @(ViewBag.Nganhhang?.Contains("F&B") == true ? "checked" : "") /> F&B</label>
-                                    <label><input type="checkbox" name="Nganhhang" value="Giáo Dục" @(ViewBag.Nganhhang?.Contains("Giáo Dục") == true ? "checked" : "") /> Giáo Dục</label>
-                                    <label><input type="checkbox" name="Nganhhang" value="Không có dữ liệu" @(ViewBag.Nganhhang?.Contains("Không có dữ liệu") == true ? "checked" : "") /> Không có dữ liệu</label>
-                                    <label><input type="checkbox" name="Nganhhang" value="Nội Trợ" @(ViewBag.Nganhhang?.Contains("Nội Trợ") == true ? "checked" : "") /> Nội Trợ</label>
-                                    <label><input type="checkbox" name="Nganhhang" value="Nông Nghiệp" @(ViewBag.Nganhhang?.Contains("Nông Nghiệp") == true ? "checked" : "") /> Nông Nghiệp</label>
-                                    <label><input type="checkbox" name="Nganhhang" value="Tài Chính" @(ViewBag.Nganhhang?.Contains("Tài Chính") == true ? "checked" : "") /> Tài Chính</label>
-                                    <label><input type="checkbox" name="Nganhhang" value="Thương Mại" @(ViewBag.Nganhhang?.Contains("Thương Mại") == true ? "checked" : "") /> Thương Mại</label>
-                                    <label><input type="checkbox" name="Nganhhang" value="Truyền Thông" @(ViewBag.Nganhhang?.Contains("Truyền Thông") == true ? "checked" : "") /> Truyền Thông</label>
-                                    <label><input type="checkbox" name="Nganhhang" value="Vật Dụng Gia Đình" @(ViewBag.Nganhhang?.Contains("Vật Dụng Gia Đình") == true ? "checked" : "") /> Vật Dụng Gia Đình</label>
-                                    <label><input type="checkbox" name="Nganhhang" value="Vật Liệu Xây Dựng" @(ViewBag.Nganhhang?.Contains("Vật Liệu Xây Dựng") == true ? "checked" : "") /> Vật Liệu Xây Dựng</label>
-                                    <label><input type="checkbox" name="Nganhhang" value="Y Tế" @(ViewBag.Nganhhang?.Contains("Y Tế") == true ? "checked" : "") /> Y Tế</label>
-                                </div>
+                            <div style="width: 200px;">
+                                <select name="city" id="city" class="form-control" style="width: 100%;">
+                                    <option value="">-- Chọn tỉnh --</option>
+                                    @foreach (var city in (ViewBag.CityList as List<string>) ?? new List<string>())
+                                    {
+                                        if (ViewBag.City?.Contains(city) == true)
+                                        {
+                                            <option value="@city" selected>@city</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@city">@city</option>
+                                        }
+                                    }
+                                </select>
                             </div>
-
-
-
-
-                            <div class="custom-multi-select">
-                                <div class="select-box" onclick="toggleDropdown(this)">
-                                    <span class="selected-options" data-placeholder="Chọn Sbjnum">Khác</span>
-                                    <i class="arrow"></i>
-                                </div>
-                                <div class="dropdown-options" onchange="limitSelection(this, 10)">
-                                    <label>
-                                        <input type="textbox" name="sbjnum" value="@(ViewBag.Sbjnum ?? string.Empty)" placeholder="Nhập Sbjnum" />
-                                    </label>
-                                    <label>
-                                        <input type="textbox" name="phoneNumber" value="@(ViewBag.Phonenumber ?? string.Empty)" placeholder="Nhập số điện thoại" />
-                                    </label>
-                                </div>
+                            <div style="width: 200px;">
+                                <select name="sex" id="sex" class="form-control" style="width: 100%;">
+                                    <option value="">-- Chọn giới tính --</option>
+                                    @foreach (var sex in (ViewBag.SexList as List<string>) ?? new List<string>())
+                                    {
+                                        if (ViewBag.Sex?.Contains(sex) == true)
+                                        {
+                                            <option value="@sex" selected>@sex</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@sex">@sex</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                            <div style="width: 200px;">
+                                <select name="age" id="age" class="form-control" style="width: 100%;">
+                                    <option value="">-- Chọn tuổi --</option>
+                                    @foreach (var age in (ViewBag.AgeList as IEnumerable<object>) ??
+                                                                        Enumerable.Range(10, 91).Cast<object>())
+                                    {
+                                        var ageStr = age.ToString();
+                                        if (ViewBag.Age?.Contains(ageStr) == true)
+                                        {
+                                            <option value="@ageStr" selected>@ageStr</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@ageStr">@ageStr</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                            <!-- Hàng 2 -->
+                            <div style="width: 200px;">
+                                <select name="job" id="job" class="form-control" style="width: 100%;">
+                                    <option value="">-- Chọn nghề nghiệp --</option>
+                                    @foreach (var job in (ViewBag.JobList as List<string>) ?? new List<string>())
+                                    {
+                                        if (ViewBag.Job?.Contains(job) == true)
+                                        {
+                                            <option value="@job" selected>@job</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@job">@job</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                            <div style="width: 200px;">
+                                <select name="chuyenKhoa" id="chuyenKhoa" class="form-control" style="width: 100%;">
+                                    <option value="">-- Chọn chuyên ngành --</option>
+                                    @foreach (var ck in (ViewBag.ChuyenKhoaList as List<string>) ?? new List<string>())
+                                    {
+                                        if (ViewBag.ChuyenKhoa?.Contains(ck) == true)
+                                        {
+                                            <option value="@ck" selected>@ck</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@ck">@ck</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                            <div style="width: 200px;">
+                                <select name="className" id="className" class="form-control" style="width: 100%;">
+                                    <option value="">-- Chọn thành phần --</option>
+                                    @foreach (var cl in (ViewBag.ClassList as List<string>) ?? new List<string>())
+                                    {
+                                        if (ViewBag.Classname?.Contains(cl) == true)
+                                        {
+                                            <option value="@cl" selected>@cl</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@cl">@cl</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                            <div style="width: 200px;">
+                                <select name="Nganhhang" id="nganhhang" class="form-control" style="width: 100%;">
+                                    <option value="">-- Chọn ngành hàng --</option>
+                                    @foreach (var nh in (ViewBag.NganhhangList as List<string>) ?? new List<string>())
+                                    {
+                                        if (ViewBag.Nganhhang?.Contains(nh) == true)
+                                        {
+                                            <option value="@nh" selected>@nh</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@nh">@nh</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                            <div style="width: 200px;">
+                                <select name="maritalStatus" id="maritalStatus" class="form-control"
+                                    style="width: 100%;">
+                                    <option value="">-- Chọn tình trạng --</option>
+                                    @foreach (var ms in (ViewBag.MaritalStatusList as List<string>) ?? new
+                                                                        List<string>())
+                                    {
+                                        if (ViewBag.MaritalStatus?.Contains(ms) == true)
+                                        {
+                                            <option value="@ms" selected>@ms</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@ms">@ms</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                            <div style="width: 200px;">
+                                <input type="text" id="sbjnum" name="sbjnum" value="@(ViewBag.Sbjnum ?? string.Empty)"
+                                    class="form-control" style="width: 100%;" placeholder="Nhập Sbjnum" />
+                            </div>
+                            <div style="width: 200px;">
+                                <input type="text" id="phoneNumber" name="phoneNumber"
+                                    value="@(ViewBag.Phonenumber ?? string.Empty)" class="form-control"
+                                    style="width: 100%;" placeholder="Nhập số điện thoại" />
                             </div>
                         </div>
-                        <P>        &nbsp     </P>
+                        <P> &nbsp </P>
 
-                        <button type="submit" class="btn btn-primary">  Lọc</button>
-                        <button type="button" class="btn btn-danger" onclick="window.location.href='@Url.Action("Index", "Admin")'">
+                        <button type="submit" class="btn btn-primary"> Lọc</button>
+                        <button type="button" class="btn btn-danger"
+                            onclick="window.location.href='@Url.Action("Index", "Admin")'">
                             Xóa bộ lọc
                         </button>
 
@@ -801,7 +454,8 @@
                         <div class="col mr-2">
                             <h5 class="m-0 font-weight-bold text-white ">Tổng dự án</h5>
 
-                            <div class="h3 mb-0 font-weight text-white"> <span style="font-size: 0.55em;">Số dự án</span> @ViewBag.TotalProjects</div>
+                            <div class="h3 mb-0 font-weight text-white"> <span style="font-size: 0.55em;">Số dự
+                                    án</span> @ViewBag.TotalProjects</div>
 
                         </div>
                         <div class="col-auto">
@@ -820,7 +474,8 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <h5 class="m-0 font-weight-bold text-white">Tổng số lượng</h5>
-                            <div class="h3 mb-0 font-weight text-white"><span style="font-size: 0.55em;">Số mẫu</span> @ViewBag.TotalRows  </div>
+                            <div class="h3 mb-0 font-weight text-white"><span style="font-size: 0.55em;">Số mẫu</span>
+                                @ViewBag.TotalRows </div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-users fa-2x text-white"></i>
@@ -838,13 +493,16 @@
                         <div class="col mr-2">
                             <h5 class="m-0 font-weight-bold text-white">Tổng số mẫu khu vực</h5>
                             <div class="h3 mb-0 font-weight text-white">
-                                <span style="font-size: 0.55em;">Miền Bắc</span> @ViewBag.mienbac <span style="font-size: 0.55em;"></span>
+                                <span style="font-size: 0.55em;">Miền Bắc</span> @ViewBag.mienbac <span
+                                    style="font-size: 0.55em;"></span>
                             </div>
                             <div class="h3 mb-0 font-weight text-white">
-                                <span style="font-size: 0.55em;">Miền Trung</span> @ViewBag.mientrung <span style="font-size: 0.55em;"></span>
+                                <span style="font-size: 0.55em;">Miền Trung</span> @ViewBag.mientrung <span
+                                    style="font-size: 0.55em;"></span>
                             </div>
                             <div class="h3 mb-0 font-weight text-white">
-                                <span style="font-size: 0.55em;">Miền Nam</span> @ViewBag.miennam <span style="font-size: 0.55em;"></span>
+                                <span style="font-size: 0.55em;">Miền Nam</span> @ViewBag.miennam <span
+                                    style="font-size: 0.55em;"></span>
                             </div>
 
                         </div>
@@ -867,13 +525,16 @@
                         <div class="col mr-2">
                             <h5 class="m-0 font-weight-bold text-white">Số lượng nam nữ</h5>
                             <div class="h3 mb-0 font-weight text-white">
-                                <span style="font-size: 0.55em;">Nam</span> @ViewBag.namCount <span style="font-size: 0.55em;"></span>
+                                <span style="font-size: 0.55em;">Nam</span> @ViewBag.namCount <span
+                                    style="font-size: 0.55em;"></span>
                             </div>
                             <div class="h3 mb-0 font-weight text-white">
-                                <span style="font-size: 0.55em;">Nữ</span> @ViewBag.nuCount <span style="font-size: 0.55em;"></span>
+                                <span style="font-size: 0.55em;">Nữ</span> @ViewBag.nuCount <span
+                                    style="font-size: 0.55em;"></span>
                             </div>
                             <div class="h3 mb-0 font-weight text-white">
-                                <span style="font-size: 0.55em;">Không xác định</span> @ViewBag.KXDCount <span style="font-size: 0.55em;"></span>
+                                <span style="font-size: 0.55em;">Không xác định</span> @ViewBag.KXDCount <span
+                                    style="font-size: 0.55em;"></span>
                             </div>
 
                         </div>
@@ -922,7 +583,7 @@
                     <div class="chart-pie pt-4 pb-2">
                         <canvas id="myPieChart"></canvas>
                     </div>
-                   
+
                 </div>
             </div>
         </div>
@@ -942,7 +603,7 @@
                 </div>
             </div>
         </div>
-       
+
 
 
     </div>
@@ -983,7 +644,7 @@
                 </div>
             </div>
 
-           
+
         </div>
 
         <!-- Cột chứa bản đồ bên phải (chiếm 30% màn hình) -->
@@ -1061,7 +722,7 @@
         </div>
     </div>
 
-    
+
 
 
 
@@ -1097,7 +758,7 @@
     <!-- Page level custom scripts -->
     <!-- Thêm thư viện html2image.js -->
     <!-- Đoạn mã JavaScript của bạn -->
-    
+
 
 
 
@@ -1993,7 +1654,7 @@
         });
         //dropdown search trong multi box
 
-                function filterOptions(input) {
+        function filterOptions(input) {
             const filter = input.value.toLowerCase();
             const dropdown = input.closest('.dropdown-options'); // Tìm dropdown chứa ô input
             const options = dropdown.querySelectorAll('label'); // Lấy tất cả các label trong dropdown
@@ -2005,7 +1666,7 @@
                 } else {
                     option.style.display = "none"; // Ẩn nếu không khớp
                 }
-        });
+            });
         }
 
 

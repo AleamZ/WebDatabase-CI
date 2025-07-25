@@ -71,5 +71,6 @@ namespace CIResearch.Models
         public string? Khuvuc { get; set; }
         public int Count { get; set; }
 
+        public string? ChuyenKhoa { get; set; }
     }
 }
