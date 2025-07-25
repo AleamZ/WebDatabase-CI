@@ -204,6 +204,7 @@
 
 
 <body id="page-top">
+    <a href="@Url.Action("SearchPhoneNumber", "Admin")" class="btn btn-primary" style="margin-bottom: 20px;">Tìm kiếm số điện thoại</a>
     <div class="card shadow mb-4">
         <div class="card-header py-3">
             <h5 class="m-0 font-weight-bold text-primary">Tìm kiếm</h5>
@@ -416,15 +417,7 @@
                                     }
                                 </select>
                             </div>
-                            <div style="width: 200px;">
-                                <input type="text" id="sbjnum" name="sbjnum" value="@(ViewBag.Sbjnum ?? string.Empty)"
-                                    class="form-control" style="width: 100%;" placeholder="Nhập Sbjnum" />
-                            </div>
-                            <div style="width: 200px;">
-                                <input type="text" id="phoneNumber" name="phoneNumber"
-                                    value="@(ViewBag.Phonenumber ?? string.Empty)" class="form-control"
-                                    style="width: 100%;" placeholder="Nhập số điện thoại" />
-                            </div>
+                            @* Xóa ô filter nhập số điện thoại (input filter số điện thoại) khỏi form filter *@
                         </div>
                         <P> &nbsp </P>
 
@@ -953,7 +946,7 @@
         var yearlyChart = new Chart(ctx, {
             type: 'line', // Loại biểu đồ: đường
             data: {
-                labels: yearLabels, // Sử dụng nhãn từ ViewBag.YearLabelsProject
+                labels: yearLabels, // Sử dụng nhãn từ ViewBag.YearLabels
                 datasets: [{
                     label: "Tổng số mẫu qua từng năm", // Tiêu đề
                     lineTension: 0.3,

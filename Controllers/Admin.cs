@@ -13,7 +13,7 @@ namespace CIResearch.Controllers
 {
     public class Admin : Controller
     {
-        private string _connectionString = "Server=localhost;Database=sakila;User=root;Password=1234;DefaultCommandTimeout=1000;ConnectionTimeout=1000;";
+        private string _connectionString = "Server=localhost;Database=sakila;User=root;Password=123456;DefaultCommandTimeout=1000;ConnectionTimeout=1000;";
 
         public ActionResult Index(string stt = "", List<string> code = null, List<string> projectName = null, List<string> year = null,
     string contactObject = "", List<string> sbjnum = null, string fullname = "",
@@ -352,6 +352,47 @@ namespace CIResearch.Controllers
             System.IO.File.AppendAllText(logPath, logContent + "\n-------------------\n");
 
             return View(adminChart);
+        }
+
+        // Action hiển thị trang tìm kiếm số điện thoại và xử lý tìm kiếm
+        [HttpGet]
+        public IActionResult SearchPhoneNumber(string phoneNumber = null)
+        {
+            List<ALLDATA> results = null;
+            if (!string.IsNullOrWhiteSpace(phoneNumber))
+            {
+                // Tìm kiếm theo số điện thoại (LIKE hoặc =)
+                using (MySqlConnection connection = new MySqlConnection(_connectionString))
+                {
+                    connection.Open();
+                    var query = "SELECT * FROM all_data_final WHERE PHONENUMBER LIKE @phoneNumber";
+                    using (MySqlCommand command = new MySqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@phoneNumber", "%" + phoneNumber + "%");
+                        using (MySqlDataReader reader = command.ExecuteReader())
+                        {
+                            results = new List<ALLDATA>();
+                            while (reader.Read())
+                            {
+                                ALLDATA data = new ALLDATA
+                                {
+                                    Stt = reader.IsDBNull(reader.GetOrdinal("STT")) ? 0 : reader.GetInt32("STT"),
+                                    Code = reader.IsDBNull(reader.GetOrdinal("CODE")) ? null : reader.GetString("CODE"),
+                                    ProjectName = reader.IsDBNull(reader.GetOrdinal("PROJECTNAME")) ? null : reader.GetString("PROJECTNAME"),
+                                    Year = reader.IsDBNull(reader.GetOrdinal("YEAR")) ? 0 : reader.GetInt32("YEAR"),
+                                    Fullname = reader.IsDBNull(reader.GetOrdinal("FULLNAME")) ? null : reader.GetString("FULLNAME"),
+                                    City = reader.IsDBNull(reader.GetOrdinal("CITY")) ? null : reader.GetString("CITY"),
+                                    PhoneNumber = reader.IsDBNull(reader.GetOrdinal("PHONENUMBER")) ? null : reader.GetString("PHONENUMBER")
+                                    // Có thể bổ sung các trường khác nếu muốn hiển thị
+                                };
+                                results.Add(data);
+                            }
+                        }
+                    }
+                }
+            }
+            ViewBag.PhoneNumber = phoneNumber;
+            return View(results);
         }
 
 

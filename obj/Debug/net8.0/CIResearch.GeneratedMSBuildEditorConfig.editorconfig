@@ -40,6 +40,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[d:/Projects/Webdatabase-CI/Views/Admin/SearchPhoneNumber.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cU2VhcmNoUGhvbmVOdW1iZXIuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [d:/Projects/Webdatabase-CI/Views/AllData/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWxsRGF0YVxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 

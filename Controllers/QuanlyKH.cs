@@ -8,7 +8,7 @@ namespace CIResearch.Controllers
 {
     public class QuanlyKHController : Controller
     {
-        private string _connectionString = "Server=localhost;Database=sakila;User=root;Password=1234;";
+        private string _connectionString = "Server=localhost;Database=sakila;User=root;Password=123456;";
 
         // Xem danh sách dữ liệu
         public IActionResult Index()
