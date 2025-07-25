@@ -31,7 +31,7 @@ namespace CIResearch.Controllers
     public class DN2Controller : Controller
     {
         private readonly IMemoryCache _cache;
-        private string _connectionString = "Server=localhost;Database=sakila;User=root;Password=123456;";
+        private string _connectionString = "Server=localhost;Database=sakila;User=root;Password=1234;";
 
         // Multi-level cache keys for comprehensive caching
         private const string DATA_CACHE_KEY = "dn_all2";

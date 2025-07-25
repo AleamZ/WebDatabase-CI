@@ -29,7 +29,7 @@ namespace CIResearch.Controllers
 
 
 
-        private string _connectionString = "Server=localhost;Database=sakila;User=root;Password=123456;DefaultCommandTimeout=1000;ConnectionTimeout=1000;";
+        private string _connectionString = "Server=localhost;Database=sakila;User=root;Password=1234;DefaultCommandTimeout=1000;ConnectionTimeout=1000;";
         private readonly IMemoryCache _cache;
 
         public BacsiController(IMemoryCache cache)
@@ -607,52 +607,56 @@ namespace CIResearch.Controllers
       string source = "", List<string> className = null, List<string> education = null,
       List<string> provinces = null, List<string> qc = null, string qa = "", List<string> Khuvuc = null, List<string> Nganhhang = null, List<string> chuyenKhoa = null)
         {
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            OfficeOpenXml.ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
 
             var username = HttpContext.Session.GetString("Username");
-            if (string.IsNullOrEmpty(username))
+            var role = HttpContext.Session.GetString("Role");
+            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(role))
             {
                 TempData["ErrorMessage"] = "Vui lòng đăng nhập để xuất file excel.";
                 return RedirectToAction("Index", "Bacsi");
             }
 
-            if (!CanExport(username))
+            // Lấy email user từ database
+            string userEmail = null;
+            using (var connection = new MySql.Data.MySqlClient.MySqlConnection(_connectionString))
             {
-                var timeUntilReset = GetTimeUntilReset();
-                TempData["ErrorMessage"] = $"Mỗi tài khoản chỉ có thể xuất 2 lần/1 ngày. Xin hãy đợi {timeUntilReset.Hours} giờ, {timeUntilReset.Minutes} phút, và {timeUntilReset.Seconds} giây mới có thể xuất tiếp, nếu muốn xuất thêm xin vui lòng liên hệ phòng DP";
+                connection.Open();
+                var cmd = new MySql.Data.MySqlClient.MySqlCommand("SELECT email FROM users WHERE username = @username", connection);
+                cmd.Parameters.AddWithValue("@username", username);
+                using (var reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        userEmail = reader.IsDBNull(0) ? null : reader.GetString(0);
+                    }
+                }
+            }
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                TempData["ErrorMessage"] = "Không tìm thấy email của bạn trong hệ thống. Vui lòng cập nhật email trong hồ sơ cá nhân.";
                 return RedirectToAction("Index", "Bacsi");
             }
 
             var projectList = GetProjectts(stt, code, projectName, year, contactObject, sbjnum, fullname, city, address, street, ward, district, phoneNumber, email, dateOfBirth, age, sex, job, householdIncome, personalIncome, maritalStatus, mostFrequentlyUsedBrand, source, className, education, provinces, qc, qa, Khuvuc, Nganhhang, chuyenKhoa);
 
-            var userRole = HttpContext.Session.GetString("Role");
-            int maxRows;
-            switch (userRole)
+            // Giới hạn số lượng xuất theo role nếu cần (tùy chỉnh nếu muốn)
+            int maxRows = int.MaxValue;
+            switch (role)
             {
-                case "Admin":
-                    maxRows = int.MaxValue;
-                    break;
                 case "Manager":
                     maxRows = 2000;
                     break;
                 case "Execute":
-                    maxRows = 100;
-                    break;
                 case "Assistant":
                     maxRows = 100;
                     break;
-                default:
-                    maxRows = 100;
-                    break;
             }
-
-            var random = new Random();
             var limitedProjectList = projectList.OrderBy(x => Guid.NewGuid()).Take(maxRows).ToList();
 
-            using (var package = new ExcelPackage())
+            using (var package = new OfficeOpenXml.ExcelPackage())
             {
                 var worksheet = package.Workbook.Worksheets.Add("Projects");
-
                 worksheet.Cells[1, 1].Value = "STT";
                 worksheet.Cells[1, 2].Value = "Code";
                 worksheet.Cells[1, 3].Value = "Project Name";
@@ -718,17 +722,62 @@ namespace CIResearch.Controllers
                     worksheet.Cells[i + 2, 29].Value = project.Khuvuc;
                     worksheet.Cells[i + 2, 30].Value = project.Nganhhang;
                 }
-
                 worksheet.Cells.AutoFitColumns();
 
-                var recipientEmail = "aug13hehe@gmail.com";
-                var emailData = package.GetAsByteArray();
-                SendEmailWithAttachment(recipientEmail, "CÔNG TY TNHH CI RESEARCH - FILE EXCEL EXPORT",
-                    "Kính gửi,\nPhòng Data - Processing gửi file excel đã được lọc theo yêu cầu của người dùng. Trân trọng!\n\nPhòng Data - Processing.\nCÔNG TY TNHH CI RESEARCH.", emailData);
+                // Serialize filter params để lưu vào bảng
+                var filterParams = new
+                {
+                    stt,
+                    code,
+                    projectName,
+                    year,
+                    contactObject,
+                    sbjnum,
+                    fullname,
+                    city,
+                    address,
+                    street,
+                    ward,
+                    district,
+                    phoneNumber,
+                    email,
+                    dateOfBirth,
+                    age,
+                    sex,
+                    job,
+                    householdIncome,
+                    personalIncome,
+                    maritalStatus,
+                    mostFrequentlyUsedBrand,
+                    source,
+                    className,
+                    education,
+                    provinces,
+                    qc,
+                    qa,
+                    Khuvuc,
+                    Nganhhang,
+                    chuyenKhoa
+                };
+                string filterParamsJson = Newtonsoft.Json.JsonConvert.SerializeObject(filterParams);
 
-                LogUserAction("XUẤT");
-                TempData["SuccessMessage"] = "Team DP đã nhận yêu cầu xuất file excel, xin vui lòng liên hệ team DP để nhận data";
+                // Lưu request vào bảng ExportRequests
+                var repo = new CIResearch.Services.ExportRequestRepository(_connectionString);
+                var exportRequest = new CIResearch.Models.ExportRequest
+                {
+                    Username = username,
+                    Email = userEmail,
+                    RequestTime = DateTime.Now,
+                    Status = "pending",
+                    FilterParams = filterParamsJson,
+                    FileData = package.GetAsByteArray(),
+                    RejectReason = null,
+                    ApprovedTime = null,
+                    AdminApprovedBy = null
+                };
+                repo.AddRequestAsync(exportRequest).Wait();
 
+                TempData["SuccessMessage"] = "Yêu cầu xuất file đã được gửi và đang chờ admin duyệt. Bạn sẽ nhận được email khi được phê duyệt.";
                 return RedirectToAction("Index", "Bacsi");
             }
         }

@@ -27,7 +27,7 @@ namespace CIResearch.Controllers
     public class DNController_Optimized : Controller
     {
         private readonly IMemoryCache _cache;
-        private string _connectionString = "Server=localhost;Database=sakila;User=root;Password=123456;";
+        private string _connectionString = "Server=localhost;Database=sakila;User=root;Password=1234;";
         private const string DATA_CACHE_KEY = "dn_all_data";
         private const int CACHE_DURATION_MINUTES = 30;
 

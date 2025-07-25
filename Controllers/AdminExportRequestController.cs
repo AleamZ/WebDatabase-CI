@@ -9,7 +9,7 @@ namespace CIResearch.Controllers
 {
     public class AdminExportRequestController : Controller
     {
-        private readonly string _connectionString = "Server=localhost;Database=sakila;User=root;Password=123456;";
+        private readonly string _connectionString = "Server=localhost;Database=sakila;User=root;Password=1234;";
 
         private bool IsAdmin()
         {

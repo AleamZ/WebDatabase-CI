@@ -10,7 +10,7 @@ namespace CIResearch.Controllers
     public class Tracuulocxuat : Controller
     {
 
-        private readonly string _connectionString = "Server=localhost;Database=sakila;User=root;Password=123456;";
+        private readonly string _connectionString = "Server=localhost;Database=sakila;User=root;Password=1234;";
 
         public IActionResult Index(string searchUser = "")
         {

@@ -439,7 +439,7 @@
                         }
 
 
-                        @if (userRole == "Admin" ||   userRole == "Execute")    
+                        @if (userRole == "Admin" || userRole == "Manager")    
                         {
                             <button type="submit" class="btn btn-success" formaction="@Url.Action("ExportToExcel", "Bacsi")">Xuất Excel</button>
                         } 

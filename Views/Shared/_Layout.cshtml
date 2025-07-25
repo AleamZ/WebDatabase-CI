@@ -1,4 +1,8 @@
-﻿<!DOCTYPE html>
+﻿@{
+	var username = Context.Session.GetString("Username");
+	var userRole = Context.Session.GetString("Role");
+}
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -151,13 +155,14 @@
 				padding-top: 10px;
 			}
 		</style>
+		@RenderSection("Styles", required: false)
 	</head>
 
 
 	<body>
 
 		<!-- SIDEBAR (BOOTSTRAP DROPDOWN) -->
-		<section id="sidebar" class="sidebar">
+		<section id="sidebar" class="sidebar" style="280px">
 			<div class="sidebar-header">
 				<a href="#" class="brand">
 					<i>
@@ -170,101 +175,120 @@
 				</a>
 			</div>
 			<ul class="side-menu top">
-				<!-- Dữ liệu công ty dropdown -->
-				<li class="dropdown bootstrap-dropdown">
-					<a href="#" class="dropdown-toggle" data-tooltip="Dữ liệu công ty" aria-haspopup="true"
-						aria-expanded="false">
-						<i class='bx bxs-briefcase'></i>
-						<span class="text">Dữ liệu công ty</span>
-					</a>
-					<div class="dropdown-menu">
-						<a class="dropdown-item" href="/Bacsi" data-tooltip="Bác sĩ">
-							<span class="text">Bác sĩ</span>
+				@if (!string.IsNullOrEmpty(username))
+				{
+					<li class="dropdown bootstrap-dropdown">
+						<a href="#" class="dropdown-toggle" data-tooltip="Dữ liệu công ty" aria-haspopup="true"
+							aria-expanded="false">
+							<i class='bx bxs-briefcase'></i>
+							<span class="text">Dữ liệu công ty</span>
 						</a>
-						<a class="dropdown-item" href="/Manhinhchinh" data-tooltip="Consumer">
-							<span class="text">Consumer</span>
+						<div class="dropdown-menu">
+							<a class="dropdown-item" href="@Url.Action("Index", "Bacsi")" data-tooltip="Bác sĩ">
+								<span class="text">Bác sĩ</span>
+							</a>
+							<a class="dropdown-item" href="@Url.Action("Index", "Manhinhchinh")" data-tooltip="Consumer">
+								<span class="text">Consumer</span>
+							</a>
+						</div>
+					</li>
+					@if (userRole == "Admin")
+					{
+						<li class="dropdown bootstrap-dropdown">
+							<a href="#" class="dropdown-toggle" data-tooltip="Thông tin doanh nghiệp" aria-haspopup="true"
+								aria-expanded="false">
+								<i class='bx bxs-briefcase'></i>
+								<span class="text">Thông tin doanh nghiệp</span>
+							</a>
+							<div class="dropdown-menu">
+								<a class="dropdown-item" href="@Url.Action("Index", "DNInsert")">
+									<span class="text">Thêm doanh nghiệp mới</span>
+								</a>
+								<a class="dropdown-item" href="@Url.Action("Index", "DNImport")">
+									<span class="text">Import từ Excel</span>
+								</a>
+								<a class="dropdown-item" href="@Url.Action("Index", "DN")">
+									<span class="text">Năm 2023</span>
+								</a>
+								<a class="dropdown-item" href="@Url.Action("Index", "DN")">
+									<span class="text">Năm 2021</span>
+								</a>
+								<a class="dropdown-item" href="@Url.Action("Index", "DN")">
+									<span class="text">Năm 2022</span>
+								</a>
+							</div>
+						</li>
+					}
+					<li>
+						<a href="@Url.Action("ViewProfile", "Profile")" data-tooltip="Hồ sơ của tôi">
+							<i class='bx bxs-user'></i>
+							<span class="text">Hồ sơ của tôi</span>
 						</a>
-					</div>
-				</li>
-
-				<!-- Thông tin doanh nghiệp dropdown -->
-				<li class="dropdown bootstrap-dropdown">
-					<a href="#" class="dropdown-toggle" data-tooltip="Thông tin doanh nghiệp" aria-haspopup="true"
-						aria-expanded="false">
-						<i class='bx bxs-briefcase'></i>
-						<span class="text">Thông tin doanh nghiệp</span>
-					</a>
-					<div class="dropdown-menu">
-						<a class="dropdown-item" href="#">
-							<span class="text">Trang doanh nghiệp</span>
+					</li>
+					<li>
+						<a href="@Url.Action("ChangePassword", "LoginRegister")" data-tooltip="Đổi mật khẩu">
+							<i class='bx bxs-lock'></i>
+							<span class="text">Đổi mật khẩu</span>
 						</a>
-						<a class="dropdown-item" href="#">
-							<span class="text">Thêm doanh nghiệp mới</span>
+					</li>
+					@if (userRole == "Manager")
+					{
+						<li>
+							<a href="@Url.Action("Index", "Tracuulocxuat")" data-tooltip="Lịch sử lọc xuất">
+								<i class='bx bx-history'></i>
+								<span class="text">Lịch sử lọc xuất</span>
+							</a>
+						</li>
+					}
+					@if (userRole == "Admin")
+					{
+						<li>
+							<a href="@Url.Action("Index", "Admin")" data-tooltip="Trang admin">
+								<i class='bx bxs-user-plus'></i>
+								<span class="text">Trang admin</span>
+							</a>
+						</li>
+						<li>
+							<a href="@Url.Action("Register", "LoginRegister")" data-tooltip="Đăng ký tài khoản">
+								<i class='bx bxs-user-plus'></i>
+								<span class="text">Đăng ký tài khoản</span>
+							</a>
+						</li>
+						<li>
+							<a href="@Url.Action("Index", "ManageUsers")" data-tooltip="Quản lý tài khoản">
+								<i class='bx bxs-cog'></i>
+								<span class="text">Quản lý tài khoản</span>
+							</a>
+						</li>
+						<li>
+							<a href="@Url.Action("Index", "ALLDATA")" data-tooltip="Thêm dữ liệu dự án">
+								<i class='bx bxs-data'></i>
+								<span class="text">Thêm dữ liệu dự án</span>
+							</a>
+						</li>
+						<li>
+							<a href="@Url.Action("Index", "Tracuulocxuat")" data-tooltip="Lịch sử lọc xuất">
+								<i class='bx bx-history'></i>
+								<span class="text">Lịch sử lọc xuất</span>
+							</a>
+						</li>
+					}
+					<li>
+						<a href="@Url.Action("Logout", "LoginRegister")" class="logout" data-tooltip="Đăng Xuất">
+							<i class='bx bxs-log-out-circle'></i>
+							<span class="text">Đăng Xuất</span>
 						</a>
-						<a class="dropdown-item" href="#">
-							<span class="text">Import từ Excel</span>
+					</li>
+				}
+				else
+				{
+					<li>
+						<a href="@Url.Action("Login", "LoginRegister")" class="logout" data-tooltip="ĐĂNG NHẬP">
+							<i class='bx bxs-log-in-circle'></i>
+							<span class="text">ĐĂNG NHẬP</span>
 						</a>
-						<a class="dropdown-item" href="#">
-							<span class="text">Năm 2023</span>
-						</a>
-						<a class="dropdown-item" href="#">
-							<span class="text">Năm 2021</span>
-						</a>
-						<a class="dropdown-item" href="#">
-							<span class="text">Năm 2022</span>
-						</a>
-					</div>
-				</li>
-
-				<!-- Regular menu items -->
-				<li>
-					<a href="/ManageUsers" data-tooltip="Hồ sơ của tôi">
-						<i class='bx bxs-user'></i>
-						<span class="text">Hồ sơ của tôi</span>
-					</a>
-				</li>
-				<li>
-					<a href="/ManageUser" data-tooltip="Đổi mật khẩu">
-						<i class='bx bxs-lock'></i>
-						<span class="text">Đổi mật khẩu</span>
-					</a>
-				</li>
-				<li>
-					<a href="/Tracuulocxuat" data-tooltip="Lịch sử lọc xuất">
-						<i class='bx bx-history'></i>
-						<span class="text">Lịch sử lọc xuất</span>
-					</a>
-				</li>
-				<li>
-					<a href="/Admin" data-tooltip="Trang admin">
-						<i class='bx bxs-user-plus'></i>
-						<span class="text">Trang admin</span>
-					</a>
-				</li>
-				<li>
-					<a href="/LoginRegister/Register" data-tooltip="Đăng ký tài khoản">
-						<i class='bx bxs-user-plus'></i>
-						<span class="text">Đăng ký tài khoản</span>
-					</a>
-				</li>
-				<li>
-				<a href="/ManageUser" data-tooltip="Quản lý tài khoản">
-						<i class='bx bxs-cog'></i>
-						<span class="text">Quản lý tài khoản</span>
-					</a>
-				</li>
-				<li>
-					<a href="/ThemSuaXoaDuAn" data-tooltip="Thêm dữ liệu dự án">
-						<i class='bx bxs-data'></i>
-						<span class="text">Thêm dữ liệu dự án</span>
-					</a>
-				</li>
-				<li>
-					<a href="/LoginRegister/Logout" class="logout" data-tooltip="Đăng Xuất">
-						<i class='bx bxs-log-out-circle'></i>
-						<span class="text">Đăng Xuất</span>
-					</a>
-				</li>
+					</li>
+				}
 				@* <li>
 					<a href="#" class="menu-toggle" id="menu-toggle" data-tooltip="Thu gọn menu">
 						<i class='bx bx-chevron-left'></i>

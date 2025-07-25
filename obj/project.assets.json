@@ -13201,23 +13201,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\admin\\.nuget\\packages\\": {},
+    "C:\\Users\\datan\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\CI REASEARCH\\CIResearch_DP\\WEBSITE\\Webdatabase-CI10\\Webdatabase-CI\\WebDatabase-CI\\CIResearch.csproj",
+      "projectUniqueName": "D:\\Projects\\Webdatabase-CI\\CIResearch.csproj",
       "projectName": "CIResearch",
-      "projectPath": "D:\\CI REASEARCH\\CIResearch_DP\\WEBSITE\\Webdatabase-CI10\\Webdatabase-CI\\WebDatabase-CI\\CIResearch.csproj",
-      "packagesPath": "C:\\Users\\admin\\.nuget\\packages\\",
-      "outputPath": "D:\\CI REASEARCH\\CIResearch_DP\\WEBSITE\\Webdatabase-CI10\\Webdatabase-CI\\WebDatabase-CI\\obj\\",
+      "projectPath": "D:\\Projects\\Webdatabase-CI\\CIResearch.csproj",
+      "packagesPath": "C:\\Users\\datan\\.nuget\\packages\\",
+      "outputPath": "D:\\Projects\\Webdatabase-CI\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\datan\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -13337,19 +13337,19 @@
         "downloadDependencies": [
           {
             "name": "Microsoft.AspNetCore.App.Runtime.win-x64",
-            "version": "[8.0.18, 8.0.18]"
+            "version": "[8.0.16, 8.0.16]"
           },
           {
             "name": "Microsoft.NETCore.App.Crossgen2.win-x64",
-            "version": "[8.0.18, 8.0.18]"
+            "version": "[8.0.16, 8.0.16]"
           },
           {
             "name": "Microsoft.NETCore.App.Runtime.win-x64",
-            "version": "[8.0.18, 8.0.18]"
+            "version": "[8.0.16, 8.0.16]"
           },
           {
             "name": "Microsoft.WindowsDesktop.App.Runtime.win-x64",
-            "version": "[8.0.18, 8.0.18]"
+            "version": "[8.0.16, 8.0.16]"
           }
         ],
         "frameworkReferences": {
@@ -13360,7 +13360,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.302/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.300/PortableRuntimeIdentifierGraph.json"
       }
     },
     "runtimes": {

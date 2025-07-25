@@ -1,37 +1,12 @@
 @model List<CIResearch.Models.ALLDATA>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
 
-<!DOCTYPE html>
-<html lang="en">
+<!-- Bắt đầu nội dung trang ở đây, KHÔNG có <html>, <head>, <body> -->
 
-<head>
-    <link href="~/adminpanel/css/style.css" rel="stylesheet" />
-    <script src="~/adminpanel/js/script.js"></script>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="viewport" content="initial-scale=1, maximum-scale=1">
-    <link href='https://unpkg.com/boxicons@2.0.9/css/boxicons.min.css' rel='stylesheet'>
-    <!-- site metas -->
-    <title>4uhost</title>
-    <meta name="keywords" content="">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <!-- bootstrap css -->
-
-    <link href="~/css(4u)/bootstrap.min.css" rel="stylesheet" />
-    <!-- style css -->
-
-    <link href="~/css(4u)/style.css" rel="stylesheet" />
-    <!-- Responsive-->
-    <link href="~/css(4u)/responsive.css" rel="stylesheet" />
-
-    <!-- fevicon -->
-    <!-- Tweaks for older IEs-->
-
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
+<!-- Nếu có CSS riêng cho trang này, đặt vào section Styles -->
+@section Styles {
     <style>
         .table-container {
             border: 1px solid #ddd;
@@ -58,17 +33,11 @@
             border: 1px solid #ddd;
         }
 
-        <style>
+
 
         /* Thêm CSS tùy chỉnh cho giao diện */
         .admin-page {
             display: flex;
-        }
-
-        .sidebar {
-            width: 200px;
-            background-color: #f4f4f4;
-            padding: 20px;
         }
 
         .content {
@@ -200,11 +169,13 @@
     <!-- Custom styles for this template-->
     @*  <link href="css/sb-admin-2.min.css" rel="stylesheet"> *@
 
-</head>
+}
 
-
-<body id="page-top">
-    <a href="@Url.Action("SearchPhoneNumber", "Admin")" class="btn btn-primary" style="margin-bottom: 20px;">Tìm kiếm số điện thoại</a>
+<body>
+    <!-- Nội dung chính của trang (dashboard, filter, bảng, biểu đồ, ...) -->
+    <!-- Copy phần nội dung từ <body> cũ vào đây, bỏ qua các thẻ <html>, <head>, <body> -->
+    <a href="@Url.Action("SearchPhoneNumber", "Admin")" class="btn btn-primary" style="margin-bottom: 20px;">Tìm kiếm số
+        điện thoại</a>
     <div class="card shadow mb-4">
         <div class="card-header py-3">
             <h5 class="m-0 font-weight-bold text-primary">Tìm kiếm</h5>
@@ -1028,8 +999,7 @@
                         }
                     }
                 }
-            }
-        });
+            });
         //tổng số dự án theo năm
         // Lấy dữ liệu từ ViewBag
         // Tùy chỉnh font mặc định và màu sắc theo Bootstrap

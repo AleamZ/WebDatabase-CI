@@ -1,9 +1,11 @@
 using CIResearch.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using CIResearch.Middleware;
 
 namespace CIResearch.Controllers
 {
+    [RequireAuthentication]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
