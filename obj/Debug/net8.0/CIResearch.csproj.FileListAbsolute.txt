@@ -276,3 +276,10 @@ D:\Projects\Webdatabase-CI\obj\Debug\net8.0\refint\CIResearch.dll
 D:\Projects\Webdatabase-CI\obj\Debug\net8.0\CIResearch.pdb
 D:\Projects\Webdatabase-CI\obj\Debug\net8.0\CIResearch.genruntimeconfig.cache
 D:\Projects\Webdatabase-CI\obj\Debug\net8.0\ref\CIResearch.dll
+D:\Projects\Webdatabase-CI\bin\Debug\net8.0\ClosedXML.dll
+D:\Projects\Webdatabase-CI\bin\Debug\net8.0\DocumentFormat.OpenXml.dll
+D:\Projects\Webdatabase-CI\bin\Debug\net8.0\ExcelNumberFormat.dll
+D:\Projects\Webdatabase-CI\bin\Debug\net8.0\Irony.dll
+D:\Projects\Webdatabase-CI\bin\Debug\net8.0\SixLabors.Fonts.dll
+D:\Projects\Webdatabase-CI\bin\Debug\net8.0\System.IO.Packaging.dll
+D:\Projects\Webdatabase-CI\bin\Debug\net8.0\XLParser.dll

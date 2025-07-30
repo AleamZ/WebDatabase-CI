@@ -773,7 +773,8 @@ namespace CIResearch.Controllers
                     FileData = package.GetAsByteArray(),
                     RejectReason = null,
                     ApprovedTime = null,
-                    AdminApprovedBy = null
+                    AdminApprovedBy = null,
+                    Source = "Bacsi"
                 };
                 repo.AddRequestAsync(exportRequest).Wait();
 

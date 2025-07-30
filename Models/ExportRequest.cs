@@ -14,5 +14,6 @@ namespace CIResearch.Models
         public string RejectReason { get; set; } // nullable
         public DateTime? ApprovedTime { get; set; }
         public string AdminApprovedBy { get; set; } // nullable
+        public string Source { get; set; } // Trang xuất Excel: DN, Bacsi, PhoneSearch, etc.
     }
 }

@@ -6,13 +6,34 @@
 
 <h2>Tìm kiếm số điện thoại</h2>
 
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
 <form method="get" action="">
     <div class="form-group">
         <label for="phoneNumber">Nhập số điện thoại:</label>
-        <input type="text" class="form-control" id="phoneNumber" name="phoneNumber" value="@ViewBag.PhoneNumber" placeholder="Nhập số điện thoại cần tìm">
+        <input type="text" class="form-control" id="phoneNumber" name="phoneNumber" value="@ViewBag.PhoneNumber"
+            placeholder="Nhập số điện thoại cần tìm">
     </div>
-    <button type="submit" class="btn btn-success">Tìm kiếm</button>
-    <a href="@Url.Action("Index", "Admin")" class="btn btn-secondary">Quay lại</a>
+    <div class="btn-group" role="group">
+        <button type="submit" class="btn btn-success">Tìm kiếm</button>
+        <a href="@Url.Action("ExportPhoneSearchToExcel", "Admin", new { phoneNumber = ViewBag.PhoneNumber })"
+            class="btn btn-primary">Xuất Excel</a>
+        <a href="@Url.Action("Index", "Admin")" class="btn btn-secondary">Quay lại</a>
+    </div>
 </form>
 
 @if (results != null)
@@ -20,6 +41,12 @@
     if (results.Count > 0)
     {
         <h4>Kết quả tìm kiếm:</h4>
+        <div class="mb-3">
+            <a href="@Url.Action("ExportPhoneSearchToExcel", "Admin", new { phoneNumber = ViewBag.PhoneNumber })"
+                class="btn btn-info">
+                <i class="fas fa-file-excel"></i> Xuất kết quả ra Excel
+            </a>
+        </div>
         <table class="table table-bordered table-striped">
             <thead>
                 <tr>
@@ -50,4 +77,4 @@
     {
         <div class="alert alert-warning mt-3">Không tìm thấy kết quả phù hợp.</div>
     }
-} 
+}

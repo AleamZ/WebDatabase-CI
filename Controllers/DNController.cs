@@ -2268,7 +2268,8 @@ namespace CIResearch.Controllers
                     FileData = package.GetAsByteArray(),
                     RejectReason = null,
                     ApprovedTime = null,
-                    AdminApprovedBy = null
+                    AdminApprovedBy = null,
+                    Source = "DN"
                 };
                 await repo.AddRequestAsync(exportRequest);
 

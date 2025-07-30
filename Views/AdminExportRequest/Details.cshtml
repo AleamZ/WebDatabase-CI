@@ -17,12 +17,38 @@
         <td>@Model.Email</td>
     </tr>
     <tr>
+        <th>Nguồn</th>
+        <td>
+            @if (!string.IsNullOrEmpty(Model.Source))
+            {
+                <span class="badge bg-info">@Model.Source</span>
+            }
+            else
+            {
+                <span class="text-muted">Không xác định</span>
+            }
+        </td>
+    </tr>
+    <tr>
         <th>Thời gian request</th>
         <td>@Model.RequestTime.ToString("dd/MM/yyyy HH:mm:ss")</td>
     </tr>
     <tr>
         <th>Trạng thái</th>
-        <td>@Model.Status</td>
+        <td>
+            @if (Model.Status == "pending")
+            {
+                <span class="badge bg-warning">Chờ duyệt</span>
+            }
+            else if (Model.Status == "approved")
+            {
+                <span class="badge bg-success">Đã duyệt</span>
+            }
+            else if (Model.Status == "rejected")
+            {
+                <span class="badge bg-danger">Đã từ chối</span>
+            }
+        </td>
     </tr>
     <tr>
         <th>Filter Params</th>

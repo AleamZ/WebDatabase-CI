@@ -8,6 +8,10 @@ using CIResearch.Models;
 using System.Text;
 using System.Drawing;
 using System.Linq; // Added for .Where() and .Any()
+using System.IO; // Added for MemoryStream
+using ClosedXML.Excel; // Added for Excel export
+using System.Net.Mail; // Added for email functionality
+using System.Net; // Added for NetworkCredential
 
 namespace CIResearch.Controllers
 {
@@ -354,52 +358,6 @@ namespace CIResearch.Controllers
             return View(adminChart);
         }
 
-        // Action hiển thị trang tìm kiếm số điện thoại và xử lý tìm kiếm
-        [HttpGet]
-        public IActionResult SearchPhoneNumber(string phoneNumber = null)
-        {
-            List<ALLDATA> results = null;
-            if (!string.IsNullOrWhiteSpace(phoneNumber))
-            {
-                // Tìm kiếm theo số điện thoại (LIKE hoặc =)
-                using (MySqlConnection connection = new MySqlConnection(_connectionString))
-                {
-                    connection.Open();
-                    var query = "SELECT * FROM all_data_final WHERE PHONENUMBER LIKE @phoneNumber";
-                    using (MySqlCommand command = new MySqlCommand(query, connection))
-                    {
-                        command.Parameters.AddWithValue("@phoneNumber", "%" + phoneNumber + "%");
-                        using (MySqlDataReader reader = command.ExecuteReader())
-                        {
-                            results = new List<ALLDATA>();
-                            while (reader.Read())
-                            {
-                                ALLDATA data = new ALLDATA
-                                {
-                                    Stt = reader.IsDBNull(reader.GetOrdinal("STT")) ? 0 : reader.GetInt32("STT"),
-                                    Code = reader.IsDBNull(reader.GetOrdinal("CODE")) ? null : reader.GetString("CODE"),
-                                    ProjectName = reader.IsDBNull(reader.GetOrdinal("PROJECTNAME")) ? null : reader.GetString("PROJECTNAME"),
-                                    Year = reader.IsDBNull(reader.GetOrdinal("YEAR")) ? 0 : reader.GetInt32("YEAR"),
-                                    Fullname = reader.IsDBNull(reader.GetOrdinal("FULLNAME")) ? null : reader.GetString("FULLNAME"),
-                                    City = reader.IsDBNull(reader.GetOrdinal("CITY")) ? null : reader.GetString("CITY"),
-                                    PhoneNumber = reader.IsDBNull(reader.GetOrdinal("PHONENUMBER")) ? null : reader.GetString("PHONENUMBER")
-                                    // Có thể bổ sung các trường khác nếu muốn hiển thị
-                                };
-                                results.Add(data);
-                            }
-                        }
-                    }
-                }
-            }
-            ViewBag.PhoneNumber = phoneNumber;
-            return View(results);
-        }
-
-
-
-
-
-
         private List<ALLDATA> getadminChart(
           string stt, List<string> code, List<string> projectName, List<string> year,
   string contactObject, List<string> sbjnum, string fullname,
@@ -413,17 +371,12 @@ namespace CIResearch.Controllers
         {
             List<ALLDATA> project = new List<ALLDATA>();
 
-
-
             using (MySqlConnection connection = new MySqlConnection(_connectionString))
             {
                 connection.Open();
                 var queryBuilder = new StringBuilder("SELECT * FROM all_data_final WHERE 1=1");
 
-
-                // Thêm di?u ki?n l?c cho t?ng tham s?
-
-
+                // Thêm điều kiện lọc cho từng tham số
                 if (projectName != null && projectName.Any())
                 {
                     var projectNameParams = projectName.Select((_, i) => $"@projectName{i}").ToArray();
@@ -498,18 +451,8 @@ namespace CIResearch.Controllers
                     queryBuilder.Append(" AND ChuyenKhoa IN (" + string.Join(", ", chuyenKhoaParams) + ")");
                 }
 
-
-                // Lấy tổng số dòng
-                var countQuery = new StringBuilder("SELECT COUNT(*) FROM all_data_final WHERE 1=1");
-                countQuery.Append(queryBuilder.ToString().Substring("SELECT * FROM all_data_final WHERE 1=1".Length));
-
-
-
-
-
                 using (MySqlCommand command = new MySqlCommand(queryBuilder.ToString(), connection))
                 {
-
                     // Thêm tham số vào MySqlCommand
                     if (projectName != null && projectName.Any())
                         for (int i = 0; i < projectName.Count; i++)
@@ -559,11 +502,6 @@ namespace CIResearch.Controllers
                         for (int i = 0; i < chuyenKhoa.Count; i++)
                             command.Parameters.AddWithValue($"@chuyenKhoa{i}", chuyenKhoa[i]);
 
-
-
-
-
-
                     using (MySqlDataReader reader = command.ExecuteReader())
                     {
                         while (reader.Read())
@@ -607,31 +545,281 @@ namespace CIResearch.Controllers
                 }
             }
 
-
             return project;
         }
-        private void StoreUserActionsInViewBag()
+
+        // Action hiển thị trang tìm kiếm số điện thoại và xử lý tìm kiếm
+        [HttpGet]
+        public IActionResult SearchPhoneNumber(string phoneNumber = null)
         {
-            using (var connection = new MySqlConnection(_connectionString))
+            List<ALLDATA> results = null;
+            if (!string.IsNullOrWhiteSpace(phoneNumber))
             {
-                connection.Open();
-                var query = "SELECT Id, Username, Action, Timestamp FROM useraction_loc_xuat ORDER BY Timestamp DESC";
-
-                using (var command = new MySqlCommand(query, connection))
+                // Tìm kiếm theo số điện thoại (LIKE hoặc =)
+                using (MySqlConnection connection = new MySqlConnection(_connectionString))
                 {
-                    using (var reader = command.ExecuteReader())
+                    connection.Open();
+                    var query = "SELECT * FROM all_data_final WHERE PHONENUMBER LIKE @phoneNumber";
+                    using (MySqlCommand command = new MySqlCommand(query, connection))
                     {
-                        var userActions = new List<string>(); // Danh sách lưu thông tin
-                        while (reader.Read())
+                        command.Parameters.AddWithValue("@phoneNumber", "%" + phoneNumber + "%");
+                        using (MySqlDataReader reader = command.ExecuteReader())
                         {
-                            var actionInfo = $"{reader.GetString("Username")} - {reader.GetString("Action")} at {reader.GetDateTime("Timestamp"):HH:mm:ss}";
-                            userActions.Add(actionInfo);
+                            results = new List<ALLDATA>();
+                            while (reader.Read())
+                            {
+                                ALLDATA data = new ALLDATA
+                                {
+                                    Stt = reader.IsDBNull(reader.GetOrdinal("STT")) ? 0 : reader.GetInt32("STT"),
+                                    Code = reader.IsDBNull(reader.GetOrdinal("CODE")) ? null : reader.GetString("CODE"),
+                                    ProjectName = reader.IsDBNull(reader.GetOrdinal("PROJECTNAME")) ? null : reader.GetString("PROJECTNAME"),
+                                    Year = reader.IsDBNull(reader.GetOrdinal("YEAR")) ? 0 : reader.GetInt32("YEAR"),
+                                    Fullname = reader.IsDBNull(reader.GetOrdinal("FULLNAME")) ? null : reader.GetString("FULLNAME"),
+                                    City = reader.IsDBNull(reader.GetOrdinal("CITY")) ? null : reader.GetString("CITY"),
+                                    PhoneNumber = reader.IsDBNull(reader.GetOrdinal("PHONENUMBER")) ? null : reader.GetString("PHONENUMBER")
+                                    // Có thể bổ sung các trường khác nếu muốn hiển thị
+                                };
+                                results.Add(data);
+                            }
                         }
-
-                        // Lưu thông tin vào ViewBag
-                        ViewBag.UserActions = userActions;
                     }
                 }
+            }
+            ViewBag.PhoneNumber = phoneNumber;
+            return View(results);
+        }
+
+        // Action xuất Excel cho kết quả tìm kiếm số điện thoại
+        [HttpGet]
+        public async Task<IActionResult> ExportPhoneSearchToExcel(string phoneNumber = null)
+        {
+            try
+            {
+                List<ALLDATA> results = new List<ALLDATA>();
+
+                if (!string.IsNullOrWhiteSpace(phoneNumber))
+                {
+                    // Tìm kiếm theo số điện thoại
+                    using (MySqlConnection connection = new MySqlConnection(_connectionString))
+                    {
+                        connection.Open();
+                        var query = "SELECT * FROM all_data_final WHERE PHONENUMBER LIKE @phoneNumber";
+                        using (MySqlCommand command = new MySqlCommand(query, connection))
+                        {
+                            command.Parameters.AddWithValue("@phoneNumber", "%" + phoneNumber + "%");
+                            using (MySqlDataReader reader = command.ExecuteReader())
+                            {
+                                while (reader.Read())
+                                {
+                                    ALLDATA data = new ALLDATA
+                                    {
+                                        Stt = reader.IsDBNull(reader.GetOrdinal("STT")) ? 0 : reader.GetInt32("STT"),
+                                        Code = reader.IsDBNull(reader.GetOrdinal("CODE")) ? null : reader.GetString("CODE"),
+                                        ProjectName = reader.IsDBNull(reader.GetOrdinal("PROJECTNAME")) ? null : reader.GetString("PROJECTNAME"),
+                                        Year = reader.IsDBNull(reader.GetOrdinal("YEAR")) ? 0 : reader.GetInt32("YEAR"),
+                                        Fullname = reader.IsDBNull(reader.GetOrdinal("FULLNAME")) ? null : reader.GetString("FULLNAME"),
+                                        City = reader.IsDBNull(reader.GetOrdinal("CITY")) ? null : reader.GetString("CITY"),
+                                        PhoneNumber = reader.IsDBNull(reader.GetOrdinal("PHONENUMBER")) ? null : reader.GetString("PHONENUMBER"),
+                                        Email = reader.IsDBNull(reader.GetOrdinal("EMAIL")) ? null : reader.GetString("EMAIL"),
+                                        Address = reader.IsDBNull(reader.GetOrdinal("ADDRESS")) ? null : reader.GetString("ADDRESS"),
+                                        District = reader.IsDBNull(reader.GetOrdinal("DISTRICT")) ? null : reader.GetString("DISTRICT"),
+                                        Ward = reader.IsDBNull(reader.GetOrdinal("WARD")) ? null : reader.GetString("WARD"),
+                                        Age = reader.IsDBNull(reader.GetOrdinal("AGE")) ? 0 : reader.GetInt32("AGE"),
+                                        Sex = reader.IsDBNull(reader.GetOrdinal("SEX")) ? null : reader.GetString("SEX"),
+                                        Job = reader.IsDBNull(reader.GetOrdinal("JOB")) ? null : reader.GetString("JOB"),
+                                        MaritalStatus = reader.IsDBNull(reader.GetOrdinal("MARITALSTATUS")) ? null : reader.GetString("MARITALSTATUS")
+                                    };
+                                    results.Add(data);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Tạo Excel file
+                using (var workbook = new ClosedXML.Excel.XLWorkbook())
+                {
+                    var worksheet = workbook.Worksheets.Add("Kết quả tìm kiếm");
+
+                    // Thêm header
+                    worksheet.Cell("A1").Value = "STT";
+                    worksheet.Cell("B1").Value = "Họ tên";
+                    worksheet.Cell("C1").Value = "Số điện thoại";
+                    worksheet.Cell("D1").Value = "Email";
+                    worksheet.Cell("E1").Value = "Thành phố";
+                    worksheet.Cell("F1").Value = "Quận/Huyện";
+                    worksheet.Cell("G1").Value = "Phường/Xã";
+                    worksheet.Cell("H1").Value = "Địa chỉ";
+                    worksheet.Cell("I1").Value = "Tuổi";
+                    worksheet.Cell("J1").Value = "Giới tính";
+                    worksheet.Cell("K1").Value = "Nghề nghiệp";
+                    worksheet.Cell("L1").Value = "Tình trạng hôn nhân";
+                    worksheet.Cell("M1").Value = "Dự án";
+                    worksheet.Cell("N1").Value = "Năm";
+                    worksheet.Cell("O1").Value = "Code";
+
+                    // Style header
+                    var headerRange = worksheet.Range("A1:O1");
+                    headerRange.Style.Font.Bold = true;
+                    headerRange.Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.LightGray;
+
+                    // Thêm dữ liệu
+                    for (int i = 0; i < results.Count; i++)
+                    {
+                        var row = i + 2;
+                        worksheet.Cell($"A{row}").Value = results[i].Stt;
+                        worksheet.Cell($"B{row}").Value = results[i].Fullname;
+                        worksheet.Cell($"C{row}").Value = results[i].PhoneNumber;
+                        worksheet.Cell($"D{row}").Value = results[i].Email;
+                        worksheet.Cell($"E{row}").Value = results[i].City;
+                        worksheet.Cell($"F{row}").Value = results[i].District;
+                        worksheet.Cell($"G{row}").Value = results[i].Ward;
+                        worksheet.Cell($"H{row}").Value = results[i].Address;
+                        worksheet.Cell($"I{row}").Value = results[i].Age;
+                        worksheet.Cell($"J{row}").Value = results[i].Sex;
+                        worksheet.Cell($"K{row}").Value = results[i].Job;
+                        worksheet.Cell($"L{row}").Value = results[i].MaritalStatus;
+                        worksheet.Cell($"M{row}").Value = results[i].ProjectName;
+                        worksheet.Cell($"N{row}").Value = results[i].Year;
+                        worksheet.Cell($"O{row}").Value = results[i].Code;
+                    }
+
+                    // Auto-fit columns
+                    worksheet.Columns().AdjustToContents();
+
+                    // Lấy email của user đang đăng nhập
+                    string userEmail = GetCurrentUserEmail();
+
+                    if (!string.IsNullOrEmpty(userEmail))
+                    {
+                        // Gửi email với file Excel đính kèm
+                        using (var stream = new MemoryStream())
+                        {
+                            workbook.SaveAs(stream);
+                            stream.Position = 0;
+                            byte[] fileBytes = stream.ToArray();
+
+                            string subject = $"Kết quả tìm kiếm số điện thoại: {phoneNumber}";
+                            string body = $@"
+                                <h3>Kết quả tìm kiếm số điện thoại</h3>
+                                <p><strong>Nguồn:</strong> PhoneSearch (Tìm kiếm số điện thoại)</p>
+                                <p><strong>Số điện thoại tìm kiếm:</strong> {phoneNumber}</p>
+                                <p><strong>Số lượng kết quả:</strong> {results.Count} bản ghi</p>
+                                <p><strong>Thời gian xuất:</strong> {DateTime.Now:dd/MM/yyyy HH:mm:ss}</p>
+                                <br>
+                                <p>File Excel đính kèm chứa thông tin chi tiết về các kết quả tìm kiếm.</p>
+                                <br>
+                                <p>Trân trọng,<br>Hệ thống CIResearch</p>";
+
+                            SendEmailWithAttachment(userEmail, subject, body, fileBytes);
+
+                            // Lưu vào bảng ExportRequests để tracking
+                            try
+                            {
+                                var username = HttpContext.Session.GetString("Username");
+                                var filterParams = new { phoneNumber = phoneNumber, source = "PhoneSearch" };
+                                var filterParamsJson = Newtonsoft.Json.JsonConvert.SerializeObject(filterParams);
+
+                                var repo = new CIResearch.Services.ExportRequestRepository(_connectionString);
+                                var exportRequest = new CIResearch.Models.ExportRequest
+                                {
+                                    Username = username,
+                                    Email = userEmail,
+                                    RequestTime = DateTime.Now,
+                                    Status = "approved", // Admin có thể xuất trực tiếp
+                                    FilterParams = filterParamsJson,
+                                    FileData = fileBytes,
+                                    RejectReason = null,
+                                    ApprovedTime = DateTime.Now,
+                                    AdminApprovedBy = username,
+                                    Source = "PhoneSearch"
+                                };
+                                await repo.AddRequestAsync(exportRequest);
+                            }
+                            catch (Exception ex)
+                            {
+                                // Log lỗi nhưng không ảnh hưởng đến việc gửi email
+                                Console.WriteLine($"Lỗi lưu tracking: {ex.Message}");
+                            }
+                        }
+
+                        TempData["SuccessMessage"] = $"Đã gửi kết quả tìm kiếm ({results.Count} bản ghi) đến email: {userEmail}";
+                    }
+                    else
+                    {
+                        TempData["ErrorMessage"] = "Không tìm thấy email của user đang đăng nhập";
+                    }
+                }
+
+                return RedirectToAction("SearchPhoneNumber", new { phoneNumber = phoneNumber });
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Lỗi khi xuất Excel: {ex.Message}";
+                return RedirectToAction("SearchPhoneNumber", new { phoneNumber = phoneNumber });
+            }
+        }
+
+        // Lấy email của user đang đăng nhập
+        private string GetCurrentUserEmail()
+        {
+            try
+            {
+                string username = HttpContext.Session.GetString("Username");
+                if (string.IsNullOrEmpty(username))
+                    return null;
+
+                using (MySqlConnection connection = new MySqlConnection(_connectionString))
+                {
+                    connection.Open();
+                    var query = "SELECT Email FROM users WHERE Username = @username";
+                    using (MySqlCommand command = new MySqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@username", username);
+                        var result = command.ExecuteScalar();
+                        return result?.ToString();
+                    }
+                }
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        // Hàm gửi email với file đính kèm
+        private void SendEmailWithAttachment(string toEmail, string subject, string body, byte[] attachmentData)
+        {
+            try
+            {
+                const string fromEmail = "ciresearch.dn@gmail.com";
+                const string fromPassword = "mhip zhvj dhpd zrgo"; // App password
+
+                using var message = new System.Net.Mail.MailMessage
+                {
+                    From = new System.Net.Mail.MailAddress(fromEmail),
+                    Subject = subject,
+                    Body = body,
+                    IsBodyHtml = true
+                };
+
+                message.To.Add(new System.Net.Mail.MailAddress(toEmail));
+                message.Attachments.Add(new System.Net.Mail.Attachment(new MemoryStream(attachmentData),
+                    $"TimKiemSoDienThoai_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+
+                using var client = new System.Net.Mail.SmtpClient("smtp.gmail.com", 587)
+                {
+                    Credentials = new System.Net.NetworkCredential(fromEmail, fromPassword),
+                    EnableSsl = true
+                };
+
+                client.Send(message);
+            }
+            catch (Exception ex)
+            {
+                // Log lỗi nếu cần
+                throw new Exception($"Lỗi gửi email: {ex.Message}");
             }
         }
 
