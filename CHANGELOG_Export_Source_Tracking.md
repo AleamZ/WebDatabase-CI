@@ -86,7 +86,7 @@ ADD COLUMN source VARCHAR(50) NULL COMMENT 'Trang xuất Excel: DN, Bacsi, Phone
 #### 1. **Cập nhật Database**
 ```bash
 # Chạy script SQL
-mysql -u root -p sakila < Scripts/add_source_column_to_export_requests.sql
+mysql -u root -p admin_ciresearch < Scripts/add_source_column_to_export_requests.sql
 ```
 
 #### 2. **Truy cập tính năng**

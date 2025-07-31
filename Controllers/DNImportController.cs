@@ -860,7 +860,7 @@ namespace CIResearch.Controllers
             var columnList = string.Join(", ", columns);
             var paramList = string.Join(", ", columns.Select(c => $"@{c}"));
 
-            return $@"INSERT INTO sakila.dn_all ({columnList}) 
+            return $@"INSERT INTO admin_ciresearch.dn_all ({columnList}) 
                      VALUES ({paramList})";
         }
 

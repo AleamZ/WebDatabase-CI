@@ -82,7 +82,7 @@ namespace CIResearch.Controllers
                 Console.WriteLine($"✅ Database connection successful! Found {recordCount:N0} records");
 
                 return (true, "✅ Kết nối cơ sở dữ liệu thành công!",
-                       $"Server: 127.0.0.1 | Database: sakila | Records: {recordCount:N0}");
+                       $"Server: 127.0.0.1 | Database: admin_ciresearch | Records: {recordCount:N0}");
             }
             catch (MySqlException mysqlEx)
             {
@@ -1657,7 +1657,7 @@ namespace CIResearch.Controllers
             }
             else
             {
-                Console.WriteLine($"❌ NO TREND DATA FOUND after grouping from database sakila.dn_all2");
+                Console.WriteLine($"❌ NO TREND DATA FOUND after grouping from database admin_ciresearch.dn_all2");
                 Console.WriteLine($"❌ Check if records have valid values in Nam, SR_Doanhthu_Thuan_BH_CCDV, SR_Loinhuan_TruocThue columns");
             }
 
@@ -2706,7 +2706,7 @@ namespace CIResearch.Controllers
                     {
                         Message = "✅ ALL DATA IS REAL FROM DATABASE - NO DEMO DATA",
                         DatabaseStatus = "CONNECTED",
-                        DataSource = "sakila.dn_all2",
+                        DataSource = "admin_ciresearch.dn_all2",
                         LastChecked = DateTime.Now
                     }
                 };
@@ -2868,7 +2868,7 @@ namespace CIResearch.Controllers
                 Console.WriteLine("✅ Database connected for industry test");
 
                 // Test TEN_NGANH column existence and data  
-                var columnExistsQuery = "SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = 'sakila' AND table_name = 'dn_all2' AND column_name = 'TEN_NGANH'";
+                var columnExistsQuery = "SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = 'admin_ciresearch' AND table_name = 'dn_all2' AND column_name = 'TEN_NGANH'";
                 using var cmd1 = new MySqlCommand(columnExistsQuery, conn);
                 var columnExists = Convert.ToInt32(await cmd1.ExecuteScalarAsync()) > 0;
 
@@ -2880,7 +2880,7 @@ namespace CIResearch.Controllers
                     {
                         success = false,
                         message = "❌ Column TEN_NGANH does not exist in dn_all2 table",
-                        connectionString = "Server=localhost;Database=sakila;User=root;Password=***",
+                        connectionString = "Server=localhost;Database=admin_ciresearch;User=root;Password=***",
                         timestamp = DateTime.Now
                     });
                 }
@@ -2919,8 +2919,8 @@ namespace CIResearch.Controllers
                     success = true,
                     message = $"✅ Industry data test successful. Found {industries.Count} industries from TEN_NGANH column",
                     data = industries,
-                    connectionString = "Server=localhost;Database=sakila;User=root;Password=***",
-                    database = "sakila",
+                    connectionString = "Server=localhost;Database=admin_ciresearch;User=root;Password=***",
+                    database = "admin_ciresearch",
                     table = "dn_all2",
                     column = "TEN_NGANH",
                     totalIndustries = industries.Count,
@@ -2934,7 +2934,7 @@ namespace CIResearch.Controllers
                 {
                     success = false,
                     message = $"❌ Industry data test failed: {ex.Message}",
-                    connectionString = "Server=localhost;Database=sakila;User=root;Password=***",
+                    connectionString = "Server=localhost;Database=admin_ciresearch;User=root;Password=***",
                     timestamp = DateTime.Now
                 });
             }
@@ -3148,7 +3148,7 @@ namespace CIResearch.Controllers
                     success = true,
                     message = "✅ Raw Data Debug Complete",
 
-                    database = "sakila",
+                    database = "admin_ciresearch",
                     table = "dn_all2",
                     connectionString = "Server=localhost;Database=sakila;User=root;Password=1234;",
 
@@ -3240,7 +3240,7 @@ namespace CIResearch.Controllers
                 {
                     success = true,
                     message = "✅ Trend Data Test SUCCESSFUL",
-                    database = "sakila",
+                    database = "admin_ciresearch",
                     table = "dn_all2",
                     columns = new { year = "Nam", revenue = "SR_Doanhthu_Thuan_BH_CCDV", profit = "SR_Loinhuan_TruocThue" },
 
@@ -3264,7 +3264,7 @@ namespace CIResearch.Controllers
                         totalRecords = allData.Count,
                         recordsWithTrendData = allData.Count(x => x.Nam.HasValue && x.SR_Doanhthu_Thuan_BH_CCDV.HasValue && x.SR_Loinhuan_TruocThue.HasValue),
                         yearsAvailable = stats.Years.Count,
-                        dataSource = "REAL database data from sakila.dn_all2",
+                        dataSource = "REAL database data from admin_ciresearch.dn_all2",
                         confirmRealData = "✅ Chart uses actual data from Nam, SR_Doanhthu_Thuan_BH_CCDV, SR_Loinhuan_TruocThue columns"
                     },
 
@@ -3298,7 +3298,7 @@ namespace CIResearch.Controllers
                     DatabaseConnected = connectionTest.IsConnected,
                     message = connectionTest.Message,
                     details = connectionTest.Details,
-                    connectionString = "Server=127.0.0.1;Database=sakila;User=admin_dbciresearch",
+                    connectionString = "Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch",
                     timestamp = DateTime.Now
                 });
             }
@@ -3312,7 +3312,7 @@ namespace CIResearch.Controllers
                     message = "❌ Lỗi kiểm tra kết nối database!",
                     error = ex.Message,
                     details = $"Lỗi chi tiết: {ex.Message}",
-                    connectionString = "Server=127.0.0.1;Database=sakila;User=admin_dbciresearch",
+                    connectionString = "Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch",
                     timestamp = DateTime.Now
                 });
             }
@@ -3570,7 +3570,7 @@ namespace CIResearch.Controllers
                 {
                     success = true,
                     message = "✅ ViewBag.TrendData Test Successful",
-                    database = "sakila",
+                    database = "admin_ciresearch",
                     table = "dn_all2",
                     columns = new { year = "Nam", revenue = "SR_Doanhthu_Thuan_BH_CCDV", profit = "SR_Loinhuan_TruocThue" },
                     rawStatsData = new
@@ -3676,7 +3676,7 @@ namespace CIResearch.Controllers
                     },
                     metadata = new
                     {
-                        database = "sakila",
+                        database = "admin_ciresearch",
                         table = "dn_all2",
                         totalRecords = allData.Count,
                         years = stats.Years.Count,
@@ -3713,7 +3713,7 @@ namespace CIResearch.Controllers
                 var columnCheckQuery = @"
                     SELECT COUNT(*) 
                     FROM information_schema.columns 
-                    WHERE table_schema = 'sakila' 
+                    WHERE table_schema = 'admin_ciresearch' 
                     AND table_name = 'dn_all2' 
                     AND column_name = 'TEN_NGANH'";
                 using var cmd1 = new MySqlCommand(columnCheckQuery, conn);
@@ -3725,7 +3725,7 @@ namespace CIResearch.Controllers
                     {
                         success = false,
                         message = "Column TEN_NGANH does not exist in dn_all2 table",
-                        database = "sakila",
+                        database = "admin_ciresearch",
                         table = "dn_all2"
                     });
                 }
@@ -3802,7 +3802,7 @@ namespace CIResearch.Controllers
                 {
                     success = true,
                     message = "Industry data verification completed",
-                    database = "sakila",
+                    database = "admin_ciresearch",
                     table = "dn_all2",
                     column = "TEN_NGANH",
                     dataQuality = qualityStats,
@@ -3818,7 +3818,7 @@ namespace CIResearch.Controllers
                     success = false,
                     message = $"Error verifying industry data: {ex.Message}",
                     error = ex.StackTrace,
-                    database = "sakila",
+                    database = "admin_ciresearch",
                     table = "dn_all2",
                     timestamp = DateTime.Now
                 });
@@ -4428,7 +4428,7 @@ namespace CIResearch.Controllers
                     sampleCompanies = sampleCompanies,
                     databaseInfo = new
                     {
-                        database = "sakila",
+                        database = "admin_ciresearch",
                         table = "dn_all2",
                         revenueColumn = "SR_Doanhthu_Thuan_BH_CCDV",
                         profitColumn = "SR_Loinhuan_TruocThue",
@@ -4518,7 +4518,7 @@ namespace CIResearch.Controllers
                     message = "✅ Filter options loaded from database",
                     dataSource = new
                     {
-                        database = "sakila",
+                        database = "admin_ciresearch",
                         table = "dn_all2",
                         totalRecords = allData.Count
                     },
@@ -6007,7 +6007,7 @@ namespace CIResearch.Controllers
                 return Json(new
                 {
                     success = true,
-                    database = "sakila",
+                    database = "admin_ciresearch",
                     table = "dn_all2",
                     column = "QUY_MO",
                     totalCompanies = allData.Count,
@@ -6694,7 +6694,7 @@ namespace CIResearch.Controllers
                         loadTime = DateTime.Now,
                         dataSource = "Real data from dn_all2 table",
                         limitRemoved = "LIMIT 50000 has been removed - loading ALL data",
-                        connectionString = "Server=localhost;Database=sakila;User=root;Password=***"
+                        connectionString = "Server=localhost;Database=admin_ciresearch;User=root;Password=***"
                     }
                 };
 

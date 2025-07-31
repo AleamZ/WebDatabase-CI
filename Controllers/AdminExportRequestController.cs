@@ -81,26 +81,35 @@ namespace CIResearch.Controllers
             return File(req.FileData, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
         }
 
-        // Hàm gửi mail (dùng lại logic cũ)
+        // Hàm gửi mail với cấu hình mới
         private static void SendEmailWithAttachment_CIResearch(string toEmail, string subject, string body, byte[] attachmentData)
         {
             const string fromEmail = "ciresearch.dn@gmail.com";
             const string fromPassword = "mhip zhvj dhpd zrgo";
+
             using var message = new System.Net.Mail.MailMessage
             {
                 From = new System.Net.Mail.MailAddress(fromEmail),
                 Subject = subject,
-                Body = body
+                Body = body,
+                IsBodyHtml = false
             };
+
             message.To.Add(new System.Net.Mail.MailAddress(toEmail));
-            message.Attachments.Add(new System.Net.Mail.Attachment(new System.IO.MemoryStream(attachmentData),
+
+            // Thêm file đính kèm
+            message.Attachments.Add(new System.Net.Mail.Attachment(
+                new System.IO.MemoryStream(attachmentData),
                 "Data_Ciresearch.xlsx",
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            ));
+
             using var client = new System.Net.Mail.SmtpClient("smtp.gmail.com", 587)
             {
                 Credentials = new System.Net.NetworkCredential(fromEmail, fromPassword),
                 EnableSsl = true
             };
+
             client.Send(message);
         }
     }

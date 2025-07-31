@@ -6,6 +6,23 @@
 
 <h2>Tìm kiếm số điện thoại</h2>
 
+<!-- Thông báo trạng thái đăng nhập -->
+@if (ViewBag.IsLoggedIn == true)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-user-check"></i> Đã đăng nhập với quyền: <strong>@ViewBag.UserRole</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+else
+{
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <i class="fas fa-user-clock"></i> Bạn đang truy cập như <strong>Guest</strong>. 
+        <a href="@Url.Action("Login", "LoginRegister")" class="alert-link">Đăng nhập</a> để sử dụng chức năng xuất dữ liệu.
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
 @if (TempData["SuccessMessage"] != null)
 {
     <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -30,8 +47,7 @@
     </div>
     <div class="btn-group" role="group">
         <button type="submit" class="btn btn-success">Tìm kiếm</button>
-        <a href="@Url.Action("ExportPhoneSearchToExcel", "Admin", new { phoneNumber = ViewBag.PhoneNumber })"
-            class="btn btn-primary">Xuất Excel</a>
+
         <a href="@Url.Action("Index", "Admin")" class="btn btn-secondary">Quay lại</a>
     </div>
 </form>
@@ -42,36 +58,62 @@
     {
         <h4>Kết quả tìm kiếm:</h4>
         <div class="mb-3">
-            <a href="@Url.Action("ExportPhoneSearchToExcel", "Admin", new { phoneNumber = ViewBag.PhoneNumber })"
-                class="btn btn-info">
-                <i class="fas fa-file-excel"></i> Xuất kết quả ra Excel
-            </a>
+            @if (ViewBag.IsLoggedIn == true)
+            {
+                <a href="@Url.Action("RequestPhoneSearchExport", "Admin", new { phoneNumber = ViewBag.PhoneNumber })"
+                    class="btn btn-info">
+                    <i class="fas fa-file-excel"></i> Gửi yêu cầu xuất Excel
+                </a>
+            }
+            else
+            {
+                <button type="button" class="btn btn-secondary" disabled title="Cần đăng nhập để xuất dữ liệu">
+                    <i class="fas fa-file-excel"></i> Gửi yêu cầu xuất Excel
+                </button>
+                <small class="text-muted d-block mt-1">Vui lòng <a href="@Url.Action("Login", "LoginRegister")">đăng nhập</a> để sử dụng chức năng này.</small>
+            }
         </div>
-        <table class="table table-bordered table-striped">
-            <thead>
-                <tr>
-                    <th>STT</th>
-                    <th>Họ tên</th>
-                    <th>Số điện thoại</th>
-                    <th>Thành phố</th>
-                    <th>Dự án</th>
-                    <th>Năm</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in results)
-                {
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped table-sm">
+                <thead>
                     <tr>
-                        <td>@item.Stt</td>
-                        <td>@item.Fullname</td>
-                        <td>@item.PhoneNumber</td>
-                        <td>@item.City</td>
-                        <td>@item.ProjectName</td>
-                        <td>@item.Year</td>
+                        <th>STT</th>
+                        <th>Code</th>
+                        <th>Họ tên</th>
+                        <th>Số điện thoại</th>
+                        <th>Email</th>
+                        <th>Thành phố</th>
+                        <th>Dự án</th>
+                        <th>Năm</th>
+                        <th>Tuổi</th>
+                        <th>Giới tính</th>
+                        <th>Nghề nghiệp</th>
+                        <th>Ngành hàng</th>
+                        <th>Chuyên khoa</th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach (var item in results)
+                    {
+                        <tr>
+                            <td>@item.Stt</td>
+                            <td>@item.Code</td>
+                            <td>@item.Fullname</td>
+                            <td>@item.PhoneNumber</td>
+                            <td>@item.Email</td>
+                            <td>@item.City</td>
+                            <td>@item.ProjectName</td>
+                            <td>@item.Year</td>
+                            <td>@item.Age</td>
+                            <td>@item.Sex</td>
+                            <td>@item.Job</td>
+                            <td>@item.Nganhhang</td>
+                            <td>@item.ChuyenKhoa</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     }
     else
     {

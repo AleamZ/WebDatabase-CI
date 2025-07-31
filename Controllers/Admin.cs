@@ -7,11 +7,11 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using CIResearch.Models;
 using System.Text;
 using System.Drawing;
-using System.Linq; // Added for .Where() and .Any()
+using System.Linq; // Added for .All()
 using System.IO; // Added for MemoryStream
 using ClosedXML.Excel; // Added for Excel export
-using System.Net.Mail; // Added for email functionality
-using System.Net; // Added for NetworkCredential
+using CIResearch.Services; // Added for ExportRequestRepository
+using System.Threading.Tasks; // Added for async/await
 
 namespace CIResearch.Controllers
 {
@@ -27,68 +27,46 @@ namespace CIResearch.Controllers
     List<string> job = null, List<string> householdIncome = null, List<string> personalIncome = null,
     List<string> maritalStatus = null, string mostFrequentlyUsedBrand = "",
     string source = "", List<string> Classname = null, string education = "",
-    List<string> provinces = null, string qc = "", string qa = "", List<string> Khuvuc = null, List<String> Nganhhang = null, List<string> region = null, List<string> chuyenKhoa = null)
+    List<string> provinces = null, string qc = "", string qa = "", List<string> Khuvuc = null, List<String> Nganhhang = null, List<string> region = null)
         {
-            // Chuẩn hóa filter đầu vào
-            code = code?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
-            projectName = projectName?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
-            year = year?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
-            city = city?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
-            sex = sex?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
-            age = age?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
-            job = job?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
-            maritalStatus = maritalStatus?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
-            Classname = Classname?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
-            Nganhhang = Nganhhang?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
-            provinces = provinces?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
-            Khuvuc = Khuvuc?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
-            chuyenKhoa = chuyenKhoa?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
+            // Cho phép truy cập như guest - không cần kiểm tra role
+            var userRole = HttpContext.Session.GetString("Role");
+            var isLoggedIn = !string.IsNullOrEmpty(userRole);
 
-            // Truyền lại filter về ViewBag
-            ViewBag.Code = code;
-            ViewBag.Projectname = projectName;
+            // Lưu trạng thái đăng nhập vào ViewBag để view có thể hiển thị phù hợp
+            ViewBag.IsLoggedIn = isLoggedIn;
+            ViewBag.UserRole = userRole;
+
             ViewBag.Year = year;
+            ViewBag.Projectname = projectName;
             ViewBag.City = city;
             ViewBag.Sex = sex;
             ViewBag.Age = age;
+            ViewBag.Region = region;
             ViewBag.Job = job;
-            ViewBag.MaritalStatus = maritalStatus;
             ViewBag.Classname = Classname;
+            ViewBag.MaritalStatus = maritalStatus;
+            ViewBag.Code = code;
             ViewBag.Nganhhang = Nganhhang;
-            ViewBag.Provinces = provinces;
-            ViewBag.Khuvuc = Khuvuc;
-            ViewBag.ChuyenKhoa = chuyenKhoa;
 
-            // --- TRUYỀN DỮ LIỆU FILTER ĐỘNG ---
-            ViewBag.CodeList = GetDistinctCodes();
-            ViewBag.ProjectNameList = GetDistinctProjectNames();
-            ViewBag.YearList = GetDistinctYears();
-            ViewBag.CityList = GetDistinctCities();
-            ViewBag.JobList = GetDistinctJobs();
-            ViewBag.EducationList = GetDistinctEducations();
-            ViewBag.SexList = GetDistinctSexes();
-            ViewBag.MaritalStatusList = GetDistinctMaritalStatuses();
-            ViewBag.HouseholdIncomeList = GetDistinctHouseholdIncomes();
-            ViewBag.PersonalIncomeList = GetDistinctPersonalIncomes();
-            ViewBag.DistrictList = GetDistinctDistricts();
-            ViewBag.WardList = GetDistinctWards();
-            ViewBag.ProvincesList = GetDistinctProvinces();
-            ViewBag.ClassList = GetDistinctClasses();
-            ViewBag.NganhhangList = GetDistinctNganhhangs();
-            ViewBag.QcList = GetDistinctQcs();
-            ViewBag.QaList = GetDistinctQas();
-            ViewBag.KhuvucList = GetDistinctKhuvucs();
-            ViewBag.ChuyenKhoaList = GetDistinctChuyenKhoas();
 
-            var userRole = HttpContext.Session.GetString("Role");
-            if (userRole != "Admin")
+            if (sbjnum != null && sbjnum.All(string.IsNullOrWhiteSpace))
             {
-                // Nếu không phải admin, chuyển hướng người dùng đến trang khác (ví dụ: trang lỗi hoặc login)
-                return RedirectToAction("Index", "Home"); // Thay "Home" bằng controller phù hợp nếu cần
+                sbjnum = null;
             }
 
-            // Lọc dữ liệu
-            var adminChart = getadminChart(stt, code, projectName, year, contactObject, sbjnum, fullname, city, address, street, ward, district, phoneNumber, email, dateOfBirth, age, sex, job, householdIncome, personalIncome, maritalStatus, mostFrequentlyUsedBrand, source, Classname, education, provinces, qc, qa, Khuvuc, Nganhhang, chuyenKhoa);
+            ViewBag.Sbjnum = sbjnum != null ? string.Join(",", sbjnum) : "";
+
+            if (phoneNumber != null && phoneNumber.All(string.IsNullOrWhiteSpace))
+            {
+                phoneNumber = null;
+            }
+
+            ViewBag.Phonenumber = phoneNumber != null ? string.Join(",", phoneNumber) : "";
+
+            List<ALLDATA> adminChart = new List<ALLDATA>();
+
+            adminChart = getadminChart(stt, code, projectName, year, contactObject, sbjnum, fullname, city, address, street, ward, district, phoneNumber, email, dateOfBirth, age, sex, job, householdIncome, personalIncome, maritalStatus, mostFrequentlyUsedBrand, source, Classname, education, provinces, qc, qa, Khuvuc, Nganhhang);
 
             //lọc theo 3 miền
 
@@ -349,14 +327,13 @@ namespace CIResearch.Controllers
 
 
 
-            // Log ra file tạm để kiểm tra dữ liệu đã lọc
-            var logPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "admin_filter_debug.log");
-            var logContent = $"[{DateTime.Now}] Tổng số mẫu sau lọc: {adminChart.Count}\n";
-            logContent += string.Join("\n", adminChart.Take(10).Select(x => $"STT: {x.Stt}, Code: {x.Code}, ProjectName: {x.ProjectName}, Year: {x.Year}, City: {x.City}, Sex: {x.Sex}"));
-            System.IO.File.AppendAllText(logPath, logContent + "\n-------------------\n");
-
             return View(adminChart);
         }
+
+
+
+
+
 
         private List<ALLDATA> getadminChart(
           string stt, List<string> code, List<string> projectName, List<string> year,
@@ -367,16 +344,21 @@ namespace CIResearch.Controllers
   List<string> job, List<string> householdIncome, List<string> personalIncome,
   List<string> maritalStatus, string mostFrequentlyUsedBrand,
   string source, List<string> className, string education,
-  List<string> provinces, string qc, string qa, List<string> Khuvuc, List<string> Nganhhang, List<string> chuyenKhoa)
+  List<string> provinces, string qc, string qa, List<string> Khuvuc, List<string> Nganhhang)
         {
             List<ALLDATA> project = new List<ALLDATA>();
+
+
 
             using (MySqlConnection connection = new MySqlConnection(_connectionString))
             {
                 connection.Open();
                 var queryBuilder = new StringBuilder("SELECT * FROM all_data_final WHERE 1=1");
 
-                // Thêm điều kiện lọc cho từng tham số
+
+                // Thêm di?u ki?n l?c cho t?ng tham s?
+
+
                 if (projectName != null && projectName.Any())
                 {
                     var projectNameParams = projectName.Select((_, i) => $"@projectName{i}").ToArray();
@@ -445,14 +427,19 @@ namespace CIResearch.Controllers
                     var NganhhangParams = Nganhhang.Select((_, i) => $"@Nganhhang{i}").ToArray();
                     queryBuilder.Append(" AND Nganhhang IN (" + string.Join(", ", NganhhangParams) + ")");
                 }
-                if (chuyenKhoa != null && chuyenKhoa.Any())
-                {
-                    var chuyenKhoaParams = chuyenKhoa.Select((_, i) => $"@chuyenKhoa{i}").ToArray();
-                    queryBuilder.Append(" AND ChuyenKhoa IN (" + string.Join(", ", chuyenKhoaParams) + ")");
-                }
+
+
+                // Lấy tổng số dòng
+                var countQuery = new StringBuilder("SELECT COUNT(*) FROM all_data_final WHERE 1=1");
+                countQuery.Append(queryBuilder.ToString().Substring("SELECT * FROM all_data_final WHERE 1=1".Length));
+
+
+
+
 
                 using (MySqlCommand command = new MySqlCommand(queryBuilder.ToString(), connection))
                 {
+
                     // Thêm tham số vào MySqlCommand
                     if (projectName != null && projectName.Any())
                         for (int i = 0; i < projectName.Count; i++)
@@ -498,9 +485,11 @@ namespace CIResearch.Controllers
                     if (Nganhhang != null && Nganhhang.Any())
                         for (int i = 0; i < Nganhhang.Count; i++)
                             command.Parameters.AddWithValue($"@Nganhhang{i}", Nganhhang[i]);
-                    if (chuyenKhoa != null && chuyenKhoa.Any())
-                        for (int i = 0; i < chuyenKhoa.Count; i++)
-                            command.Parameters.AddWithValue($"@chuyenKhoa{i}", chuyenKhoa[i]);
+
+
+
+
+
 
                     using (MySqlDataReader reader = command.ExecuteReader())
                     {
@@ -508,36 +497,35 @@ namespace CIResearch.Controllers
                         {
                             ALLDATA Alldatas = new ALLDATA
                             {
-                                Stt = reader.IsDBNull(reader.GetOrdinal("STT")) ? 0 : reader.GetInt32("STT"),
-                                Code = reader.IsDBNull(reader.GetOrdinal("CODE")) ? null : reader.GetString("CODE"),
-                                ProjectName = reader.IsDBNull(reader.GetOrdinal("PROJECTNAME")) ? null : reader.GetString("PROJECTNAME"),
-                                Year = reader.IsDBNull(reader.GetOrdinal("YEAR")) ? 0 : reader.GetInt32("YEAR"),
-                                ContactObject = reader.IsDBNull(reader.GetOrdinal("CONTACTOBJECT")) ? null : reader.GetString("CONTACTOBJECT"),
-                                Sbjnum = reader.IsDBNull(reader.GetOrdinal("SBJNUM")) ? 0 : reader.GetInt32("SBJNUM"),
-                                Fullname = reader.IsDBNull(reader.GetOrdinal("FULLNAME")) ? null : reader.GetString("FULLNAME"),
-                                City = reader.IsDBNull(reader.GetOrdinal("CITY")) ? null : reader.GetString("CITY"),
-                                Address = reader.IsDBNull(reader.GetOrdinal("ADDRESS")) ? null : reader.GetString("ADDRESS"),
-                                Street = reader.IsDBNull(reader.GetOrdinal("STREET")) ? null : reader.GetString("STREET"),
-                                Ward = reader.IsDBNull(reader.GetOrdinal("WARD")) ? null : reader.GetString("WARD"),
-                                District = reader.IsDBNull(reader.GetOrdinal("DISTRICT")) ? null : reader.GetString("DISTRICT"),
-                                PhoneNumber = reader.IsDBNull(reader.GetOrdinal("PHONENUMBER")) ? null : reader.GetString("PHONENUMBER"),
-                                Email = reader.IsDBNull(reader.GetOrdinal("EMAIL")) ? null : reader.GetString("EMAIL"),
+                                Stt = reader.GetInt32("STT"),
+                                Code = reader.GetString("CODE"),
+                                ProjectName = reader.GetString("PROJECTNAME"),
+                                Year = reader.GetInt32("YEAR"),
+                                ContactObject = reader.GetString("CONTACTOBJECT"),
+                                Sbjnum = reader.GetInt32("SBJNUM"),
+                                Fullname = reader.GetString("FULLNAME"),
+                                City = reader.GetString("CITY"),
+                                Address = reader.GetString("ADDRESS"),
+                                Street = reader.GetString("STREET"),
+                                Ward = reader.GetString("WARD"),
+                                District = reader.GetString("DISTRICT"),
+                                PhoneNumber = reader.GetString("PHONENUMBER"),
+                                Email = reader.GetString("EMAIL"),
                                 DateOfBirth = reader.IsDBNull(reader.GetOrdinal("DATEOFBIRTH")) ? (int?)null : reader.GetInt32("DATEOFBIRTH"),
-                                Age = reader.IsDBNull(reader.GetOrdinal("AGE")) ? 0 : reader.GetInt32("AGE"),
-                                Sex = reader.IsDBNull(reader.GetOrdinal("SEX")) ? null : reader.GetString("SEX"),
-                                Job = reader.IsDBNull(reader.GetOrdinal("JOB")) ? null : reader.GetString("JOB"),
-                                HouseholdIncome = reader.IsDBNull(reader.GetOrdinal("HOUSEHOLDINCOME")) ? null : reader.GetString("HOUSEHOLDINCOME"),
-                                PersonalIncome = reader.IsDBNull(reader.GetOrdinal("PERSONALINCOME")) ? null : reader.GetString("PERSONALINCOME"),
-                                MaritalStatus = reader.IsDBNull(reader.GetOrdinal("MARITALSTATUS")) ? null : reader.GetString("MARITALSTATUS"),
-                                MostFrequentlyUsedBrand = reader.IsDBNull(reader.GetOrdinal("MOSTFREQUENTLYUSEDBRAND")) ? null : reader.GetString("MOSTFREQUENTLYUSEDBRAND"),
-                                Source = reader.IsDBNull(reader.GetOrdinal("SOURCE")) ? null : reader.GetString("SOURCE"),
-                                Class = reader.IsDBNull(reader.GetOrdinal("Class")) ? null : reader.GetString("Class"),
-                                Education = reader.IsDBNull(reader.GetOrdinal("EDUCATION")) ? null : reader.GetString("EDUCATION"),
-                                Provinces = reader.IsDBNull(reader.GetOrdinal("PROVINCES")) ? null : reader.GetString("PROVINCES"),
-                                Qc = reader.IsDBNull(reader.GetOrdinal("QC")) ? null : reader.GetString("QC"),
-                                Qa = reader.IsDBNull(reader.GetOrdinal("QA")) ? null : reader.GetString("QA"),
-                                Nganhhang = reader.IsDBNull(reader.GetOrdinal("Nganhhang")) ? null : reader.GetString("Nganhhang"),
-                                ChuyenKhoa = reader.IsDBNull(reader.GetOrdinal("ChuyenKhoa")) ? null : reader.GetString("ChuyenKhoa")
+                                Age = reader.GetInt32("AGE"),
+                                Sex = reader.GetString("SEX"),
+                                Job = reader.GetString("JOB"),
+                                HouseholdIncome = reader.GetString("HOUSEHOLDINCOME"),
+                                PersonalIncome = reader.GetString("PERSONALINCOME"),
+                                MaritalStatus = reader.GetString("MARITALSTATUS"),
+                                MostFrequentlyUsedBrand = reader.GetString("MOSTFREQUENTLYUSEDBRAND"),
+                                Source = reader.GetString("SOURCE"),
+                                Class = reader.GetString("Class"),
+                                Education = reader.GetString("EDUCATION"),
+                                Provinces = reader.GetString("PROVINCES"),
+                                Qc = reader.GetString("QC"),
+                                Qa = reader.GetString("QA"),
+                                Nganhhang = reader.GetString("Nganhhang")
                             };
                             project.Add(Alldatas);
                         }
@@ -545,281 +533,31 @@ namespace CIResearch.Controllers
                 }
             }
 
+
             return project;
         }
-
-        // Action hiển thị trang tìm kiếm số điện thoại và xử lý tìm kiếm
-        [HttpGet]
-        public IActionResult SearchPhoneNumber(string phoneNumber = null)
+        private void StoreUserActionsInViewBag()
         {
-            List<ALLDATA> results = null;
-            if (!string.IsNullOrWhiteSpace(phoneNumber))
+            using (var connection = new MySqlConnection(_connectionString))
             {
-                // Tìm kiếm theo số điện thoại (LIKE hoặc =)
-                using (MySqlConnection connection = new MySqlConnection(_connectionString))
+                connection.Open();
+                var query = "SELECT Id, Username, Action, Timestamp FROM useraction_loc_xuat ORDER BY Timestamp DESC";
+
+                using (var command = new MySqlCommand(query, connection))
                 {
-                    connection.Open();
-                    var query = "SELECT * FROM all_data_final WHERE PHONENUMBER LIKE @phoneNumber";
-                    using (MySqlCommand command = new MySqlCommand(query, connection))
+                    using (var reader = command.ExecuteReader())
                     {
-                        command.Parameters.AddWithValue("@phoneNumber", "%" + phoneNumber + "%");
-                        using (MySqlDataReader reader = command.ExecuteReader())
+                        var userActions = new List<string>(); // Danh sách lưu thông tin
+                        while (reader.Read())
                         {
-                            results = new List<ALLDATA>();
-                            while (reader.Read())
-                            {
-                                ALLDATA data = new ALLDATA
-                                {
-                                    Stt = reader.IsDBNull(reader.GetOrdinal("STT")) ? 0 : reader.GetInt32("STT"),
-                                    Code = reader.IsDBNull(reader.GetOrdinal("CODE")) ? null : reader.GetString("CODE"),
-                                    ProjectName = reader.IsDBNull(reader.GetOrdinal("PROJECTNAME")) ? null : reader.GetString("PROJECTNAME"),
-                                    Year = reader.IsDBNull(reader.GetOrdinal("YEAR")) ? 0 : reader.GetInt32("YEAR"),
-                                    Fullname = reader.IsDBNull(reader.GetOrdinal("FULLNAME")) ? null : reader.GetString("FULLNAME"),
-                                    City = reader.IsDBNull(reader.GetOrdinal("CITY")) ? null : reader.GetString("CITY"),
-                                    PhoneNumber = reader.IsDBNull(reader.GetOrdinal("PHONENUMBER")) ? null : reader.GetString("PHONENUMBER")
-                                    // Có thể bổ sung các trường khác nếu muốn hiển thị
-                                };
-                                results.Add(data);
-                            }
-                        }
-                    }
-                }
-            }
-            ViewBag.PhoneNumber = phoneNumber;
-            return View(results);
-        }
-
-        // Action xuất Excel cho kết quả tìm kiếm số điện thoại
-        [HttpGet]
-        public async Task<IActionResult> ExportPhoneSearchToExcel(string phoneNumber = null)
-        {
-            try
-            {
-                List<ALLDATA> results = new List<ALLDATA>();
-
-                if (!string.IsNullOrWhiteSpace(phoneNumber))
-                {
-                    // Tìm kiếm theo số điện thoại
-                    using (MySqlConnection connection = new MySqlConnection(_connectionString))
-                    {
-                        connection.Open();
-                        var query = "SELECT * FROM all_data_final WHERE PHONENUMBER LIKE @phoneNumber";
-                        using (MySqlCommand command = new MySqlCommand(query, connection))
-                        {
-                            command.Parameters.AddWithValue("@phoneNumber", "%" + phoneNumber + "%");
-                            using (MySqlDataReader reader = command.ExecuteReader())
-                            {
-                                while (reader.Read())
-                                {
-                                    ALLDATA data = new ALLDATA
-                                    {
-                                        Stt = reader.IsDBNull(reader.GetOrdinal("STT")) ? 0 : reader.GetInt32("STT"),
-                                        Code = reader.IsDBNull(reader.GetOrdinal("CODE")) ? null : reader.GetString("CODE"),
-                                        ProjectName = reader.IsDBNull(reader.GetOrdinal("PROJECTNAME")) ? null : reader.GetString("PROJECTNAME"),
-                                        Year = reader.IsDBNull(reader.GetOrdinal("YEAR")) ? 0 : reader.GetInt32("YEAR"),
-                                        Fullname = reader.IsDBNull(reader.GetOrdinal("FULLNAME")) ? null : reader.GetString("FULLNAME"),
-                                        City = reader.IsDBNull(reader.GetOrdinal("CITY")) ? null : reader.GetString("CITY"),
-                                        PhoneNumber = reader.IsDBNull(reader.GetOrdinal("PHONENUMBER")) ? null : reader.GetString("PHONENUMBER"),
-                                        Email = reader.IsDBNull(reader.GetOrdinal("EMAIL")) ? null : reader.GetString("EMAIL"),
-                                        Address = reader.IsDBNull(reader.GetOrdinal("ADDRESS")) ? null : reader.GetString("ADDRESS"),
-                                        District = reader.IsDBNull(reader.GetOrdinal("DISTRICT")) ? null : reader.GetString("DISTRICT"),
-                                        Ward = reader.IsDBNull(reader.GetOrdinal("WARD")) ? null : reader.GetString("WARD"),
-                                        Age = reader.IsDBNull(reader.GetOrdinal("AGE")) ? 0 : reader.GetInt32("AGE"),
-                                        Sex = reader.IsDBNull(reader.GetOrdinal("SEX")) ? null : reader.GetString("SEX"),
-                                        Job = reader.IsDBNull(reader.GetOrdinal("JOB")) ? null : reader.GetString("JOB"),
-                                        MaritalStatus = reader.IsDBNull(reader.GetOrdinal("MARITALSTATUS")) ? null : reader.GetString("MARITALSTATUS")
-                                    };
-                                    results.Add(data);
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // Tạo Excel file
-                using (var workbook = new ClosedXML.Excel.XLWorkbook())
-                {
-                    var worksheet = workbook.Worksheets.Add("Kết quả tìm kiếm");
-
-                    // Thêm header
-                    worksheet.Cell("A1").Value = "STT";
-                    worksheet.Cell("B1").Value = "Họ tên";
-                    worksheet.Cell("C1").Value = "Số điện thoại";
-                    worksheet.Cell("D1").Value = "Email";
-                    worksheet.Cell("E1").Value = "Thành phố";
-                    worksheet.Cell("F1").Value = "Quận/Huyện";
-                    worksheet.Cell("G1").Value = "Phường/Xã";
-                    worksheet.Cell("H1").Value = "Địa chỉ";
-                    worksheet.Cell("I1").Value = "Tuổi";
-                    worksheet.Cell("J1").Value = "Giới tính";
-                    worksheet.Cell("K1").Value = "Nghề nghiệp";
-                    worksheet.Cell("L1").Value = "Tình trạng hôn nhân";
-                    worksheet.Cell("M1").Value = "Dự án";
-                    worksheet.Cell("N1").Value = "Năm";
-                    worksheet.Cell("O1").Value = "Code";
-
-                    // Style header
-                    var headerRange = worksheet.Range("A1:O1");
-                    headerRange.Style.Font.Bold = true;
-                    headerRange.Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.LightGray;
-
-                    // Thêm dữ liệu
-                    for (int i = 0; i < results.Count; i++)
-                    {
-                        var row = i + 2;
-                        worksheet.Cell($"A{row}").Value = results[i].Stt;
-                        worksheet.Cell($"B{row}").Value = results[i].Fullname;
-                        worksheet.Cell($"C{row}").Value = results[i].PhoneNumber;
-                        worksheet.Cell($"D{row}").Value = results[i].Email;
-                        worksheet.Cell($"E{row}").Value = results[i].City;
-                        worksheet.Cell($"F{row}").Value = results[i].District;
-                        worksheet.Cell($"G{row}").Value = results[i].Ward;
-                        worksheet.Cell($"H{row}").Value = results[i].Address;
-                        worksheet.Cell($"I{row}").Value = results[i].Age;
-                        worksheet.Cell($"J{row}").Value = results[i].Sex;
-                        worksheet.Cell($"K{row}").Value = results[i].Job;
-                        worksheet.Cell($"L{row}").Value = results[i].MaritalStatus;
-                        worksheet.Cell($"M{row}").Value = results[i].ProjectName;
-                        worksheet.Cell($"N{row}").Value = results[i].Year;
-                        worksheet.Cell($"O{row}").Value = results[i].Code;
-                    }
-
-                    // Auto-fit columns
-                    worksheet.Columns().AdjustToContents();
-
-                    // Lấy email của user đang đăng nhập
-                    string userEmail = GetCurrentUserEmail();
-
-                    if (!string.IsNullOrEmpty(userEmail))
-                    {
-                        // Gửi email với file Excel đính kèm
-                        using (var stream = new MemoryStream())
-                        {
-                            workbook.SaveAs(stream);
-                            stream.Position = 0;
-                            byte[] fileBytes = stream.ToArray();
-
-                            string subject = $"Kết quả tìm kiếm số điện thoại: {phoneNumber}";
-                            string body = $@"
-                                <h3>Kết quả tìm kiếm số điện thoại</h3>
-                                <p><strong>Nguồn:</strong> PhoneSearch (Tìm kiếm số điện thoại)</p>
-                                <p><strong>Số điện thoại tìm kiếm:</strong> {phoneNumber}</p>
-                                <p><strong>Số lượng kết quả:</strong> {results.Count} bản ghi</p>
-                                <p><strong>Thời gian xuất:</strong> {DateTime.Now:dd/MM/yyyy HH:mm:ss}</p>
-                                <br>
-                                <p>File Excel đính kèm chứa thông tin chi tiết về các kết quả tìm kiếm.</p>
-                                <br>
-                                <p>Trân trọng,<br>Hệ thống CIResearch</p>";
-
-                            SendEmailWithAttachment(userEmail, subject, body, fileBytes);
-
-                            // Lưu vào bảng ExportRequests để tracking
-                            try
-                            {
-                                var username = HttpContext.Session.GetString("Username");
-                                var filterParams = new { phoneNumber = phoneNumber, source = "PhoneSearch" };
-                                var filterParamsJson = Newtonsoft.Json.JsonConvert.SerializeObject(filterParams);
-
-                                var repo = new CIResearch.Services.ExportRequestRepository(_connectionString);
-                                var exportRequest = new CIResearch.Models.ExportRequest
-                                {
-                                    Username = username,
-                                    Email = userEmail,
-                                    RequestTime = DateTime.Now,
-                                    Status = "approved", // Admin có thể xuất trực tiếp
-                                    FilterParams = filterParamsJson,
-                                    FileData = fileBytes,
-                                    RejectReason = null,
-                                    ApprovedTime = DateTime.Now,
-                                    AdminApprovedBy = username,
-                                    Source = "PhoneSearch"
-                                };
-                                await repo.AddRequestAsync(exportRequest);
-                            }
-                            catch (Exception ex)
-                            {
-                                // Log lỗi nhưng không ảnh hưởng đến việc gửi email
-                                Console.WriteLine($"Lỗi lưu tracking: {ex.Message}");
-                            }
+                            var actionInfo = $"{reader.GetString("Username")} - {reader.GetString("Action")} at {reader.GetDateTime("Timestamp"):HH:mm:ss}";
+                            userActions.Add(actionInfo);
                         }
 
-                        TempData["SuccessMessage"] = $"Đã gửi kết quả tìm kiếm ({results.Count} bản ghi) đến email: {userEmail}";
-                    }
-                    else
-                    {
-                        TempData["ErrorMessage"] = "Không tìm thấy email của user đang đăng nhập";
+                        // Lưu thông tin vào ViewBag
+                        ViewBag.UserActions = userActions;
                     }
                 }
-
-                return RedirectToAction("SearchPhoneNumber", new { phoneNumber = phoneNumber });
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = $"Lỗi khi xuất Excel: {ex.Message}";
-                return RedirectToAction("SearchPhoneNumber", new { phoneNumber = phoneNumber });
-            }
-        }
-
-        // Lấy email của user đang đăng nhập
-        private string GetCurrentUserEmail()
-        {
-            try
-            {
-                string username = HttpContext.Session.GetString("Username");
-                if (string.IsNullOrEmpty(username))
-                    return null;
-
-                using (MySqlConnection connection = new MySqlConnection(_connectionString))
-                {
-                    connection.Open();
-                    var query = "SELECT Email FROM users WHERE Username = @username";
-                    using (MySqlCommand command = new MySqlCommand(query, connection))
-                    {
-                        command.Parameters.AddWithValue("@username", username);
-                        var result = command.ExecuteScalar();
-                        return result?.ToString();
-                    }
-                }
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        // Hàm gửi email với file đính kèm
-        private void SendEmailWithAttachment(string toEmail, string subject, string body, byte[] attachmentData)
-        {
-            try
-            {
-                const string fromEmail = "ciresearch.dn@gmail.com";
-                const string fromPassword = "mhip zhvj dhpd zrgo"; // App password
-
-                using var message = new System.Net.Mail.MailMessage
-                {
-                    From = new System.Net.Mail.MailAddress(fromEmail),
-                    Subject = subject,
-                    Body = body,
-                    IsBodyHtml = true
-                };
-
-                message.To.Add(new System.Net.Mail.MailAddress(toEmail));
-                message.Attachments.Add(new System.Net.Mail.Attachment(new MemoryStream(attachmentData),
-                    $"TimKiemSoDienThoai_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx",
-                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
-
-                using var client = new System.Net.Mail.SmtpClient("smtp.gmail.com", 587)
-                {
-                    Credentials = new System.Net.NetworkCredential(fromEmail, fromPassword),
-                    EnableSsl = true
-                };
-
-                client.Send(message);
-            }
-            catch (Exception ex)
-            {
-                // Log lỗi nếu cần
-                throw new Exception($"Lỗi gửi email: {ex.Message}");
             }
         }
 
@@ -842,105 +580,415 @@ namespace CIResearch.Controllers
 
         }
 
-        // --- DISTINCT FILTER VALUE HELPERS ---
-        private List<string> GetDistinctCodes()
+        // Action để hiển thị trang tìm kiếm số điện thoại
+        public ActionResult SearchPhoneNumber(string phoneNumber = "")
         {
-            return GetDistinctValuesFromDb("CODE");
+            // Cho phép truy cập như guest - không cần kiểm tra role
+            var userRole = HttpContext.Session.GetString("Role");
+            var isLoggedIn = !string.IsNullOrEmpty(userRole);
+
+            // Lưu trạng thái đăng nhập vào ViewBag để view có thể hiển thị phù hợp
+            ViewBag.IsLoggedIn = isLoggedIn;
+            ViewBag.UserRole = userRole;
+
+            ViewBag.PhoneNumber = phoneNumber;
+            List<ALLDATA> results = new List<ALLDATA>();
+
+            if (!string.IsNullOrEmpty(phoneNumber))
+            {
+                results = SearchPhoneNumberInDatabase(phoneNumber);
+            }
+
+            return View(results);
         }
-        private List<string> GetDistinctProjectNames()
+
+        // Action để gửi request xuất Excel cho admin duyệt
+        public async Task<ActionResult> RequestPhoneSearchExport(string phoneNumber)
         {
-            return GetDistinctValuesFromDb("PROJECTNAME");
+            // Yêu cầu đăng nhập để xuất dữ liệu
+            var userRole = HttpContext.Session.GetString("Role");
+            if (string.IsNullOrEmpty(userRole))
+            {
+                TempData["ErrorMessage"] = "Vui lòng đăng nhập để thực hiện chức năng xuất dữ liệu.";
+                return RedirectToAction("Login", "LoginRegister");
+            }
+
+            if (string.IsNullOrEmpty(phoneNumber))
+            {
+                TempData["ErrorMessage"] = "Vui lòng nhập số điện thoại để tìm kiếm.";
+                return RedirectToAction("SearchPhoneNumber");
+            }
+
+            try
+            {
+                var results = SearchPhoneNumberInDatabase(phoneNumber);
+
+                if (results.Count == 0)
+                {
+                    TempData["ErrorMessage"] = "Không tìm thấy kết quả phù hợp.";
+                    return RedirectToAction("SearchPhoneNumber", new { phoneNumber = phoneNumber });
+                }
+
+                // Tạo file Excel
+                var workbook = new XLWorkbook();
+                var worksheet = workbook.Worksheets.Add("Kết quả tìm kiếm");
+
+                // Thêm header
+                worksheet.Cell("A1").Value = "STT";
+                worksheet.Cell("B1").Value = "Code";
+                worksheet.Cell("C1").Value = "Tên dự án";
+                worksheet.Cell("D1").Value = "Năm";
+                worksheet.Cell("E1").Value = "Đối tượng liên hệ";
+                worksheet.Cell("F1").Value = "Số thứ tự";
+                worksheet.Cell("G1").Value = "Họ tên";
+                worksheet.Cell("H1").Value = "Thành phố";
+                worksheet.Cell("I1").Value = "Địa chỉ";
+                worksheet.Cell("J1").Value = "Đường";
+                worksheet.Cell("K1").Value = "Phường";
+                worksheet.Cell("L1").Value = "Quận/Huyện";
+                worksheet.Cell("M1").Value = "Số điện thoại";
+                worksheet.Cell("N1").Value = "Email";
+                worksheet.Cell("O1").Value = "Năm sinh";
+                worksheet.Cell("P1").Value = "Tuổi";
+                worksheet.Cell("Q1").Value = "Giới tính";
+                worksheet.Cell("R1").Value = "Nghề nghiệp";
+                worksheet.Cell("S1").Value = "Thu nhập hộ gia đình";
+                worksheet.Cell("T1").Value = "Thu nhập cá nhân";
+                worksheet.Cell("U1").Value = "Tình trạng hôn nhân";
+                worksheet.Cell("V1").Value = "Thương hiệu sử dụng nhiều nhất";
+                worksheet.Cell("W1").Value = "Nguồn";
+                worksheet.Cell("X1").Value = "Lớp";
+                worksheet.Cell("Y1").Value = "Học vấn";
+                worksheet.Cell("Z1").Value = "Tỉnh";
+                worksheet.Cell("AA1").Value = "QC";
+                worksheet.Cell("AB1").Value = "QA";
+                worksheet.Cell("AC1").Value = "Khu vực";
+                worksheet.Cell("AD1").Value = "Ngành hàng";
+                worksheet.Cell("AE1").Value = "Chuyên khoa";
+
+                // Thêm dữ liệu
+                for (int i = 0; i < results.Count; i++)
+                {
+                    var row = i + 2;
+                    worksheet.Cell($"A{row}").Value = results[i].Stt;
+                    worksheet.Cell($"B{row}").Value = results[i].Code;
+                    worksheet.Cell($"C{row}").Value = results[i].ProjectName;
+                    worksheet.Cell($"D{row}").Value = results[i].Year;
+                    worksheet.Cell($"E{row}").Value = results[i].ContactObject;
+                    worksheet.Cell($"F{row}").Value = results[i].Sbjnum;
+                    worksheet.Cell($"G{row}").Value = results[i].Fullname;
+                    worksheet.Cell($"H{row}").Value = results[i].City;
+                    worksheet.Cell($"I{row}").Value = results[i].Address;
+                    worksheet.Cell($"J{row}").Value = results[i].Street;
+                    worksheet.Cell($"K{row}").Value = results[i].Ward;
+                    worksheet.Cell($"L{row}").Value = results[i].District;
+                    worksheet.Cell($"M{row}").Value = results[i].PhoneNumber;
+                    worksheet.Cell($"N{row}").Value = results[i].Email;
+                    worksheet.Cell($"O{row}").Value = results[i].DateOfBirth;
+                    worksheet.Cell($"P{row}").Value = results[i].Age;
+                    worksheet.Cell($"Q{row}").Value = results[i].Sex;
+                    worksheet.Cell($"R{row}").Value = results[i].Job;
+                    worksheet.Cell($"S{row}").Value = results[i].HouseholdIncome;
+                    worksheet.Cell($"T{row}").Value = results[i].PersonalIncome;
+                    worksheet.Cell($"U{row}").Value = results[i].MaritalStatus;
+                    worksheet.Cell($"V{row}").Value = results[i].MostFrequentlyUsedBrand;
+                    worksheet.Cell($"W{row}").Value = results[i].Source;
+                    worksheet.Cell($"X{row}").Value = results[i].Class;
+                    worksheet.Cell($"Y{row}").Value = results[i].Education;
+                    worksheet.Cell($"Z{row}").Value = results[i].Provinces;
+                    worksheet.Cell($"AA{row}").Value = results[i].Qc;
+                    worksheet.Cell($"AB{row}").Value = results[i].Qa;
+                    worksheet.Cell($"AC{row}").Value = results[i].Khuvuc;
+                    worksheet.Cell($"AD{row}").Value = results[i].Nganhhang;
+                    worksheet.Cell($"AE{row}").Value = results[i].ChuyenKhoa;
+                }
+
+                // Định dạng header
+                var headerRange = worksheet.Range("A1:AE1");
+                headerRange.Style.Font.Bold = true;
+                headerRange.Style.Fill.BackgroundColor = XLColor.LightGray;
+
+                // Tự động điều chỉnh cột
+                worksheet.Columns().AdjustToContents();
+
+                // Lưu file vào memory stream
+                byte[] fileData;
+                using (var stream = new MemoryStream())
+                {
+                    workbook.SaveAs(stream);
+                    fileData = stream.ToArray();
+                }
+
+                // Lấy thông tin user đang đăng nhập
+                var username = HttpContext.Session.GetString("Username");
+                var userEmail = GetUserEmail(username); // Lấy email từ database
+
+                // Tạo export request
+                var exportRequest = new ExportRequest
+                {
+                    Username = username,
+                    Email = userEmail,
+                    RequestTime = DateTime.Now,
+                    Status = "pending",
+                    FilterParams = $"PhoneNumber: {phoneNumber}, Results: {results.Count} records",
+                    FileData = fileData,
+                    Source = "PhoneSearch"
+                };
+
+                // Lưu request vào database
+                var repo = new ExportRequestRepository(_connectionString);
+                var requestId = await repo.AddRequestAsync(exportRequest);
+
+                TempData["SuccessMessage"] = $"Đã gửi yêu cầu xuất Excel thành công! Request ID: {requestId}. Admin sẽ duyệt và gửi file qua email: {userEmail}";
+                return RedirectToAction("SearchPhoneNumber", new { phoneNumber = phoneNumber });
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Lỗi khi gửi yêu cầu xuất Excel: {ex.Message}";
+                return RedirectToAction("SearchPhoneNumber", new { phoneNumber = phoneNumber });
+            }
         }
-        private List<string> GetDistinctYears()
+
+        // Phương thức tìm kiếm số điện thoại trong database
+        private List<ALLDATA> SearchPhoneNumberInDatabase(string phoneNumber)
         {
-            return GetDistinctValuesFromDb("YEAR");
-        }
-        private List<string> GetDistinctCities()
-        {
-            return GetDistinctValuesFromDb("CITY");
-        }
-        private List<string> GetDistinctJobs()
-        {
-            return GetDistinctValuesFromDb("JOB");
-        }
-        private List<string> GetDistinctEducations()
-        {
-            return GetDistinctValuesFromDb("EDUCATION");
-        }
-        private List<string> GetDistinctSexes()
-        {
-            return GetDistinctValuesFromDb("SEX");
-        }
-        private List<string> GetDistinctMaritalStatuses()
-        {
-            return GetDistinctValuesFromDb("MARITALSTATUS");
-        }
-        private List<string> GetDistinctHouseholdIncomes()
-        {
-            return GetDistinctValuesFromDb("HOUSEHOLDINCOME");
-        }
-        private List<string> GetDistinctPersonalIncomes()
-        {
-            return GetDistinctValuesFromDb("PERSONALINCOME");
-        }
-        private List<string> GetDistinctDistricts()
-        {
-            return GetDistinctValuesFromDb("DISTRICT");
-        }
-        private List<string> GetDistinctWards()
-        {
-            return GetDistinctValuesFromDb("WARD");
-        }
-        private List<string> GetDistinctProvinces()
-        {
-            return GetDistinctValuesFromDb("PROVINCES");
-        }
-        private List<string> GetDistinctClasses()
-        {
-            return GetDistinctValuesFromDb("Class");
-        }
-        private List<string> GetDistinctNganhhangs()
-        {
-            return GetDistinctValuesFromDb("Nganhhang");
-        }
-        private List<string> GetDistinctQcs()
-        {
-            return GetDistinctValuesFromDb("QC");
-        }
-        private List<string> GetDistinctQas()
-        {
-            return GetDistinctValuesFromDb("QA");
-        }
-        private List<string> GetDistinctKhuvucs()
-        {
-            return GetDistinctValuesFromDb("KHUVUC");
-        }
-        private List<string> GetDistinctChuyenKhoas()
-        {
-            return GetDistinctValuesFromDb("ChuyenKhoa");
-        }
-        // Helper for all distinct value queries
-        private List<string> GetDistinctValuesFromDb(string column)
-        {
-            var values = new List<string>();
-            using (var connection = new MySqlConnection(_connectionString))
+            List<ALLDATA> results = new List<ALLDATA>();
+
+            using (MySqlConnection connection = new MySqlConnection(_connectionString))
             {
                 connection.Open();
-                var query = $"SELECT DISTINCT `{column}` FROM all_data_final WHERE `{column}` IS NOT NULL AND `{column}` != '' ORDER BY `{column}`";
-                using (var command = new MySqlCommand(query, connection))
-                using (var reader = command.ExecuteReader())
+                var query = @"SELECT STT, CODE, PROJECTNAME, YEAR, CONTACTOBJECT, SBJNUM, FULLNAME, 
+                                    CITY, ADDRESS, STREET, WARD, DISTRICT, PHONENUMBER, EMAIL, 
+                                    DATEOFBIRTH, AGE, SEX, JOB, HOUSEHOLDINCOME, PERSONALINCOME, 
+                                    MARITALSTATUS, MOSTFREQUENTLYUSEDBRAND, SOURCE, Class, EDUCATION, 
+                                    PROVINCES, QC, QA, KHUVUC, NGANHHANG, CHUYENKHOA 
+                             FROM all_data_final WHERE PHONENUMBER LIKE @phoneNumber";
+
+                using (MySqlCommand command = new MySqlCommand(query, connection))
                 {
-                    while (reader.Read())
+                    command.Parameters.AddWithValue("@phoneNumber", $"%{phoneNumber}%");
+
+                    using (MySqlDataReader reader = command.ExecuteReader())
                     {
-                        var val = reader[0]?.ToString();
-                        if (!string.IsNullOrWhiteSpace(val))
-                            values.Add(val);
+                        while (reader.Read())
+                        {
+                            ALLDATA data = new ALLDATA
+                            {
+                                Stt = reader.IsDBNull(reader.GetOrdinal("STT")) ? (int?)null : reader.GetInt32("STT"),
+                                Code = reader.IsDBNull(reader.GetOrdinal("CODE")) ? null : reader.GetString("CODE"),
+                                ProjectName = reader.IsDBNull(reader.GetOrdinal("PROJECTNAME")) ? null : reader.GetString("PROJECTNAME"),
+                                Year = reader.IsDBNull(reader.GetOrdinal("YEAR")) ? (int?)null : reader.GetInt32("YEAR"),
+                                ContactObject = reader.IsDBNull(reader.GetOrdinal("CONTACTOBJECT")) ? null : reader.GetString("CONTACTOBJECT"),
+                                Sbjnum = reader.IsDBNull(reader.GetOrdinal("SBJNUM")) ? 0 : reader.GetInt32("SBJNUM"),
+                                Fullname = reader.IsDBNull(reader.GetOrdinal("FULLNAME")) ? null : reader.GetString("FULLNAME"),
+                                City = reader.IsDBNull(reader.GetOrdinal("CITY")) ? null : reader.GetString("CITY"),
+                                Address = reader.IsDBNull(reader.GetOrdinal("ADDRESS")) ? null : reader.GetString("ADDRESS"),
+                                Street = reader.IsDBNull(reader.GetOrdinal("STREET")) ? null : reader.GetString("STREET"),
+                                Ward = reader.IsDBNull(reader.GetOrdinal("WARD")) ? null : reader.GetString("WARD"),
+                                District = reader.IsDBNull(reader.GetOrdinal("DISTRICT")) ? null : reader.GetString("DISTRICT"),
+                                PhoneNumber = reader.IsDBNull(reader.GetOrdinal("PHONENUMBER")) ? null : reader.GetString("PHONENUMBER"),
+                                Email = reader.IsDBNull(reader.GetOrdinal("EMAIL")) ? null : reader.GetString("EMAIL"),
+                                DateOfBirth = reader.IsDBNull(reader.GetOrdinal("DATEOFBIRTH")) ? (int?)null : reader.GetInt32("DATEOFBIRTH"),
+                                Age = reader.IsDBNull(reader.GetOrdinal("AGE")) ? (int?)null : reader.GetInt32("AGE"),
+                                Sex = reader.IsDBNull(reader.GetOrdinal("SEX")) ? null : reader.GetString("SEX"),
+                                Job = reader.IsDBNull(reader.GetOrdinal("JOB")) ? null : reader.GetString("JOB"),
+                                HouseholdIncome = reader.IsDBNull(reader.GetOrdinal("HOUSEHOLDINCOME")) ? null : reader.GetString("HOUSEHOLDINCOME"),
+                                PersonalIncome = reader.IsDBNull(reader.GetOrdinal("PERSONALINCOME")) ? null : reader.GetString("PERSONALINCOME"),
+                                MaritalStatus = reader.IsDBNull(reader.GetOrdinal("MARITALSTATUS")) ? null : reader.GetString("MARITALSTATUS"),
+                                MostFrequentlyUsedBrand = reader.IsDBNull(reader.GetOrdinal("MOSTFREQUENTLYUSEDBRAND")) ? null : reader.GetString("MOSTFREQUENTLYUSEDBRAND"),
+                                Source = reader.IsDBNull(reader.GetOrdinal("SOURCE")) ? null : reader.GetString("SOURCE"),
+                                Class = reader.IsDBNull(reader.GetOrdinal("Class")) ? null : reader.GetString("Class"),
+                                Education = reader.IsDBNull(reader.GetOrdinal("EDUCATION")) ? null : reader.GetString("EDUCATION"),
+                                Provinces = reader.IsDBNull(reader.GetOrdinal("PROVINCES")) ? null : reader.GetString("PROVINCES"),
+                                Qc = reader.IsDBNull(reader.GetOrdinal("QC")) ? null : reader.GetString("QC"),
+                                Qa = reader.IsDBNull(reader.GetOrdinal("QA")) ? null : reader.GetString("QA"),
+                                Khuvuc = reader.IsDBNull(reader.GetOrdinal("KHUVUC")) ? null : reader.GetString("KHUVUC"),
+                                Nganhhang = reader.IsDBNull(reader.GetOrdinal("NGANHHANG")) ? null : reader.GetString("NGANHHANG"),
+                                ChuyenKhoa = reader.IsDBNull(reader.GetOrdinal("CHUYENKHOA")) ? null : reader.GetString("CHUYENKHOA")
+                            };
+                            results.Add(data);
+                        }
                     }
                 }
             }
-            return values;
+
+            return results;
         }
 
+        // Phương thức lấy email của user từ database
+        private string GetUserEmail(string username)
+        {
+            try
+            {
+                using (MySqlConnection connection = new MySqlConnection(_connectionString))
+                {
+                    connection.Open();
+                    var query = "SELECT Email FROM users WHERE Username = @username";
+
+                    using (MySqlCommand command = new MySqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@username", username);
+                        var result = command.ExecuteScalar();
+                        return result?.ToString() ?? "";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log error và trả về email mặc định
+                return "";
+            }
+        }
+
+        // Action để xuất dữ liệu từ trang admin chính
+        public async Task<ActionResult> ExportData(string stt = "", List<string> code = null, List<string> projectName = null, List<string> year = null,
+    string contactObject = "", List<string> sbjnum = null, string fullname = "",
+    List<string> city = null, string address = "", string street = "", string ward = "",
+    string district = "", List<string> phoneNumber = null, string email = "",
+    string dateOfBirth = "", List<string> age = null, List<string> sex = null,
+    List<string> job = null, List<string> householdIncome = null, List<string> personalIncome = null,
+    List<string> maritalStatus = null, string mostFrequentlyUsedBrand = "",
+    string source = "", List<string> className = null, string education = "",
+    List<string> provinces = null, string qc = "", string qa = "", List<string> Khuvuc = null, List<string> Nganhhang = null, List<string> region = null)
+        {
+            // Yêu cầu đăng nhập để xuất dữ liệu
+            var userRole = HttpContext.Session.GetString("Role");
+            if (string.IsNullOrEmpty(userRole))
+            {
+                TempData["ErrorMessage"] = "Vui lòng đăng nhập để thực hiện chức năng xuất dữ liệu.";
+                return RedirectToAction("Login", "LoginRegister");
+            }
+
+            try
+            {
+                // Lấy dữ liệu theo bộ lọc
+                var results = getadminChart(stt, code, projectName, year, contactObject, sbjnum, fullname, city, address, street, ward, district, phoneNumber, email, dateOfBirth, age, sex, job, householdIncome, personalIncome, maritalStatus, mostFrequentlyUsedBrand, source, className, education, provinces, qc, qa, Khuvuc, Nganhhang);
+
+                if (results.Count == 0)
+                {
+                    TempData["ErrorMessage"] = "Không có dữ liệu để xuất.";
+                    return RedirectToAction("Index");
+                }
+
+                // Tạo file Excel
+                var workbook = new XLWorkbook();
+                var worksheet = workbook.Worksheets.Add("Dữ liệu");
+
+                // Thêm header
+                worksheet.Cell("A1").Value = "STT";
+                worksheet.Cell("B1").Value = "Code";
+                worksheet.Cell("C1").Value = "Tên dự án";
+                worksheet.Cell("D1").Value = "Năm";
+                worksheet.Cell("E1").Value = "Đối tượng liên hệ";
+                worksheet.Cell("F1").Value = "Số thứ tự";
+                worksheet.Cell("G1").Value = "Họ tên";
+                worksheet.Cell("H1").Value = "Thành phố";
+                worksheet.Cell("I1").Value = "Địa chỉ";
+                worksheet.Cell("J1").Value = "Đường";
+                worksheet.Cell("K1").Value = "Phường";
+                worksheet.Cell("L1").Value = "Quận/Huyện";
+                worksheet.Cell("M1").Value = "Số điện thoại";
+                worksheet.Cell("N1").Value = "Email";
+                worksheet.Cell("O1").Value = "Năm sinh";
+                worksheet.Cell("P1").Value = "Tuổi";
+                worksheet.Cell("Q1").Value = "Giới tính";
+                worksheet.Cell("R1").Value = "Nghề nghiệp";
+                worksheet.Cell("S1").Value = "Thu nhập hộ gia đình";
+                worksheet.Cell("T1").Value = "Thu nhập cá nhân";
+                worksheet.Cell("U1").Value = "Tình trạng hôn nhân";
+                worksheet.Cell("V1").Value = "Thương hiệu sử dụng nhiều nhất";
+                worksheet.Cell("W1").Value = "Nguồn";
+                worksheet.Cell("X1").Value = "Lớp";
+                worksheet.Cell("Y1").Value = "Học vấn";
+                worksheet.Cell("Z1").Value = "Tỉnh";
+                worksheet.Cell("AA1").Value = "QC";
+                worksheet.Cell("AB1").Value = "QA";
+                worksheet.Cell("AC1").Value = "Khu vực";
+                worksheet.Cell("AD1").Value = "Ngành hàng";
+                worksheet.Cell("AE1").Value = "Chuyên khoa";
+
+                // Thêm dữ liệu
+                for (int i = 0; i < results.Count; i++)
+                {
+                    var row = i + 2;
+                    worksheet.Cell($"A{row}").Value = results[i].Stt;
+                    worksheet.Cell($"B{row}").Value = results[i].Code;
+                    worksheet.Cell($"C{row}").Value = results[i].ProjectName;
+                    worksheet.Cell($"D{row}").Value = results[i].Year;
+                    worksheet.Cell($"E{row}").Value = results[i].ContactObject;
+                    worksheet.Cell($"F{row}").Value = results[i].Sbjnum;
+                    worksheet.Cell($"G{row}").Value = results[i].Fullname;
+                    worksheet.Cell($"H{row}").Value = results[i].City;
+                    worksheet.Cell($"I{row}").Value = results[i].Address;
+                    worksheet.Cell($"J{row}").Value = results[i].Street;
+                    worksheet.Cell($"K{row}").Value = results[i].Ward;
+                    worksheet.Cell($"L{row}").Value = results[i].District;
+                    worksheet.Cell($"M{row}").Value = results[i].PhoneNumber;
+                    worksheet.Cell($"N{row}").Value = results[i].Email;
+                    worksheet.Cell($"O{row}").Value = results[i].DateOfBirth;
+                    worksheet.Cell($"P{row}").Value = results[i].Age;
+                    worksheet.Cell($"Q{row}").Value = results[i].Sex;
+                    worksheet.Cell($"R{row}").Value = results[i].Job;
+                    worksheet.Cell($"S{row}").Value = results[i].HouseholdIncome;
+                    worksheet.Cell($"T{row}").Value = results[i].PersonalIncome;
+                    worksheet.Cell($"U{row}").Value = results[i].MaritalStatus;
+                    worksheet.Cell($"V{row}").Value = results[i].MostFrequentlyUsedBrand;
+                    worksheet.Cell($"W{row}").Value = results[i].Source;
+                    worksheet.Cell($"X{row}").Value = results[i].Class;
+                    worksheet.Cell($"Y{row}").Value = results[i].Education;
+                    worksheet.Cell($"Z{row}").Value = results[i].Provinces;
+                    worksheet.Cell($"AA{row}").Value = results[i].Qc;
+                    worksheet.Cell($"AB{row}").Value = results[i].Qa;
+                    worksheet.Cell($"AC{row}").Value = results[i].Khuvuc;
+                    worksheet.Cell($"AD{row}").Value = results[i].Nganhhang;
+                    worksheet.Cell($"AE{row}").Value = results[i].ChuyenKhoa;
+                }
+
+                // Định dạng header
+                var headerRange = worksheet.Range("A1:AE1");
+                headerRange.Style.Font.Bold = true;
+                headerRange.Style.Fill.BackgroundColor = XLColor.LightGray;
+
+                // Tự động điều chỉnh cột
+                worksheet.Columns().AdjustToContents();
+
+                // Lưu file vào memory stream
+                byte[] fileData;
+                using (var stream = new MemoryStream())
+                {
+                    workbook.SaveAs(stream);
+                    fileData = stream.ToArray();
+                }
+
+                // Lấy thông tin user đang đăng nhập
+                var username = HttpContext.Session.GetString("Username");
+                var userEmail = GetUserEmail(username);
+
+                // Tạo export request
+                var exportRequest = new ExportRequest
+                {
+                    Username = username,
+                    Email = userEmail,
+                    RequestTime = DateTime.Now,
+                    Status = "pending",
+                    FilterParams = $"Filtered data export, Results: {results.Count} records",
+                    FileData = fileData,
+                    Source = "AdminDashboard"
+                };
+
+                // Lưu request vào database
+                var repo = new ExportRequestRepository(_connectionString);
+                var requestId = await repo.AddRequestAsync(exportRequest);
+
+                TempData["SuccessMessage"] = $"Đã gửi yêu cầu xuất Excel thành công! Request ID: {requestId}. Admin sẽ duyệt và gửi file qua email: {userEmail}";
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Lỗi khi gửi yêu cầu xuất Excel: {ex.Message}";
+                return RedirectToAction("Index");
+            }
+        }
 
     }
 }
