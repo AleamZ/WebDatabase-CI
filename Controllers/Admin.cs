@@ -17,84 +17,97 @@ namespace CIResearch.Controllers
 {
     public class Admin : Controller
     {
-        private string _connectionString = "Server=localhost;Database=sakila;User=root;Password=1234;DefaultCommandTimeout=1000;ConnectionTimeout=1000;";
+        private string _connectionString = "Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;DefaultCommandTimeout=1000;ConnectionTimeout=1000;";
 
         public ActionResult Index(string stt = "", List<string> code = null, List<string> projectName = null, List<string> year = null,
-    string contactObject = "", List<string> sbjnum = null, string fullname = "",
-    List<string> city = null, string address = "", string street = "", string ward = "",
-    string district = "", List<string> phoneNumber = null, string email = "",
-    string dateOfBirth = "", List<string> age = null, List<string> sex = null,
-    List<string> job = null, List<string> householdIncome = null, List<string> personalIncome = null,
-    List<string> maritalStatus = null, string mostFrequentlyUsedBrand = "",
-    string source = "", List<string> Classname = null, string education = "",
-    List<string> provinces = null, string qc = "", string qa = "", List<string> Khuvuc = null, List<String> Nganhhang = null, List<string> region = null)
+string contactObject = "", List<string> sbjnum = null, string fullname = "",
+List<string> city = null, string address = "", string street = "", string ward = "",
+string district = "", List<string> phoneNumber = null, string email = "",
+string dateOfBirth = "", List<string> age = null, List<string> sex = null,
+List<string> job = null, List<string> householdIncome = null, List<string> personalIncome = null,
+List<string> maritalStatus = null, string mostFrequentlyUsedBrand = "",
+string source = "", List<string> Classname = null, string education = "",
+List<string> provinces = null, string qc = "", string qa = "", List<string> Khuvuc = null, List<String> Nganhhang = null, List<string> region = null)
         {
-            // Cho phép truy cập như guest - không cần kiểm tra role
-            var userRole = HttpContext.Session.GetString("Role");
-            var isLoggedIn = !string.IsNullOrEmpty(userRole);
-
-            // Lưu trạng thái đăng nhập vào ViewBag để view có thể hiển thị phù hợp
-            ViewBag.IsLoggedIn = isLoggedIn;
-            ViewBag.UserRole = userRole;
-
-            ViewBag.Year = year;
-            ViewBag.Projectname = projectName;
-            ViewBag.City = city;
-            ViewBag.Sex = sex;
-            ViewBag.Age = age;
-            ViewBag.Region = region;
-            ViewBag.Job = job;
-            ViewBag.Classname = Classname;
-            ViewBag.MaritalStatus = maritalStatus;
-            ViewBag.Code = code;
-            ViewBag.Nganhhang = Nganhhang;
-
-
-            if (sbjnum != null && sbjnum.All(string.IsNullOrWhiteSpace))
+            try
             {
-                sbjnum = null;
-            }
+                // Cho phép truy cập như guest - không cần kiểm tra role
+                var userRole = HttpContext.Session.GetString("Role");
+                var username = HttpContext.Session.GetString("Username");
 
-            ViewBag.Sbjnum = sbjnum != null ? string.Join(",", sbjnum) : "";
+                // Kiểm tra session có hợp lệ không
+                var isLoggedIn = !string.IsNullOrEmpty(userRole) && !string.IsNullOrEmpty(username);
 
-            if (phoneNumber != null && phoneNumber.All(string.IsNullOrWhiteSpace))
-            {
-                phoneNumber = null;
-            }
-
-            ViewBag.Phonenumber = phoneNumber != null ? string.Join(",", phoneNumber) : "";
-
-            List<ALLDATA> adminChart = new List<ALLDATA>();
-
-            adminChart = getadminChart(stt, code, projectName, year, contactObject, sbjnum, fullname, city, address, street, ward, district, phoneNumber, email, dateOfBirth, age, sex, job, householdIncome, personalIncome, maritalStatus, mostFrequentlyUsedBrand, source, Classname, education, provinces, qc, qa, Khuvuc, Nganhhang);
-
-            //lọc theo 3 miền
-
-
-            var provinceSampleCounts = adminChart
-       .GroupBy(a => a.City)
-       .Select(g => new
-       {
-           City = g.Key,
-           SampleCount = g.Count()
-       })
-       .ToList();
-
-            ViewBag.ProvinceData = JsonConvert.SerializeObject(provinceSampleCounts);
-
-
-            var totalSamples = adminChart.Count(); // Tổng số mẫu
-            var provinceSampleCountsSlide = adminChart
-                .GroupBy(a => a.City)
-                .Select(g => new
+                // Nếu session không hợp lệ, clear session để tránh lỗi
+                if (!isLoggedIn && (!string.IsNullOrEmpty(userRole) || !string.IsNullOrEmpty(username)))
                 {
-                    City = g.Key,
-                    SampleCount = g.Count(),
-                    Percentage = (double)g.Count() / totalSamples * 100 // Tính phần trăm
-                })
-                .ToList();
+                    HttpContext.Session.Clear();
+                    isLoggedIn = false;
+                    userRole = null;
+                }
 
-            ViewBag.ProvinceDataSlide = JsonConvert.SerializeObject(provinceSampleCounts);
+                // Lưu trạng thái đăng nhập vào ViewBag để view có thể hiển thị phù hợp
+                ViewBag.IsLoggedIn = isLoggedIn;
+                ViewBag.UserRole = userRole;
+
+                ViewBag.Year = year;
+                ViewBag.Projectname = projectName;
+                ViewBag.City = city;
+                ViewBag.Sex = sex;
+                ViewBag.Age = age;
+                ViewBag.Region = region;
+                ViewBag.Job = job;
+                ViewBag.Classname = Classname;
+                ViewBag.MaritalStatus = maritalStatus;
+                ViewBag.Code = code;
+                ViewBag.Nganhhang = Nganhhang;
+
+
+                if (sbjnum != null && sbjnum.All(string.IsNullOrWhiteSpace))
+                {
+                    sbjnum = null;
+                }
+
+                ViewBag.Sbjnum = sbjnum != null ? string.Join(",", sbjnum) : "";
+
+                if (phoneNumber != null && phoneNumber.All(string.IsNullOrWhiteSpace))
+                {
+                    phoneNumber = null;
+                }
+
+                ViewBag.Phonenumber = phoneNumber != null ? string.Join(",", phoneNumber) : "";
+
+                List<ALLDATA> adminChart = new List<ALLDATA>();
+
+                adminChart = getadminChart(stt, code, projectName, year, contactObject, sbjnum, fullname, city, address, street, ward, district, phoneNumber, email, dateOfBirth, age, sex, job, householdIncome, personalIncome, maritalStatus, mostFrequentlyUsedBrand, source, Classname, education, provinces, qc, qa, Khuvuc, Nganhhang);
+
+                //lọc theo 3 miền
+
+
+                var provinceSampleCounts = adminChart
+           .GroupBy(a => a.City)
+           .Select(g => new
+           {
+               City = g.Key,
+               SampleCount = g.Count()
+           })
+           .ToList();
+
+                ViewBag.ProvinceData = JsonConvert.SerializeObject(provinceSampleCounts);
+
+
+                var totalSamples = adminChart.Count(); // Tổng số mẫu
+                var provinceSampleCountsSlide = adminChart
+                    .GroupBy(a => a.City)
+                    .Select(g => new
+                    {
+                        City = g.Key,
+                        SampleCount = g.Count(),
+                        Percentage = (double)g.Count() / totalSamples * 100 // Tính phần trăm
+                    })
+                    .ToList();
+
+                ViewBag.ProvinceDataSlide = JsonConvert.SerializeObject(provinceSampleCounts);
 
 
 
@@ -104,13 +117,13 @@ namespace CIResearch.Controllers
 
 
 
-            //phần chính
-            //tổng số mẫu
-            ViewBag.TotalRows = adminChart.Count.ToString("N0");
-            //tổng số dự án
-            ViewBag.TotalProjects = adminChart.Select(x => x.ProjectName).Distinct().Count();
-            //tổng số mẫu 3 miền
-            var northernProvinces = new HashSet<string>
+                //phần chính
+                //tổng số mẫu
+                ViewBag.TotalRows = adminChart.Count.ToString("N0");
+                //tổng số dự án
+                ViewBag.TotalProjects = adminChart.Select(x => x.ProjectName).Distinct().Count();
+                //tổng số mẫu 3 miền
+                var northernProvinces = new HashSet<string>
 {
     "BẮC GIANG", "BẮC KẠN", "BẮC NINH", "CAO BẰNG", "ĐIỆN BIÊN",
     "HÀ GIANG", "HÀ NAM", "HÀ NỘI", "HẢI DƯƠNG", "HẢI PHÒNG",
@@ -118,7 +131,7 @@ namespace CIResearch.Controllers
     "NINH BÌNH", "PHÚ THỌ", "QUẢNG NINH", "SƠN LA", "THÁI BÌNH",
     "THÁI NGUYÊN", "TUYÊN QUANG", "VĨNH PHÚC", "YÊN BÁI"
 };
-            var centralProvinces = new HashSet<string>
+                var centralProvinces = new HashSet<string>
 {
     "BÌNH ĐỊNH",
     "ĐÀ NẴNG",
@@ -137,7 +150,7 @@ namespace CIResearch.Controllers
     "THỪA THIÊN HUẾ"
 };
 
-            var southernProvinces = new HashSet<string>
+                var southernProvinces = new HashSet<string>
 {
     "AN GIANG",
     "BÀ RỊA VŨNG TÀU",
@@ -164,170 +177,178 @@ namespace CIResearch.Controllers
 };
 
 
-            ViewBag.NorthernSampleCount = adminChart.Count(x => northernProvinces.Contains(x.City));
-            ViewBag.CentralSampleCount = adminChart.Count(x => centralProvinces.Contains(x.City));
-            ViewBag.SouthernSampleCount = adminChart.Count(x => southernProvinces.Contains(x.City));
+                ViewBag.NorthernSampleCount = adminChart.Count(x => northernProvinces.Contains(x.City));
+                ViewBag.CentralSampleCount = adminChart.Count(x => centralProvinces.Contains(x.City));
+                ViewBag.SouthernSampleCount = adminChart.Count(x => southernProvinces.Contains(x.City));
 
-            int mienBacCount = adminChart.Count(x => x.City != null && northernProvinces.Contains(x.City.Trim().ToUpper()));
-            int mienTrungCount = adminChart.Count(x => x.City != null && centralProvinces.Contains(x.City.Trim().ToUpper()));
-            int mienNamCount = adminChart.Count(x => x.City != null && southernProvinces.Contains(x.City.Trim().ToUpper()));
+                int mienBacCount = adminChart.Count(x => x.City != null && northernProvinces.Contains(x.City.Trim().ToUpper()));
+                int mienTrungCount = adminChart.Count(x => x.City != null && centralProvinces.Contains(x.City.Trim().ToUpper()));
+                int mienNamCount = adminChart.Count(x => x.City != null && southernProvinces.Contains(x.City.Trim().ToUpper()));
 
 
-            int totalCalculated = mienBacCount + mienTrungCount + mienNamCount;
-            int totalRows = adminChart.Count(); // Tổng số dòng thực tế
-                                                // Kiểm tra số dư (nếu có)
-            int soDu = totalRows - totalCalculated;
+                int totalCalculated = mienBacCount + mienTrungCount + mienNamCount;
+                int totalRows = adminChart.Count(); // Tổng số dòng thực tế
+                                                    // Kiểm tra số dư (nếu có)
+                int soDu = totalRows - totalCalculated;
 
-            if (soDu > 0)
-            {
-                // Chia đều số dư cho 3 miền
-                int chiaDu = soDu / 3;
-                int duLe = soDu % 3; // Phần dư nếu không chia hết
+                if (soDu > 0)
+                {
+                    // Chia đều số dư cho 3 miền
+                    int chiaDu = soDu / 3;
+                    int duLe = soDu % 3; // Phần dư nếu không chia hết
 
-                // Cộng phần dư cho từng miền
-                mienBacCount += chiaDu + (duLe > 0 ? 1 : 0);
-                mienTrungCount += chiaDu + (duLe > 1 ? 1 : 0);
-                mienNamCount += chiaDu;
+                    // Cộng phần dư cho từng miền
+                    mienBacCount += chiaDu + (duLe > 0 ? 1 : 0);
+                    mienTrungCount += chiaDu + (duLe > 1 ? 1 : 0);
+                    mienNamCount += chiaDu;
+                }
+
+                // Xuất kết quả ra ViewBag
+                ViewBag.mienbac = mienBacCount.ToString("N0");
+                ViewBag.mientrung = mienTrungCount.ToString("N0");
+                ViewBag.miennam = mienNamCount.ToString("N0");
+                ViewBag.TotalRows = totalRows.ToString("N0");
+
+
+
+
+
+                //đếm tổng số mẫu nam nữ,
+
+
+                ViewBag.namCount = adminChart.Count(x => x.Sex == "Nam").ToString("N0");
+                ViewBag.nuCount = adminChart.Count(x => x.Sex == "Nữ").ToString("N0");
+                ViewBag.KXDCount = adminChart.Count(x => string.IsNullOrEmpty(x.Sex) || (x.Sex != "Nam" && x.Sex != "Nữ")).ToString("N0");
+
+                ViewBag.MaleCount = adminChart.Count(x => x.Sex == "Nam");
+                ViewBag.FemaleCount = adminChart.Count(x => x.Sex == "Nữ");
+                ViewBag.UndefinedCount = adminChart.Count(x => string.IsNullOrEmpty(x.Sex) || (x.Sex != "Nam" && x.Sex != "Nữ"));
+
+
+
+
+                // Tổng số lượng mẫu  theo từng năm
+                var yearlyData = adminChart.GroupBy(p => p.Year)
+                                         .Select(g => new { Year = g.Key, Count = g.Count() })
+                                         .OrderBy(g => g.Year)
+                                         .ToList();
+
+                ViewBag.YearLabels = yearlyData.Select(g => g.Year).ToArray();
+                ViewBag.YearData = yearlyData.Select(g => g.Count).ToArray();
+                //tổng số dự án 
+                // Nhóm theo năm và tên dự án, sau đó đếm số lượng dự án riêng biệt trong mỗi năm
+                var yearlyProject = adminChart
+                    .GroupBy(p => p.Year) // Nhóm theo năm
+                    .Select(g => new
+                    {
+                        Year = g.Key,
+                        ProjectCount = g.Select(p => p.ProjectName).Distinct().Count() // Đếm số dự án riêng biệt trong năm
+                    })
+                    .OrderBy(g => g.Year) // Sắp xếp theo năm
+                    .ToList();
+
+                // Truyền dữ liệu vào ViewBag để dùng trong View
+                ViewBag.YearLabelsProject = yearlyProject.Select(g => g.Year).ToArray(); // Năm
+                ViewBag.YearDataProject = yearlyProject.Select(g => g.ProjectCount).ToArray(); // Số lượng dự án riêng biệt trong từng năm
+
+
+
+                // Gom nhóm tình trạng hôn nhân
+                var maritalStatusData = adminChart
+                    .Where(p => p.MaritalStatus != "0")
+                    .GroupBy(p =>
+                    {
+                        if (p.MaritalStatus.Contains("Độc thân")) return "Độc thân";
+                        if (p.MaritalStatus.Contains("Đã kết hôn")) return "Đã kết hôn";
+                        if (p.MaritalStatus.Contains("Ly hôn")) return "Đã ly hôn";
+
+                        return "Khác";
+                    })
+                    .Select(g => new { MaritalStatus = g.Key, Count = g.Count() })
+                    .ToList();
+
+                // Đưa dữ liệu vào ViewBag
+                ViewBag.MaritalStatusLabels = maritalStatusData.Select(g => g.MaritalStatus).ToArray();
+                ViewBag.MaritalStatusData = maritalStatusData.Select(g => g.Count).ToArray();
+
+
+                //biểu đồ cột nghề nghiệp 
+                var jobdata = adminChart.Where(p => p.Job != "0")  // Giả sử "0" là giá trị không hợp lệ
+         .GroupBy(p => p.Job)  // Nhóm theo nghề nghiệp
+         .Select(g => new { Job = g.Key, Count = g.Count() })  // Tính số lượng cho mỗi nhóm
+         .ToList();
+
+                // Chuyển các giá trị nhóm thành mảng để sử dụng trong view
+                ViewBag.JobLabels = jobdata.Select(g => g.Job).ToArray();
+                ViewBag.JobData = jobdata.Select(g => g.Count).ToArray();
+
+
+
+                //biểu đồ cột ngành hàng
+                var nganhdata = adminChart.Where(p => p.Nganhhang != "0")  // Giả sử "0" là giá trị không hợp lệ
+         .GroupBy(p => p.Nganhhang)  // Nhóm theo nghề nghiệp
+         .Select(g => new { Nganhhang = g.Key, Count = g.Count() })  // Tính số lượng cho mỗi nhóm
+         .ToList();
+
+                // Chuyển các giá trị nhóm thành mảng để sử dụng trong view
+                ViewBag.nganhLabels = nganhdata.Select(g => g.Nganhhang).ToArray();
+                ViewBag.nganhData = nganhdata.Select(g => g.Count).ToArray();
+
+
+                //biểu đồ cột ngành hàng
+                var totalCountCl = adminChart.Where(p => p.Class != "0").Count();  // Tổng số mẫu hợp lệ
+
+                var classdata = adminChart.Where(p => p.Class != "0")  // Giả sử "0" là giá trị không hợp lệ
+                    .GroupBy(p => p.Class)  // Nhóm theo nghề nghiệp
+                    .Select(g => new
+                    {
+                        Class = g.Key,
+                        Count = g.Count(),
+                        Percentage = (double)g.Count() / totalCountCl * 100  // Tính tỉ lệ phần trăm
+                    })
+                    .ToList();
+
+                // Chuyển các giá trị nhóm thành mảng để sử dụng trong view
+                ViewBag.classLabels = classdata.Select(g => g.Class).ToArray();
+                ViewBag.classData = classdata.Select(g => g.Count).ToArray();
+                ViewBag.classPercentages = classdata.Select(g => g.Percentage).ToArray();
+
+
+
+
+
+
+
+
+                // Dữ liệu cho biểu đồ đường (done) 
+                var ageData = adminChart.Where(p => p.Age != 0)
+                    .GroupBy(p => p.Age > 100 ? 100 : (p.Age / 5) * 5)  // Nhóm thành các khoảng 10 tuổi, lớn hơn 100 là 99+
+                    .Select(g => new
+                    {
+                        AgeRange = g.Key == 100 ? "99+" : $"{g.Key} đến {g.Key + 5}", // Tạo chuỗi khoảng tuổi
+                        Count = g.Count()
+                    })
+                    .OrderBy(g => g.AgeRange) // Sắp xếp theo AgeRange
+                    .ToList();
+
+                ViewBag.ageLabels = ageData.Select(g => g.AgeRange).ToArray();
+                ViewBag.ageData = ageData.Select(g => g.Count).ToArray();
+
+                return View(adminChart);
             }
+            catch (Exception ex)
+            {
+                // Log lỗi và clear session nếu có vấn đề
+                Console.WriteLine($"Error in Admin Index: {ex.Message}");
+                HttpContext.Session.Clear();
 
-            // Xuất kết quả ra ViewBag
-            ViewBag.mienbac = mienBacCount.ToString("N0");
-            ViewBag.mientrung = mienTrungCount.ToString("N0");
-            ViewBag.miennam = mienNamCount.ToString("N0");
-            ViewBag.TotalRows = totalRows.ToString("N0");
+                // Set default values
+                ViewBag.IsLoggedIn = false;
+                ViewBag.UserRole = null;
 
-
-
-
-
-            //đếm tổng số mẫu nam nữ,
-
-
-            ViewBag.namCount = adminChart.Count(x => x.Sex == "Nam").ToString("N0");
-            ViewBag.nuCount = adminChart.Count(x => x.Sex == "Nữ").ToString("N0");
-            ViewBag.KXDCount = adminChart.Count(x => string.IsNullOrEmpty(x.Sex) || (x.Sex != "Nam" && x.Sex != "Nữ")).ToString("N0");
-
-            ViewBag.MaleCount = adminChart.Count(x => x.Sex == "Nam");
-            ViewBag.FemaleCount = adminChart.Count(x => x.Sex == "Nữ");
-            ViewBag.UndefinedCount = adminChart.Count(x => string.IsNullOrEmpty(x.Sex) || (x.Sex != "Nam" && x.Sex != "Nữ"));
-
-
-
-
-            // Tổng số lượng mẫu  theo từng năm
-            var yearlyData = adminChart.GroupBy(p => p.Year)
-                                     .Select(g => new { Year = g.Key, Count = g.Count() })
-                                     .OrderBy(g => g.Year)
-                                     .ToList();
-
-            ViewBag.YearLabels = yearlyData.Select(g => g.Year).ToArray();
-            ViewBag.YearData = yearlyData.Select(g => g.Count).ToArray();
-            //tổng số dự án 
-            // Nhóm theo năm và tên dự án, sau đó đếm số lượng dự án riêng biệt trong mỗi năm
-            var yearlyProject = adminChart
-                .GroupBy(p => p.Year) // Nhóm theo năm
-                .Select(g => new
-                {
-                    Year = g.Key,
-                    ProjectCount = g.Select(p => p.ProjectName).Distinct().Count() // Đếm số dự án riêng biệt trong năm
-                })
-                .OrderBy(g => g.Year) // Sắp xếp theo năm
-                .ToList();
-
-            // Truyền dữ liệu vào ViewBag để dùng trong View
-            ViewBag.YearLabelsProject = yearlyProject.Select(g => g.Year).ToArray(); // Năm
-            ViewBag.YearDataProject = yearlyProject.Select(g => g.ProjectCount).ToArray(); // Số lượng dự án riêng biệt trong từng năm
-
-
-
-            // Gom nhóm tình trạng hôn nhân
-            var maritalStatusData = adminChart
-                .Where(p => p.MaritalStatus != "0")
-                .GroupBy(p =>
-                {
-                    if (p.MaritalStatus.Contains("Độc thân")) return "Độc thân";
-                    if (p.MaritalStatus.Contains("Đã kết hôn")) return "Đã kết hôn";
-                    if (p.MaritalStatus.Contains("Ly hôn")) return "Đã ly hôn";
-
-                    return "Khác";
-                })
-                .Select(g => new { MaritalStatus = g.Key, Count = g.Count() })
-                .ToList();
-
-            // Đưa dữ liệu vào ViewBag
-            ViewBag.MaritalStatusLabels = maritalStatusData.Select(g => g.MaritalStatus).ToArray();
-            ViewBag.MaritalStatusData = maritalStatusData.Select(g => g.Count).ToArray();
-
-
-            //biểu đồ cột nghề nghiệp 
-            var jobdata = adminChart.Where(p => p.Job != "0")  // Giả sử "0" là giá trị không hợp lệ
-     .GroupBy(p => p.Job)  // Nhóm theo nghề nghiệp
-     .Select(g => new { Job = g.Key, Count = g.Count() })  // Tính số lượng cho mỗi nhóm
-     .ToList();
-
-            // Chuyển các giá trị nhóm thành mảng để sử dụng trong view
-            ViewBag.JobLabels = jobdata.Select(g => g.Job).ToArray();
-            ViewBag.JobData = jobdata.Select(g => g.Count).ToArray();
-
-
-
-            //biểu đồ cột ngành hàng
-            var nganhdata = adminChart.Where(p => p.Nganhhang != "0")  // Giả sử "0" là giá trị không hợp lệ
-     .GroupBy(p => p.Nganhhang)  // Nhóm theo nghề nghiệp
-     .Select(g => new { Nganhhang = g.Key, Count = g.Count() })  // Tính số lượng cho mỗi nhóm
-     .ToList();
-
-            // Chuyển các giá trị nhóm thành mảng để sử dụng trong view
-            ViewBag.nganhLabels = nganhdata.Select(g => g.Nganhhang).ToArray();
-            ViewBag.nganhData = nganhdata.Select(g => g.Count).ToArray();
-
-
-            //biểu đồ cột ngành hàng
-            var totalCountCl = adminChart.Where(p => p.Class != "0").Count();  // Tổng số mẫu hợp lệ
-
-            var classdata = adminChart.Where(p => p.Class != "0")  // Giả sử "0" là giá trị không hợp lệ
-                .GroupBy(p => p.Class)  // Nhóm theo nghề nghiệp
-                .Select(g => new
-                {
-                    Class = g.Key,
-                    Count = g.Count(),
-                    Percentage = (double)g.Count() / totalCountCl * 100  // Tính tỉ lệ phần trăm
-                })
-                .ToList();
-
-            // Chuyển các giá trị nhóm thành mảng để sử dụng trong view
-            ViewBag.classLabels = classdata.Select(g => g.Class).ToArray();
-            ViewBag.classData = classdata.Select(g => g.Count).ToArray();
-            ViewBag.classPercentages = classdata.Select(g => g.Percentage).ToArray();
-
-
-
-
-
-
-
-
-            // Dữ liệu cho biểu đồ đường (done) 
-            var ageData = adminChart.Where(p => p.Age != 0)
-                .GroupBy(p => p.Age > 100 ? 100 : (p.Age / 5) * 5)  // Nhóm thành các khoảng 10 tuổi, lớn hơn 100 là 99+
-                .Select(g => new
-                {
-                    AgeRange = g.Key == 100 ? "99+" : $"{g.Key} đến {g.Key + 5}", // Tạo chuỗi khoảng tuổi
-                    Count = g.Count()
-                })
-                .OrderBy(g => g.AgeRange) // Sắp xếp theo AgeRange
-                .ToList();
-
-            ViewBag.ageLabels = ageData.Select(g => g.AgeRange).ToArray();
-            ViewBag.ageData = ageData.Select(g => g.Count).ToArray();
-
-
-
-
-
-
-
-            return View(adminChart);
+                // Vẫn trả về view với dữ liệu rỗng
+                return View(new List<ALLDATA>());
+            }
         }
 
 
@@ -583,23 +604,51 @@ namespace CIResearch.Controllers
         // Action để hiển thị trang tìm kiếm số điện thoại
         public ActionResult SearchPhoneNumber(string phoneNumber = "")
         {
-            // Cho phép truy cập như guest - không cần kiểm tra role
-            var userRole = HttpContext.Session.GetString("Role");
-            var isLoggedIn = !string.IsNullOrEmpty(userRole);
-
-            // Lưu trạng thái đăng nhập vào ViewBag để view có thể hiển thị phù hợp
-            ViewBag.IsLoggedIn = isLoggedIn;
-            ViewBag.UserRole = userRole;
-
-            ViewBag.PhoneNumber = phoneNumber;
-            List<ALLDATA> results = new List<ALLDATA>();
-
-            if (!string.IsNullOrEmpty(phoneNumber))
+            try
             {
-                results = SearchPhoneNumberInDatabase(phoneNumber);
-            }
+                // Cho phép truy cập như guest - không cần kiểm tra role
+                var userRole = HttpContext.Session.GetString("Role");
+                var username = HttpContext.Session.GetString("Username");
 
-            return View(results);
+                // Kiểm tra session có hợp lệ không
+                var isLoggedIn = !string.IsNullOrEmpty(userRole) && !string.IsNullOrEmpty(username);
+
+                // Nếu session không hợp lệ, clear session để tránh lỗi
+                if (!isLoggedIn && (!string.IsNullOrEmpty(userRole) || !string.IsNullOrEmpty(username)))
+                {
+                    HttpContext.Session.Clear();
+                    isLoggedIn = false;
+                    userRole = null;
+                }
+
+                // Lưu trạng thái đăng nhập vào ViewBag để view có thể hiển thị phù hợp
+                ViewBag.IsLoggedIn = isLoggedIn;
+                ViewBag.UserRole = userRole;
+
+                ViewBag.PhoneNumber = phoneNumber;
+                List<ALLDATA> results = new List<ALLDATA>();
+
+                if (!string.IsNullOrEmpty(phoneNumber))
+                {
+                    results = SearchPhoneNumberInDatabase(phoneNumber);
+                }
+
+                return View(results);
+            }
+            catch (Exception ex)
+            {
+                // Log lỗi và clear session nếu có vấn đề
+                Console.WriteLine($"Error in SearchPhoneNumber: {ex.Message}");
+                HttpContext.Session.Clear();
+
+                // Set default values
+                ViewBag.IsLoggedIn = false;
+                ViewBag.UserRole = null;
+                ViewBag.PhoneNumber = phoneNumber;
+
+                // Vẫn trả về view với dữ liệu rỗng
+                return View(new List<ALLDATA>());
+            }
         }
 
         // Action để gửi request xuất Excel cho admin duyệt
@@ -988,6 +1037,14 @@ namespace CIResearch.Controllers
                 TempData["ErrorMessage"] = $"Lỗi khi gửi yêu cầu xuất Excel: {ex.Message}";
                 return RedirectToAction("Index");
             }
+        }
+
+        // Action để clear session (debug purpose)
+        public ActionResult ClearSession()
+        {
+            HttpContext.Session.Clear();
+            TempData["SuccessMessage"] = "Session đã được xóa thành công.";
+            return RedirectToAction("Index");
         }
 
     }

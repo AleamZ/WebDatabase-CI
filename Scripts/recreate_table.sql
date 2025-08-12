@@ -1,5 +1,5 @@
 -- Script để drop và tạo lại bảng dn_all
-USE sakila;
+USE admin_ciresearch;
 
 -- Drop bảng cũ
 DROP TABLE IF EXISTS dn_all;
@@ -48,7 +48,7 @@ CREATE TABLE `dn_all` (
 -- Kiểm tra AUTO_INCREMENT hiện tại
 SELECT AUTO_INCREMENT 
 FROM information_schema.TABLES 
-WHERE TABLE_SCHEMA = 'sakila' 
+WHERE TABLE_SCHEMA = 'admin_ciresearch' 
 AND TABLE_NAME = 'dn_all';
 
 -- Kiểm tra số lượng bản ghi (phải là 0)

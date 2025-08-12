@@ -4,7 +4,7 @@
 -- Purpose: Set up indexes and configurations for optimal performance
 -- =====================================================
 
-USE sakila;
+USE admin_ciresearch;
 
 -- =====================================================
 -- 1. BACKUP EXISTING INDEXES (Optional - for safety)

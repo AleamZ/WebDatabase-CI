@@ -1,7 +1,7 @@
 # Script PowerShell để chạy SQL script
 param(
     [string]$Server = "localhost",
-    [string]$Database = "sakila",
+    [string]$Database = "admin_ciresearch",
     [string]$User = "root",
     [string]$Password = "1234"
 )

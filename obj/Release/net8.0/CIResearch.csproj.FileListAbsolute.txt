@@ -275,6 +275,7 @@ D:\Projects\Webdatabase-CI\obj\Release\net8.0\staticwebassets.build.json
 D:\Projects\Webdatabase-CI\obj\Release\net8.0\staticwebassets.build.json.cache
 D:\Projects\Webdatabase-CI\obj\Release\net8.0\staticwebassets.development.json
 D:\Projects\Webdatabase-CI\obj\Release\net8.0\staticwebassets.build.endpoints.json
+D:\Projects\Webdatabase-CI\obj\Release\net8.0\staticwebassets.upToDateCheck.txt
 D:\Projects\Webdatabase-CI\obj\Release\net8.0\CIResearch.csproj.Up2Date
 D:\Projects\Webdatabase-CI\obj\Release\net8.0\CIResearch.dll
 D:\Projects\Webdatabase-CI\obj\Release\net8.0\refint\CIResearch.dll

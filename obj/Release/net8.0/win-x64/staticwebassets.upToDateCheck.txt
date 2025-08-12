@@ -2,7 +2,6 @@ wwwroot\adminpanel\CSS\style.css
 wwwroot\adminpanel\JS\script.js
 wwwroot\af\Humanizer.resources.dll
 wwwroot\appsettings.Development.json
-wwwroot\appsettings.json
 wwwroot\ar\Humanizer.resources.dll
 wwwroot\az\Humanizer.resources.dll
 wwwroot\bg\Humanizer.resources.dll
@@ -2339,3 +2338,4 @@ wwwroot\zh-Hant\Microsoft.CodeAnalysis.resources.dll
 wwwroot\zh-Hant\Microsoft.CodeAnalysis.Scripting.resources.dll
 wwwroot\zh-Hant\Microsoft.CodeAnalysis.Workspaces.resources.dll
 wwwroot\ZstdSharp.dll
+wwwroot\appsettings.json

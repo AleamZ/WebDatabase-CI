@@ -239,13 +239,16 @@
                     <button type="button" class="btn btn-success btn-sm" onclick="exportData()">
                         <i class="fas fa-file-excel"></i> Xuất dữ liệu
                     </button>
+                    <a href="@Url.Action("ClearSession", "Admin")" class="btn btn-warning btn-sm" title="Xóa session nếu gặp lỗi">
+                        <i class="fas fa-broom"></i> Xóa Session
+                    </a>
                 }
-                @* else
+                else
                 {
                     <button type="button" class="btn btn-secondary btn-sm" disabled title="Cần đăng nhập để xuất dữ liệu">
                         <i class="fas fa-file-excel"></i> Xuất dữ liệu
                     </button>
-                } *@
+                }
             </div>
         </div>
         <div class="card-body">

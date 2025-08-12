@@ -84,24 +84,8 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRE5JbXBvcnRcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Projects/Webdatabase-CI/Views/DN/demo.index.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRE5cZGVtby5pbmRleC5jc2h0bWw=
-build_metadata.AdditionalFiles.CssScope = 
-
-[D:/Projects/Webdatabase-CI/Views/DN/Index.backup copy.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRE5cSW5kZXguYmFja3VwIGNvcHkuY3NodG1s
-build_metadata.AdditionalFiles.CssScope = 
-
-[D:/Projects/Webdatabase-CI/Views/DN/Index.backup.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRE5cSW5kZXguYmFja3VwLmNzaHRtbA==
-build_metadata.AdditionalFiles.CssScope = 
-
 [D:/Projects/Webdatabase-CI/Views/DN/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRE5cSW5kZXguY3NodG1s
-build_metadata.AdditionalFiles.CssScope = 
-
-[D:/Projects/Webdatabase-CI/Views/DN/IndexOptimized.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRE5cSW5kZXhPcHRpbWl6ZWQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [D:/Projects/Webdatabase-CI/Views/DN/ViewRawData.cshtml]

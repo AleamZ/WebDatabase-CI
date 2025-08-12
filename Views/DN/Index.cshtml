@@ -1153,26 +1153,6 @@
                         <i class="fas fa-table me-1"></i>
                                                 Dữ liệu chi tiết
                                             </button>
-                                            <button type="button" class="btn btn-warning btn-sm" onclick="showFilterGuide()">
-                                                <i class="fas fa-question-circle me-1"></i>
-                                                Hướng dẫn
-                    </button>
-                                            <button type="button" class="btn btn-primary btn-sm" onclick="testAutoUpdate()">
-                                                <i class="fas fa-sync-alt me-1"></i>
-                                                Test Auto-Update Cards
-                    </button>
-                                            <button type="button" class="btn btn-info btn-sm" onclick="debugCompanyCountDiscrepancy()">
-                        <i class="fas fa-search me-1"></i>
-                                                Debug Discrepancy
-                    </button>
-                                            <button type="button" class="btn btn-danger btn-sm" onclick="debugRevenueDataInDatabase()">
-                                                <i class="fas fa-database me-1"></i>
-                                                Debug Revenue NULL
-                    </button>
-                                            <button type="button" class="btn btn-warning btn-sm" onclick="compareCodeVsDatabase()">
-                                                <i class="fas fa-balance-scale me-1"></i>
-                                                Code vs DB
-                    </button>
                                             @if (Context.Session.GetString("Role") == "Admin")
                                             {
                                                 <a href="/AdminExportRequest" class="btn btn-dark btn-sm">
@@ -1944,6 +1924,13 @@ window.addEventListener('load', function() {
     if (canvas) {
         console.log('✅ Canvas element found');
         
+        // Check if chart already exists and destroy it first
+        const existingChart = Chart.getChart(canvas);
+        if (existingChart) {
+            console.log('🔄 Destroying existing chart before creating test chart...');
+            existingChart.destroy();
+        }
+        
         // Try to create a simple chart immediately
         try {
             const simpleChart = new Chart(canvas, {
@@ -2007,7 +1994,7 @@ function initVungKinhTeChart() {
     // ONLY USE REAL DATA FROM DATABASE - NO SAMPLE DATA
     if (!vungKinhTeData || vungKinhTeData.length === 0) {
         console.log('⚠️ No real data from database - chart will be empty');
-        console.log('⚠️ Expected database: Server=localhost;Database=sakila;User=root;Password=1234;');
+        console.log('⚠️ Expected database: Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;');
         console.log('⚠️ Expected data from Vungkinhte column');
         vungKinhTeData = [];
     }
@@ -2020,7 +2007,7 @@ function initVungKinhTeChart() {
     // NO DEFAULT SAMPLE DATA - Only show empty chart if no database data
     if (total === 0) {
         console.log('⚠️ No valid data from database - displaying empty chart');
-        console.log('⚠️ Database connection: Server=127.0.0.1;Database=sakilaciresearch;User=admin_dbciresearch;Password=9t52$7sBx;=admin_dbciresearch;Password=9t52$7sBx;');
+        console.log('⚠️ Database connection: Server=127.0.0.1;Database=admin_ciresearchciresearch;User=admin_dbciresearch;Password=9t52$7sBx;=admin_dbciresearch;Password=9t52$7sBx;');
         console.log('⚠️ Check Vungkinhte column in dn_all table for 7 economic zones');
         console.log('⚠️ Expected: Đông Nam Bộ, Đồng bằng Sông Hồng, Duyên hải Nam Trung Bộ, Bắc Trung Bộ, ĐBSCL, Tây Nguyên, Trung du và Miền núi Bắc Bộ');
         labels = ['Không có dữ liệu Vùng Kinh Tế'];
@@ -2038,7 +2025,11 @@ function initVungKinhTeChart() {
     
     try {
         // Destroy existing chart if any
-        Chart.getChart(ctx)?.destroy();
+        const existingChart = Chart.getChart(ctx);
+        if (existingChart) {
+            console.log('🔄 Destroying existing Vùng Kinh Tế chart...');
+            existingChart.destroy();
+        }
         
         const vungKinhTeChart = new Chart(ctx, {
             type: 'doughnut',
@@ -2119,6 +2110,8 @@ window.addEventListener('load', function() {
     }
 });
 </script>
+
+
 
 <!-- Advanced Filter JavaScript Functions -->
 <script>
@@ -2894,7 +2887,7 @@ function initIndustryChart() {
         return false;
     }
     
-    // Get data from ViewBag - MUST be from database sakilaciresearch TEN_NGANH column
+    // Get data from ViewBag - MUST be from database admin_ciresearchciresearch TEN_NGANH column
     let industryData = [];
     try {
         // Get data from ViewBag.IndustryData (passed from controller)
@@ -2902,7 +2895,7 @@ function initIndustryChart() {
         
         console.log('🔍 INDUSTRY DATA DEBUG:');
         console.log('📊 Industry data from ViewBag:', industryData);
-        console.log('📊 Data source: Server=127.0.0.1;Database=sakilaciresearch;User=admin_dbciresearch;Password=9t52$7sBx;=admin_dbciresearch;Password=9t52$7sBx; TEN_NGANH column');
+        console.log('📊 Data source: Server=127.0.0.1;Database=admin_ciresearchciresearch;User=admin_dbciresearch;Password=9t52$7sBx;=admin_dbciresearch;Password=9t52$7sBx; TEN_NGANH column');
         console.log('📊 Number of industries:', industryData ? industryData.length : 0);
         
         if (industryData && industryData.length > 0) {
@@ -2925,7 +2918,7 @@ function initIndustryChart() {
     // Check if we have real data from database TEN_NGANH column
     if (!industryData || industryData.length === 0) {
         console.error('❌ No real industry data from TEN_NGANH column!');
-        console.error('📊 Database connection: Server=127.0.0.1;Database=sakilaciresearch;User=admin_dbciresearch;Password=9t52$7sBx;=admin_dbciresearch;Password=9t52$7sBx;');
+        console.error('📊 Database connection: Server=127.0.0.1;Database=admin_ciresearchciresearch;User=admin_dbciresearch;Password=9t52$7sBx;=admin_dbciresearch;Password=9t52$7sBx;');
         console.error('📊 Expected data from TEN_NGANH column not found');
         console.error('❌ Chart creation will be aborted - NO FALLBACK DATA');
         
@@ -2934,7 +2927,7 @@ function initIndustryChart() {
         return false;
     } else {
         console.log('✅ Using REAL industry data from TEN_NGANH column');
-        console.log('📊 Data source: database sakilaciresearch, table dn_all, column TEN_NGANH');
+        console.log('📊 Data source: database admin_ciresearchciresearch, table dn_all, column TEN_NGANH');
         console.log('📊 Number of industries found:', industryData.length);
     }
     
@@ -2955,17 +2948,17 @@ function initIndustryChart() {
     // Validate data quality - MUST have real data from database TEN_NGANH column
     if (total === 0) {
         console.error('❌ CRITICAL: No valid industry data from TEN_NGANH column!');
-        console.error('❌ Database: Server=127.0.0.1;Database=sakilaciresearch;User=admin_dbciresearch;Password=9t52$7sBx;=admin_dbciresearch;Password=9t52$7sBx;');
+        console.error('❌ Database: Server=127.0.0.1;Database=admin_ciresearchciresearch;User=admin_dbciresearch;Password=9t52$7sBx;=admin_dbciresearch;Password=9t52$7sBx;');
         console.error('❌ Expected TEN_NGANH column data not found');
         console.error('❌ Check database connection and data availability');
         
         // Show error message to user
-        alert('⚠️ Không thể tải dữ liệu ngành nghề từ cột TEN_NGANH!\n\nVui lòng kiểm tra:\n- Kết nối database sakilaciresearch\n- Dữ liệu trong cột TEN_NGANH\n- Server: localhost, User: root, Password: 1234');
+        alert('⚠️ Không thể tải dữ liệu ngành nghề từ cột TEN_NGANH!\n\nVui lòng kiểm tra:\n- Kết nối database admin_ciresearchciresearch\n- Dữ liệu trong cột TEN_NGANH\n- Server: localhost, User: root, Password: 1234');
         
         // Return false to indicate chart creation failed
         return false;
     } else {
-        console.log('✅ CONFIRMED: Using real TEN_NGANH data from database sakilaciresearch');
+        console.log('✅ CONFIRMED: Using real TEN_NGANH data from database admin_ciresearchciresearch');
         console.log('📊 Total companies with TEN_NGANH data:', total);
         console.log('📊 Top 5 industries:', labels.slice(0, 5));
     }
@@ -2982,7 +2975,11 @@ function initIndustryChart() {
     
     try {
         // Destroy existing chart if any
-        Chart.getChart(ctx)?.destroy();
+        const existingChart = Chart.getChart(ctx);
+        if (existingChart) {
+            console.log('🔄 Destroying existing Industry chart...');
+            existingChart.destroy();
+        }
         
         const industryChart = new Chart(ctx, {
             type: 'bar',
@@ -3207,7 +3204,7 @@ function testIndustryDataFromDatabase() {
             } else {
                 alert(`❌ Industry Data Test FAILED!\n\n` +
                       `Error: ${data.message}\n` +
-                      `Database: ${data.database || 'sakilaciresearch'}\n` +
+                      `Database: ${data.database || 'admin_ciresearchciresearch'}\n` +
                       `Table: ${data.table || 'dn_all'}\n` +
                       `Column: ${data.column || 'TEN_NGANH'}`);
             }
@@ -3907,15 +3904,45 @@ function initMarketShareChart() {
         return false;
     }
     
-    // Get selected year from filter
-    const selectedYears = getSelectedFilterValues('yearFilter');
-    let apiUrl = '/DN/GetMarketShareChart';
+    // Get all current filter values
+    const filters = getCurrentFilterValues();
+    console.log('📊 Current filters for Market Share chart:', filters);
     
-    if (selectedYears && selectedYears.length > 0) {
-        // Use first selected year
-        apiUrl += `?nam=${selectedYears[0]}`;
-        console.log(`📡 Market Share API with year filter: ${selectedYears[0]}`);
+    // Build API URL with all filters
+    let apiUrl = '/DN/GetFilteredMarketShareChart';
+    const params = new URLSearchParams();
+    
+    // Add year filter
+    if (filters.years && filters.years.length > 0) {
+        filters.years.forEach(year => params.append('Nam', year));
     }
+    
+    // Add business type filter
+    if (filters.businessTypes && filters.businessTypes.length > 0) {
+        filters.businessTypes.forEach(type => params.append('Loaihinhkte', type));
+    }
+    
+    // Add province filter
+    if (filters.provinces && filters.provinces.length > 0) {
+        filters.provinces.forEach(province => params.append('MaTinh_Dieutra', province));
+    }
+    
+    // Add economic zone filter
+    if (filters.economicZones && filters.economicZones.length > 0) {
+        filters.economicZones.forEach(zone => params.append('Vungkinhte', zone));
+    }
+    
+    // Add company size filter
+    if (filters.companySizes && filters.companySizes.length > 0) {
+        filters.companySizes.forEach(size => params.append('QuyMo', size));
+    }
+    
+    if (params.toString()) {
+        apiUrl += '?' + params.toString();
+    }
+    
+    console.log(`📡 Market Share API URL: ${apiUrl}`);
+    console.log(`📡 Market Share API with filters:`, filters);
     
     fetch(apiUrl)
         .then(response => {
@@ -3926,7 +3953,7 @@ function initMarketShareChart() {
             console.log('📊 Market Share API Response:', apiData);
             
             if (apiData.success && apiData.data && apiData.data.datasets && apiData.data.datasets.length > 0) {
-                console.log('✅ Using Market Share API data');
+                console.log('✅ Using Filtered Market Share API data');
                 createMarketShareChartWithData(ctx, apiData.data, apiData.metadata, apiData.detailedData);
             } else {
                 console.log('⚠️ Market Share API failed or no data, showing error message');
@@ -4210,8 +4237,8 @@ function createMarketShareChartWithData(ctx, chartData, metadata, detailedData) 
             console.log('🔄 Chart resized maintaining aspect ratio');
         }, 200);
         
-        // Create custom legend
-        createMarketShareLegend(chartData.labels, chartData.datasets, metadata, detailedData);
+        // Create custom legend with chart data
+        createMarketShareLegendFromChart(chart, chartData, metadata, detailedData);
         
         return true;
     } catch (error) {
@@ -4311,10 +4338,12 @@ function createEmptyMarketShareChart(ctx, errorData) {
     console.log('🔴 Empty Market Share chart created with error message');
 }
 
-// Function to create custom legend for Market Share chart
-function createMarketShareLegend(labels, datasets, metadata, detailedData) {
+// Function to create custom legend for Market Share chart from chart data
+function createMarketShareLegendFromChart(chart, chartData, metadata, detailedData) {
     const legendContainer = document.getElementById('marketShareLegendDetails');
     if (!legendContainer) return;
+    
+    console.log('📊 Creating Market Share Legend from chart data:', { chart, chartData, metadata, detailedData });
     
     let legendHTML = `
         <!-- Market Share Summary -->
@@ -4324,39 +4353,55 @@ function createMarketShareLegend(labels, datasets, metadata, detailedData) {
                 Tổng quan thị trường
             </h6>
             <div style="font-size: 0.85rem;">
-                <div class="mb-1">📅 Năm phân tích: <strong>${metadata.analysisYear}</strong></div>
-                <div class="mb-1">📊 Tổng DN phân tích: <strong>${metadata.totalCompanies}</strong></div>
-                <div class="mb-1">💰 Tổng doanh thu thị trường: <strong>${metadata.totalMarketRevenue} tỷ VND</strong></div>
-                <div class="mb-1">🏆 Top 10 chiếm: <strong>${detailedData.marketSummary.top10SharePercentage}%</strong></div>
-                <div class="mb-1">🔄 Khác chiếm: <strong>${detailedData.marketSummary.othersSharePercentage}%</strong></div>
-                <div class="mb-1">✅ Tổng Market Share: <strong>${detailedData.marketSummary.totalMarketShareValidation}%</strong></div>
-                <div class="${detailedData.marketSummary.shouldBe100Percent ? 'text-success' : 'text-warning'}">
-                    ${detailedData.marketSummary.shouldBe100Percent ? '✅' : '⚠️'} Validation: <strong>${detailedData.marketSummary.calculationAccuracy}</strong>
-                </div>
+                <div class="mb-1">📊 Tổng DN phân tích: <strong>${metadata?.totalCompanies || 'N/A'}</strong></div>
+                <div class="mb-1">💼 DN có doanh thu: <strong>${metadata?.companiesWithPositiveRevenue || 'N/A'}</strong></div>
+                <div class="mb-1">💰 Tổng doanh thu thị trường: <strong>${metadata?.totalMarketRevenue ? (metadata.totalMarketRevenue / 1000).toFixed(2) : 'N/A'} tỷ VND</strong></div>
             </div>
         </div>
         
-        <!-- Revenue Breakdown -->
+        <!-- Applied Filters -->
         <div class="mb-3 p-3 bg-light border rounded">
-            <h6 class="text-secondary mb-2">
-                <i class="fas fa-calculator me-1"></i>
-                Chi tiết BASE calculation
+            <h6 class="text-info mb-2">
+                <i class="fas fa-filter me-1"></i>
+                Bộ lọc đã áp dụng
             </h6>
-                         <div style="font-size: 0.8rem;">
-                <div class="mb-1">🏢 <strong>DN trong BASE: ${metadata.revenueBreakdown.totalCompaniesInBase}</strong></div>
-                <div class="mb-1">📊 DN có dữ liệu doanh thu: <strong>${metadata.revenueBreakdown.companiesWithActualRevenueData}</strong></div>
-                <div class="mb-1">❓ DN KHÔNG có dữ liệu DT: <strong>${metadata.revenueBreakdown.companiesWithoutRevenueData}</strong></div>
-                <hr style="margin: 8px 0;">
-                <div class="mb-1">📈 DN có doanh thu dương: <strong>${metadata.revenueBreakdown.companiesWithPositiveRevenue}</strong></div>
-                <div class="mb-1">📉 DN có doanh thu âm: <strong>${metadata.revenueBreakdown.companiesWithNegativeRevenue}</strong></div>
-                <div class="mb-1">⭕ DN có doanh thu = 0: <strong>${metadata.revenueBreakdown.companiesWithZeroRevenue}</strong></div>
-                <hr style="margin: 8px 0;">
-                <div class="mb-1">💚 Tổng doanh thu dương: <strong>${metadata.revenueBreakdown.positiveRevenueSum} tỷ VND</strong></div>
-                <div class="mb-1">❤️ Tổng doanh thu âm: <strong>${metadata.revenueBreakdown.negativeRevenueSum} tỷ VND</strong></div>
-                <div>🔵 <strong>BASE = ${metadata.revenueBreakdown.totalMarketRevenueSum} tỷ VND</strong></div>
-                <div class="mt-2 text-muted" style="font-size: 0.75rem;">
-                    <em>DN không có dữ liệu DT được tính là 0% market share</em>
-                </div>
+            <div style="font-size: 0.85rem;">
+    `;
+    
+    // Show applied filters
+    if (metadata?.appliedFilters) {
+        const filters = metadata.appliedFilters;
+        let hasFilters = false;
+        
+        if (filters.years && filters.years.length > 0) {
+            legendHTML += `<div class="mb-1">📅 Năm: <strong>${filters.years.join(', ')}</strong></div>`;
+            hasFilters = true;
+        }
+        if (filters.businessTypes && filters.businessTypes.length > 0) {
+            legendHTML += `<div class="mb-1">🏢 Loại hình: <strong>${filters.businessTypes.join(', ')}</strong></div>`;
+            hasFilters = true;
+        }
+        if (filters.provinces && filters.provinces.length > 0) {
+            legendHTML += `<div class="mb-1">📍 Tỉnh/TP: <strong>${filters.provinces.join(', ')}</strong></div>`;
+            hasFilters = true;
+        }
+        if (filters.economicZones && filters.economicZones.length > 0) {
+            legendHTML += `<div class="mb-1">🌍 Vùng kinh tế: <strong>${filters.economicZones.join(', ')}</strong></div>`;
+            hasFilters = true;
+        }
+        if (filters.companySizes && filters.companySizes.length > 0) {
+            legendHTML += `<div class="mb-1">📏 Quy mô: <strong>${filters.companySizes.join(', ')}</strong></div>`;
+            hasFilters = true;
+        }
+        
+        if (!hasFilters) {
+            legendHTML += `<div class="mb-1 text-muted">Không có bộ lọc nào được áp dụng</div>`;
+        }
+    } else {
+        legendHTML += `<div class="mb-1 text-muted">Không có thông tin bộ lọc</div>`;
+    }
+    
+    legendHTML += `
             </div>
         </div>
         
@@ -4368,58 +4413,60 @@ function createMarketShareLegend(labels, datasets, metadata, detailedData) {
             </h6>
     `;
     
-    if (detailedData && detailedData.top10Details) {
-        detailedData.top10Details.forEach((company, index) => {
-            const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFCE56', '#FF9F40', '#9966FF', '#FF6384', '#36A2EB', '#C9CBCF'];
+    // Extract data from chart
+    if (chart && chart.data && chart.data.labels && chart.data.labels.length > 0) {
+        const labels = chart.data.labels;
+        const data = chart.data.datasets[0].data;
+        const colors = chart.data.datasets[0].backgroundColor;
+        
+        console.log('📊 Chart data for legend:', { labels, data, colors });
+        
+        labels.forEach((label, index) => {
+            const marketShare = data[index];
             const color = colors[index] || '#95A5A6';
+            
+            // Try to get company details from detailedData
+            let companyName = label;
+            let taxCode = 'N/A';
+            let province = 'N/A';
+            let revenue = 'N/A';
+            
+            if (detailedData && detailedData.length > index) {
+                const company = detailedData[index];
+                companyName = company.TenDN || company.companyName || label;
+                taxCode = company.Masothue || company.taxCode || 'N/A';
+                province = company.Province || company.province || 'N/A';
+                revenue = company.Revenue ? (company.Revenue / 1000).toFixed(2) : 'N/A';
+            }
             
             legendHTML += `
                 <div class="legend-item mb-2 p-2 bg-white border rounded" style="border-left: 4px solid ${color} !important;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <div style="flex: 1;">
                             <div style="font-weight: 600; font-size: 0.8rem; color: #2d3748; margin-bottom: 2px;">
-                                #${company.rank} ${company.companyName}
+                                #${index + 1} ${companyName}
                             </div>
                             <div style="font-size: 0.7rem; color: #718096;">
-                                MST: ${company.taxCode} | Năm: ${company.year}
+                                MST: ${taxCode} | ${province}
                             </div>
                         </div>
                         <div style="text-align: right;">
                             <div style="font-weight: 600; color: ${color}; font-size: 0.85rem;">
-                                ${parseFloat(company.marketShare).toFixed(2)}%
+                                ${parseFloat(marketShare).toFixed(2)}%
                             </div>
                             <div style="font-size: 0.75rem; color: #718096;">
-                                ${parseFloat(company.revenue).toFixed(2)} tỷ VND
+                                ${revenue} tỷ VND
                             </div>
                         </div>
                     </div>
                 </div>
             `;
         });
-    }
-    
-    // Others section
-    if (detailedData && detailedData.othersData && detailedData.othersData.count > 0) {
+    } else {
         legendHTML += `
-            <div class="legend-item mb-2 p-2 bg-light border rounded" style="border-left: 4px solid #95A5A6 !important;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div style="flex: 1;">
-                        <div style="font-weight: 600; font-size: 0.8rem; color: #2d3748; margin-bottom: 2px;">
-                            Others (${detailedData.othersData.count} DN)
-                        </div>
-                        <div style="font-size: 0.7rem; color: #718096;">
-                            Các doanh nghiệp khác
-                        </div>
-                    </div>
-                    <div style="text-align: right;">
-                        <div style="font-weight: 600; color: #95A5A6; font-size: 0.85rem;">
-                            ${parseFloat(detailedData.othersData.totalMarketShare).toFixed(2)}%
-                        </div>
-                        <div style="font-size: 0.75rem; color: #718096;">
-                            ${parseFloat(detailedData.othersData.totalRevenue).toFixed(2)} tỷ VND
-                        </div>
-                    </div>
-                </div>
+            <div class="text-muted text-center p-3">
+                <i class="fas fa-exclamation-triangle"></i>
+                Không có dữ liệu chart
             </div>
         `;
     }
@@ -4435,12 +4482,143 @@ function createMarketShareLegend(labels, datasets, metadata, detailedData) {
             </h6>
             <div style="font-size: 0.8rem; color: #0c5460;">
                 <strong>Market Share = (Doanh thu DN / Tổng doanh thu thị trường) × 100%</strong><br>
-                <small>Dữ liệu lấy từ cột SR_Doanhthu_Thuan_BH_CCDV (năm gần nhất của mỗi DN)</small>
+                <small>Dữ liệu lấy từ cột SR_Doanhthu_Thuan_BH_CCDV với bộ lọc đã chọn</small>
             </div>
         </div>
     `;
     
     legendContainer.innerHTML = legendHTML;
+    console.log('✅ Market Share Legend created successfully from chart data');
+}
+
+// Function to create custom legend for Market Share chart (legacy)
+function createMarketShareLegend(labels, datasets, metadata, detailedData) {
+    const legendContainer = document.getElementById('marketShareLegendDetails');
+    if (!legendContainer) return;
+    
+    console.log('📊 Creating Market Share Legend with data:', { metadata, detailedData });
+    
+    let legendHTML = `
+        <!-- Market Share Summary -->
+        <div class="mb-3 p-3 bg-white border rounded">
+            <h6 class="text-primary mb-2">
+                <i class="fas fa-chart-pie me-1"></i>
+                Tổng quan thị trường
+            </h6>
+            <div style="font-size: 0.85rem;">
+                <div class="mb-1">📊 Tổng DN phân tích: <strong>${metadata.totalCompanies}</strong></div>
+                <div class="mb-1">💼 DN có doanh thu: <strong>${metadata.companiesWithPositiveRevenue}</strong></div>
+                <div class="mb-1">💰 Tổng doanh thu thị trường: <strong>${(metadata.totalMarketRevenue / 1000).toFixed(2)} tỷ VND</strong></div>
+            </div>
+        </div>
+        
+        <!-- Applied Filters -->
+        <div class="mb-3 p-3 bg-light border rounded">
+            <h6 class="text-info mb-2">
+                <i class="fas fa-filter me-1"></i>
+                Bộ lọc đã áp dụng
+            </h6>
+            <div style="font-size: 0.85rem;">
+    `;
+    
+    // Show applied filters
+    if (metadata.appliedFilters) {
+        const filters = metadata.appliedFilters;
+        let hasFilters = false;
+        
+        if (filters.years && filters.years.length > 0) {
+            legendHTML += `<div class="mb-1">📅 Năm: <strong>${filters.years.join(', ')}</strong></div>`;
+            hasFilters = true;
+        }
+        if (filters.businessTypes && filters.businessTypes.length > 0) {
+            legendHTML += `<div class="mb-1">🏢 Loại hình: <strong>${filters.businessTypes.join(', ')}</strong></div>`;
+            hasFilters = true;
+        }
+        if (filters.provinces && filters.provinces.length > 0) {
+            legendHTML += `<div class="mb-1">📍 Tỉnh/TP: <strong>${filters.provinces.join(', ')}</strong></div>`;
+            hasFilters = true;
+        }
+        if (filters.economicZones && filters.economicZones.length > 0) {
+            legendHTML += `<div class="mb-1">🌍 Vùng kinh tế: <strong>${filters.economicZones.join(', ')}</strong></div>`;
+            hasFilters = true;
+        }
+        if (filters.companySizes && filters.companySizes.length > 0) {
+            legendHTML += `<div class="mb-1">📏 Quy mô: <strong>${filters.companySizes.join(', ')}</strong></div>`;
+            hasFilters = true;
+        }
+        
+        if (!hasFilters) {
+            legendHTML += `<div class="mb-1 text-muted">Không có bộ lọc nào được áp dụng</div>`;
+        }
+    }
+    
+    legendHTML += `
+            </div>
+        </div>
+        
+        <!-- Top 10 Details -->
+        <div class="mb-3">
+            <h6 class="text-success mb-2">
+                <i class="fas fa-trophy me-1"></i>
+                Top 10 Market Share
+            </h6>
+    `;
+    
+    if (detailedData && detailedData.length > 0) {
+        detailedData.forEach((company, index) => {
+            const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFCE56', '#FF9F40', '#9966FF', '#FF6384', '#36A2EB', '#C9CBCF'];
+            const color = colors[index] || '#95A5A6';
+            
+            legendHTML += `
+                <div class="legend-item mb-2 p-2 bg-white border rounded" style="border-left: 4px solid ${color} !important;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; font-size: 0.8rem; color: #2d3748; margin-bottom: 2px;">
+                                #${index + 1} ${company.TenDN}
+                            </div>
+                            <div style="font-size: 0.7rem; color: #718096;">
+                                MST: ${company.Masothue} | ${company.Province}
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-weight: 600; color: ${color}; font-size: 0.85rem;">
+                                ${parseFloat(company.MarketShare).toFixed(2)}%
+                            </div>
+                            <div style="font-size: 0.75rem; color: #718096;">
+                                ${(company.Revenue / 1000).toFixed(2)} tỷ VND
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+    } else {
+        legendHTML += `
+            <div class="text-muted text-center p-3">
+                <i class="fas fa-exclamation-triangle"></i>
+                Không có dữ liệu doanh nghiệp
+            </div>
+        `;
+    }
+    
+    legendHTML += `
+        </div>
+        
+        <!-- Formula Explanation -->
+        <div class="mt-3 p-3 bg-info bg-opacity-10 border border-info rounded">
+            <h6 class="text-info mb-2">
+                <i class="fas fa-calculator me-1"></i>
+                Công thức tính toán
+            </h6>
+            <div style="font-size: 0.8rem; color: #0c5460;">
+                <strong>Market Share = (Doanh thu DN / Tổng doanh thu thị trường) × 100%</strong><br>
+                <small>Dữ liệu lấy từ cột SR_Doanhthu_Thuan_BH_CCDV với bộ lọc đã chọn</small>
+            </div>
+        </div>
+    `;
+    
+    legendContainer.innerHTML = legendHTML;
+    console.log('✅ Market Share Legend created successfully');
 }
 
 // Initialize Market Share chart when DOM is ready
@@ -4467,16 +4645,46 @@ window.addEventListener('load', function() {
 <script>
 // Test function for Market Share API
 function testMarketShareAPI() {
-    console.log('🧪 Testing Market Share API...');
+    console.log('🧪 Testing Filtered Market Share API...');
     
-    // Get selected year from filter for API test
-    const selectedYears = getSelectedFilterValues('yearFilter');
-    let testApiUrl = '/DN/GetMarketShareChart';
+    // Get all current filter values for API test
+    const filters = getCurrentFilterValues();
+    console.log('📊 Testing with filters:', filters);
     
-    if (selectedYears && selectedYears.length > 0) {
-        testApiUrl += `?nam=${selectedYears[0]}`;
-        console.log(`📡 Testing Market Share API with year: ${selectedYears[0]}`);
+    // Build API URL with all filters
+    let testApiUrl = '/DN/GetFilteredMarketShareChart';
+    const params = new URLSearchParams();
+    
+    // Add year filter
+    if (filters.years && filters.years.length > 0) {
+        filters.years.forEach(year => params.append('Nam', year));
     }
+    
+    // Add business type filter
+    if (filters.businessTypes && filters.businessTypes.length > 0) {
+        filters.businessTypes.forEach(type => params.append('Loaihinhkte', type));
+    }
+    
+    // Add province filter
+    if (filters.provinces && filters.provinces.length > 0) {
+        filters.provinces.forEach(province => params.append('MaTinh_Dieutra', province));
+    }
+    
+    // Add economic zone filter
+    if (filters.economicZones && filters.economicZones.length > 0) {
+        filters.economicZones.forEach(zone => params.append('Vungkinhte', zone));
+    }
+    
+    // Add company size filter
+    if (filters.companySizes && filters.companySizes.length > 0) {
+        filters.companySizes.forEach(size => params.append('QuyMo', size));
+    }
+    
+    if (params.toString()) {
+        testApiUrl += '?' + params.toString();
+    }
+    
+    console.log(`📡 Testing Filtered Market Share API URL: ${testApiUrl}`);
     
     fetch(testApiUrl)
         .then(response => {
@@ -4487,34 +4695,42 @@ function testMarketShareAPI() {
             console.log('📊 Market Share API test data:', data);
             
             if (data.success) {
-                let message = `✅ MARKET SHARE API SUCCESSFUL!\n\n`;
+                let message = `✅ FILTERED MARKET SHARE API SUCCESSFUL!\n\n`;
                 
-                message += `📊 MARKET ANALYSIS:\n`;
+                message += `📊 FILTERED MARKET ANALYSIS:\n`;
                 message += `- Total Companies: ${data.metadata.totalCompanies}\n`;
-                message += `- Top 10 Companies: ${data.metadata.top10Companies}\n`;
-                message += `- Others Count: ${data.metadata.othersCount}\n`;
-                message += `- Total Market Revenue: ${data.metadata.totalMarketRevenue} tỷ VND\n\n`;
+                message += `- Companies with Revenue: ${data.metadata.companiesWithPositiveRevenue}\n`;
+                message += `- Total Market Revenue: ${(data.metadata.totalMarketRevenue / 1000).toFixed(2)} tỷ VND\n\n`;
                 
-                message += `📋 FORMULA:\n`;
-                message += `${data.metadata.marketShareFormula}\n\n`;
+                message += `🔍 APPLIED FILTERS:\n`;
+                if (data.metadata.appliedFilters.years && data.metadata.appliedFilters.years.length > 0) {
+                    message += `- Years: ${data.metadata.appliedFilters.years.join(', ')}\n`;
+                }
+                if (data.metadata.appliedFilters.businessTypes && data.metadata.appliedFilters.businessTypes.length > 0) {
+                    message += `- Business Types: ${data.metadata.appliedFilters.businessTypes.join(', ')}\n`;
+                }
+                if (data.metadata.appliedFilters.provinces && data.metadata.appliedFilters.provinces.length > 0) {
+                    message += `- Provinces: ${data.metadata.appliedFilters.provinces.join(', ')}\n`;
+                }
+                if (data.metadata.appliedFilters.economicZones && data.metadata.appliedFilters.economicZones.length > 0) {
+                    message += `- Economic Zones: ${data.metadata.appliedFilters.economicZones.join(', ')}\n`;
+                }
+                if (data.metadata.appliedFilters.companySizes && data.metadata.appliedFilters.companySizes.length > 0) {
+                    message += `- Company Sizes: ${data.metadata.appliedFilters.companySizes.join(', ')}\n`;
+                }
+                message += `\n`;
                 
                 message += `🏆 TOP 5 COMPANIES:\n`;
-                if (data.detailedData && data.detailedData.top10Details) {
-                    data.detailedData.top10Details.slice(0, 5).forEach(company => {
-                        message += `${company.rank}. ${company.companyName}\n`;
-                        message += `   Market Share: ${company.marketShare}%\n`;
-                        message += `   Revenue: ${company.revenue} tỷ VND\n`;
+                if (data.detailedData && data.detailedData.length > 0) {
+                    data.detailedData.slice(0, 5).forEach((company, index) => {
+                        message += `${index + 1}. ${company.TenDN}\n`;
+                        message += `   Market Share: ${company.MarketShare}%\n`;
+                        message += `   Revenue: ${(company.Revenue / 1000).toFixed(2)} tỷ VND\n`;
+                        message += `   Province: ${company.Province}\n`;
                     });
                 }
                 
-                message += `\n📈 MARKET SUMMARY:\n`;
-                if (data.detailedData && data.detailedData.marketSummary) {
-                    message += `- Top 10 Share: ${data.detailedData.marketSummary.top10SharePercentage}%\n`;
-                    message += `- Others Share: ${data.detailedData.marketSummary.othersSharePercentage}%\n`;
-                }
-                
-                message += `\n✅ Data Source: ${data.metadata.dataSource}\n`;
-                message += `Unit: ${data.metadata.unit}\n`;
+                message += `\n⏱️ Execution Time: ${data.executionTime}ms\n`;
                 message += `\nCheck console for full details.`;
                 
                 alert(message);
@@ -4678,7 +4894,7 @@ function refreshCompanySizeChart(filters = null) {
     
     return new Promise((resolve) => {
         try {
-            initQuyMoChart(); // Re-initialize with updated year
+            createNewQuyMoChart(); // Re-initialize with updated year
             resolve();
         } catch (error) {
             console.error('❌ Error refreshing Company Size chart:', error);
@@ -4697,7 +4913,7 @@ function showLoadingIndicators() {
     
     const chartContainers = [
         'marketShareChart', 'vungKinhTeChart', 'industryChart', 
-        'quyMoChart'
+        'newQuyMoChart'
         // 'revenueChart', 'profitChart' - removed
     ];
     
@@ -4737,7 +4953,7 @@ function showLoadingIndicators() {
 function hideLoadingIndicators() {
     const chartContainers = [
         'marketShareChart', 'vungKinhTeChart', 'industryChart', 
-        'quyMoChart'
+        'newQuyMoChart'
         // 'revenueChart', 'profitChart' - removed
     ];
     

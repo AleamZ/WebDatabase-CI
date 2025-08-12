@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CIResearch")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+880dcfb90d6a95a8c451354b403a674caef96e55")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1b7de2e45cd33db3ef3016eeaf29324cdc5ecd95")]
 [assembly: System.Reflection.AssemblyProductAttribute("CIResearch")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CIResearch")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

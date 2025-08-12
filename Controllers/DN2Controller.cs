@@ -31,7 +31,7 @@ namespace CIResearch.Controllers
     public class DN2Controller : Controller
     {
         private readonly IMemoryCache _cache;
-        private string _connectionString = "Server=localhost;Database=sakila;User=root;Password=1234;";
+        private string _connectionString = "Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;";
 
         // Multi-level cache keys for comprehensive caching
         private const string DATA_CACHE_KEY = "dn_all2";
@@ -2800,7 +2800,7 @@ namespace CIResearch.Controllers
                         .OrderByDescending(x => x.Count)
                         .ToList(),
                     BusinessTypes = stats.BusinessTypeData,
-                    ConnectionString = "Server=localhost;Database=sakila;User=root;Password=1234;",
+                    ConnectionString = "Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;",
                     DatabaseTable = "dn_all2"
                 };
 
@@ -2836,7 +2836,7 @@ namespace CIResearch.Controllers
 
                 var result = new
                 {
-                    DatabaseConnection = "✅ Connected to Server=localhost;Database=sakila;User=root;Password=1234;",
+                    DatabaseConnection = "✅ Connected to Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;",
                     TableUsed = "dn_all2",
                     ColumnUsed = "Vungkinhte",
                     TotalRecords = allData.Count,
@@ -2853,7 +2853,7 @@ namespace CIResearch.Controllers
                 {
                     Error = ex.Message,
                     StackTrace = ex.StackTrace,
-                    DatabaseConnection = "❌ Failed to connect to Server=localhost;Database=sakila;User=root;Password=1234;"
+                    DatabaseConnection = "❌ Failed to connect to Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;"
                 });
             }
         }
@@ -2983,7 +2983,7 @@ namespace CIResearch.Controllers
                     companySizeDistribution = companySizeData,
                     databaseInfo = new
                     {
-                        connectionString = "Server=localhost;Database=sakila;User=root;Password=1234;",
+                        connectionString = "Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;",
                         table = "dn_all2",
                         revenueColumn = "SR_Doanhthu_Thuan_BH_CCDV",
                         unit = "triệu VND"
@@ -3150,7 +3150,7 @@ namespace CIResearch.Controllers
 
                     database = "admin_ciresearch",
                     table = "dn_all2",
-                    connectionString = "Server=localhost;Database=sakila;User=root;Password=1234;",
+                    connectionString = "Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;",
 
                     rawDataSample = rawData,
                     databaseStatistics = dbStats,
@@ -3278,7 +3278,7 @@ namespace CIResearch.Controllers
                 {
                     success = false,
                     message = $"❌ Trend Data Test FAILED: {ex.Message}",
-                    connectionString = "Server=localhost;Database=sakila;User=root;Password=1234;",
+                    connectionString = "Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;",
                     timestamp = DateTime.Now
                 });
             }
@@ -3682,7 +3682,7 @@ namespace CIResearch.Controllers
                         years = stats.Years.Count,
                         message = "✅ Real data from database in Chart.js format",
                         timestamp = DateTime.Now,
-                        dataSource = "Real database: Server=localhost;Database=sakila;User=root;Password=1234;"
+                        dataSource = "Real database: Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;"
                     }
                 };
 

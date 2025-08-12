@@ -1,5 +1,5 @@
--- Tạo bảng all_data_final trong database sakila
-USE sakila;
+-- Tạo bảng all_data_final trong database admin_ciresearch
+USE admin_ciresearch;
 
 -- Tạo bảng all_data_final
 CREATE TABLE IF NOT EXISTS all_data_final (

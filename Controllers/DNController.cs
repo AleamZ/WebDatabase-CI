@@ -31,7 +31,7 @@ namespace CIResearch.Controllers
     public class DNController : Controller
     {
         private readonly IMemoryCache _cache;
-        private string _connectionString = "Server=localhost;Database=sakila;User=root;Password=1234;";
+        private string _connectionString = "Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;";
 
         // Multi-level cache keys for comprehensive caching
         private const string DATA_CACHE_KEY = "dn_all";
@@ -2841,7 +2841,7 @@ namespace CIResearch.Controllers
                         .OrderByDescending(x => x.Count)
                         .ToList(),
                     BusinessTypes = stats.BusinessTypeData,
-                    ConnectionString = "Server=localhost;Database=sakila;User=root;Password=1234;",
+                    ConnectionString = "Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;",
                     DatabaseTable = "dn_all"
                 };
 
@@ -2877,7 +2877,7 @@ namespace CIResearch.Controllers
 
                 var result = new
                 {
-                    DatabaseConnection = "✅ Connected to Server=localhost;Database=sakila;User=root;Password=1234;",
+                    DatabaseConnection = "✅ Connected to Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;",
                     TableUsed = "dn_all",
                     ColumnUsed = "Vungkinhte",
                     TotalRecords = allData.Count,
@@ -2894,7 +2894,7 @@ namespace CIResearch.Controllers
                 {
                     Error = ex.Message,
                     StackTrace = ex.StackTrace,
-                    DatabaseConnection = "❌ Failed to connect to Server=localhost;Database=sakila;User=root;Password=1234;"
+                    DatabaseConnection = "❌ Failed to connect to Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;"
                 });
             }
         }
@@ -3024,7 +3024,7 @@ namespace CIResearch.Controllers
                     companySizeDistribution = companySizeData,
                     databaseInfo = new
                     {
-                        connectionString = "Server=localhost;Database=sakila;User=root;Password=1234;",
+                        connectionString = "Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;",
                         table = "dn_all",
                         revenueColumn = "SR_Doanhthu_Thuan_BH_CCDV",
                         unit = "triệu VND"
@@ -3191,7 +3191,7 @@ namespace CIResearch.Controllers
 
                     database = "admin_ciresearch",
                     table = "dn_all",
-                    connectionString = "Server=localhost;Database=sakila;User=root;Password=1234;",
+                    connectionString = "Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;",
 
                     rawDataSample = rawData,
                     databaseStatistics = dbStats,
@@ -3319,7 +3319,7 @@ namespace CIResearch.Controllers
                 {
                     success = false,
                     message = $"❌ Trend Data Test FAILED: {ex.Message}",
-                    connectionString = "Server=localhost;Database=sakila;User=root;Password=1234;",
+                    connectionString = "Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;",
                     timestamp = DateTime.Now
                 });
             }
@@ -3339,7 +3339,7 @@ namespace CIResearch.Controllers
                     DatabaseConnected = connectionTest.IsConnected,
                     message = connectionTest.Message,
                     details = connectionTest.Details,
-                    connectionString = "Server=localhost;Database=sakila;User=root;Password=1234;",
+                    connectionString = "Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;",
                     timestamp = DateTime.Now
                 });
             }
@@ -3353,7 +3353,7 @@ namespace CIResearch.Controllers
                     message = "❌ Lỗi kiểm tra kết nối database!",
                     error = ex.Message,
                     details = $"Lỗi chi tiết: {ex.Message}",
-                    connectionString = "Server=localhost;Database=sakila;User=root;Password=1234;",
+                    connectionString = "Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;",
                     timestamp = DateTime.Now
                 });
             }
@@ -3723,7 +3723,7 @@ namespace CIResearch.Controllers
                         years = stats.Years.Count,
                         message = "✅ Real data from database in Chart.js format",
                         timestamp = DateTime.Now,
-                        dataSource = "Real database: Server=localhost;Database=sakila;User=root;Password=1234;"
+                        dataSource = "Real database: Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;"
                     }
                 };
 
@@ -7478,6 +7478,282 @@ namespace CIResearch.Controllers
                     error = ex.Message,
                     message = "❌ Failed to get flexible market share data",
                     stackTrace = ex.StackTrace,
+                    executionTime = stopwatch.ElapsedMilliseconds,
+                    timestamp = DateTime.Now
+                });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetFilteredMarketShareChart(
+            List<string>? Nam = null,
+            List<string>? Loaihinhkte = null,
+            List<string>? MaTinh_Dieutra = null,
+            List<string>? Vungkinhte = null,
+            List<string>? QuyMo = null)
+        {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+
+            try
+            {
+                Console.WriteLine($"🚀 FILTERED MARKET SHARE CHART - Starting calculation with filters...");
+                Console.WriteLine($"📊 Filters applied:");
+                Console.WriteLine($"   - Years: {string.Join(", ", Nam ?? new List<string>())}");
+                Console.WriteLine($"   - Business Types: {string.Join(", ", Loaihinhkte ?? new List<string>())}");
+                Console.WriteLine($"   - Provinces: {string.Join(", ", MaTinh_Dieutra ?? new List<string>())}");
+                Console.WriteLine($"   - Economic Zones: {string.Join(", ", Vungkinhte ?? new List<string>())}");
+                Console.WriteLine($"   - Company Sizes: {string.Join(", ", QuyMo ?? new List<string>())}");
+
+                using var conn = new MySqlConnection(_connectionString);
+                await conn.OpenAsync();
+
+                // Build WHERE clause based on filters
+                var whereConditions = new List<string>();
+                var parameters = new List<MySqlParameter>();
+
+                // Year filter
+                if (Nam != null && Nam.Count > 0)
+                {
+                    whereConditions.Add("Nam IN (" + string.Join(",", Nam.Select((_, i) => $"@year{i}")) + ")");
+                    for (int i = 0; i < Nam.Count; i++)
+                    {
+                        parameters.Add(new MySqlParameter($"@year{i}", Nam[i]));
+                    }
+                }
+
+                // Business type filter
+                if (Loaihinhkte != null && Loaihinhkte.Count > 0)
+                {
+                    whereConditions.Add("Loaihinhkte IN (" + string.Join(",", Loaihinhkte.Select((_, i) => $"@businessType{i}")) + ")");
+                    for (int i = 0; i < Loaihinhkte.Count; i++)
+                    {
+                        parameters.Add(new MySqlParameter($"@businessType{i}", Loaihinhkte[i]));
+                    }
+                }
+
+                // Province filter
+                if (MaTinh_Dieutra != null && MaTinh_Dieutra.Count > 0)
+                {
+                    whereConditions.Add("MaTinh_Dieutra IN (" + string.Join(",", MaTinh_Dieutra.Select((_, i) => $"@province{i}")) + ")");
+                    for (int i = 0; i < MaTinh_Dieutra.Count; i++)
+                    {
+                        parameters.Add(new MySqlParameter($"@province{i}", MaTinh_Dieutra[i]));
+                    }
+                }
+
+                // Economic zone filter
+                if (Vungkinhte != null && Vungkinhte.Count > 0)
+                {
+                    whereConditions.Add("Vungkinhte IN (" + string.Join(",", Vungkinhte.Select((_, i) => $"@economicZone{i}")) + ")");
+                    for (int i = 0; i < Vungkinhte.Count; i++)
+                    {
+                        parameters.Add(new MySqlParameter($"@economicZone{i}", Vungkinhte[i]));
+                    }
+                }
+
+                // Company size filter
+                if (QuyMo != null && QuyMo.Count > 0)
+                {
+                    whereConditions.Add("QUY_MO IN (" + string.Join(",", QuyMo.Select((_, i) => $"@companySize{i}")) + ")");
+                    for (int i = 0; i < QuyMo.Count; i++)
+                    {
+                        parameters.Add(new MySqlParameter($"@companySize{i}", QuyMo[i]));
+                    }
+                }
+
+                // Base conditions
+                whereConditions.Add("Masothue IS NOT NULL AND TRIM(Masothue) != ''");
+                whereConditions.Add("SR_Doanhthu_Thuan_BH_CCDV > 0");
+
+                var whereClause = whereConditions.Count > 0 ? "WHERE " + string.Join(" AND ", whereConditions) : "";
+
+                // 🚀 STEP 1: Get total market revenue and company count for filtered data
+                Console.WriteLine($"📊 STEP 1: Calculating total market metrics with filters...");
+                var totalMarketQuery = $@"
+                    SELECT 
+                        COUNT(DISTINCT Masothue) AS TotalCompanies,
+                        SUM(COALESCE(SR_Doanhthu_Thuan_BH_CCDV, 0)) AS TotalMarketRevenue,
+                        COUNT(DISTINCT CASE WHEN SR_Doanhthu_Thuan_BH_CCDV > 0 THEN Masothue END) AS CompaniesWithPositiveRevenue
+                    FROM dn_all
+                    {whereClause}";
+
+                decimal totalMarketRevenue = 0;
+                int totalCompanies = 0;
+                int companiesWithPositiveRevenue = 0;
+
+                using var cmdTotal = new MySqlCommand(totalMarketQuery, conn);
+                foreach (var param in parameters)
+                {
+                    cmdTotal.Parameters.Add(param);
+                }
+
+                using var readerTotal = await cmdTotal.ExecuteReaderAsync();
+                if (await readerTotal.ReadAsync())
+                {
+                    totalCompanies = readerTotal.GetInt32("TotalCompanies");
+                    totalMarketRevenue = readerTotal.GetDecimal("TotalMarketRevenue");
+                    companiesWithPositiveRevenue = readerTotal.GetInt32("CompaniesWithPositiveRevenue");
+                }
+                readerTotal.Close();
+
+                Console.WriteLine($"📊 FILTERED MARKET METRICS:");
+                Console.WriteLine($"   - Total Companies: {totalCompanies:N0}");
+                Console.WriteLine($"   - Companies with Positive Revenue: {companiesWithPositiveRevenue:N0}");
+                Console.WriteLine($"   - Total Market Revenue: {totalMarketRevenue:N0} triệu VND = {totalMarketRevenue / 1000:N2} tỷ VND");
+
+                if (totalMarketRevenue <= 0 || companiesWithPositiveRevenue == 0)
+                {
+                    Console.WriteLine($"❌ NO VALID MARKET DATA WITH APPLIED FILTERS!");
+                    return Json(new
+                    {
+                        success = false,
+                        message = $"❌ Không tìm thấy dữ liệu market share với bộ lọc đã chọn",
+                        debug = new
+                        {
+                            filters = new
+                            {
+                                years = Nam,
+                                businessTypes = Loaihinhkte,
+                                provinces = MaTinh_Dieutra,
+                                economicZones = Vungkinhte,
+                                companySizes = QuyMo
+                            },
+                            totalCompanies = totalCompanies,
+                            totalMarketRevenue = totalMarketRevenue,
+                            companiesWithPositiveRevenue = companiesWithPositiveRevenue
+                        },
+                        timestamp = DateTime.Now
+                    });
+                }
+
+                // 🚀 STEP 2: Get Top 10 companies with highest revenue from filtered data
+                Console.WriteLine($"📊 STEP 2: Getting Top 10 companies from filtered data...");
+                var top10Query = $@"
+                    SELECT 
+                        Masothue,
+                        MAX(TenDN) AS TenDN,
+                        MAX(SR_Doanhthu_Thuan_BH_CCDV) AS Revenue,
+                        MAX(Nam) AS Year,
+                        MAX(Loaihinhkte) AS BusinessType,
+                        MAX(MaTinh_Dieutra) AS Province,
+                        MAX(Vungkinhte) AS EconomicZone,
+                        MAX(QUY_MO) AS CompanySize
+                    FROM dn_all
+                    {whereClause}
+                    GROUP BY Masothue
+                    ORDER BY MAX(SR_Doanhthu_Thuan_BH_CCDV) DESC
+                    LIMIT 10";
+
+                var topCompanies = new List<object>();
+                using var cmdTop10 = new MySqlCommand(top10Query, conn);
+                foreach (var param in parameters)
+                {
+                    cmdTop10.Parameters.Add(param);
+                }
+
+                using var readerTop10 = await cmdTop10.ExecuteReaderAsync();
+                while (await readerTop10.ReadAsync())
+                {
+                    var revenue = readerTop10.GetDecimal("Revenue");
+                    var marketShare = totalMarketRevenue > 0 ? (revenue / totalMarketRevenue) * 100 : 0;
+
+                    topCompanies.Add(new
+                    {
+                        Masothue = readerTop10.GetString("Masothue"),
+                        TenDN = readerTop10.GetString("TenDN"),
+                        Revenue = revenue,
+                        MarketShare = Math.Round(marketShare, 2),
+                        Year = readerTop10.GetInt32("Year"),
+                        BusinessType = readerTop10.GetString("BusinessType"),
+                        Province = readerTop10.GetString("Province"),
+                        EconomicZone = readerTop10.GetString("EconomicZone"),
+                        CompanySize = readerTop10.GetString("CompanySize")
+                    });
+                }
+                readerTop10.Close();
+
+                Console.WriteLine($"📊 TOP 10 COMPANIES FROM FILTERED DATA:");
+                foreach (var company in topCompanies)
+                {
+                    var comp = (dynamic)company;
+                    Console.WriteLine($"   - {comp.TenDN}: {comp.Revenue:N0} triệu VND ({comp.MarketShare:F2}%)");
+                }
+
+                // 🚀 STEP 3: Prepare chart data
+                var labels = topCompanies.Select(c =>
+                {
+                    var comp = (dynamic)c;
+                    var shortName = comp.TenDN.Length > 20 ? comp.TenDN.Substring(0, 17) + "..." : comp.TenDN;
+                    return $"{shortName}\n({comp.MarketShare:F1}%)";
+                }).ToArray();
+
+                var data = topCompanies.Select(c =>
+                {
+                    var comp = (dynamic)c;
+                    return (double)comp.MarketShare;
+                }).ToArray();
+
+                var colors = new[]
+                {
+                    "#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF",
+                    "#FF9F40", "#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0"
+                };
+
+                var chartData = new
+                {
+                    labels = labels,
+                    datasets = new[]
+                    {
+                        new
+                        {
+                            label = "Market Share (%)",
+                            data = data,
+                            backgroundColor = colors,
+                            borderColor = colors.Select(c => c + "CC").ToArray(),
+                            borderWidth = 3,
+                            hoverBorderWidth = 4
+                        }
+                    }
+                };
+
+                var metadata = new
+                {
+                    totalCompanies = totalCompanies,
+                    totalMarketRevenue = totalMarketRevenue,
+                    companiesWithPositiveRevenue = companiesWithPositiveRevenue,
+                    appliedFilters = new
+                    {
+                        years = Nam,
+                        businessTypes = Loaihinhkte,
+                        provinces = MaTinh_Dieutra,
+                        economicZones = Vungkinhte,
+                        companySizes = QuyMo
+                    }
+                };
+
+                stopwatch.Stop();
+                Console.WriteLine($"✅ FILTERED MARKET SHARE CHART completed in {stopwatch.ElapsedMilliseconds}ms");
+
+                return Json(new
+                {
+                    success = true,
+                    data = chartData,
+                    metadata = metadata,
+                    detailedData = topCompanies,
+                    executionTime = stopwatch.ElapsedMilliseconds,
+                    timestamp = DateTime.Now
+                });
+            }
+            catch (Exception ex)
+            {
+                stopwatch.Stop();
+                Console.WriteLine($"❌ FILTERED MARKET SHARE CHART ERROR: {ex.Message}");
+                Console.WriteLine($"❌ Stack trace: {ex.StackTrace}");
+
+                return Json(new
+                {
+                    success = false,
+                    message = $"❌ Lỗi khi tạo Market Share chart với filter: {ex.Message}",
                     executionTime = stopwatch.ElapsedMilliseconds,
                     timestamp = DateTime.Now
                 });
