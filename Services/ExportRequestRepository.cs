@@ -18,8 +18,8 @@ namespace CIResearch.Services
         {
             using var conn = new MySqlConnection(_connectionString);
             await conn.OpenAsync();
-            var cmd = new MySqlCommand(@"INSERT INTO ExportRequests (username, email, request_time, status, filter_params, file_data, reject_reason, approved_time, admin_approved_by, source)
-                VALUES (@username, @email, @request_time, @status, @filter_params, @file_data, @reject_reason, @approved_time, @admin_approved_by, @source);
+            var cmd = new MySqlCommand(@"INSERT INTO ExportRequests (username, email, request_time, status, filter_params, file_data, reject_reason, approved_time, admin_approved_by)
+                VALUES (@username, @email, @request_time, @status, @filter_params, @file_data, @reject_reason, @approved_time, @admin_approved_by);
                 SELECT LAST_INSERT_ID();", conn);
             cmd.Parameters.AddWithValue("@username", request.Username);
             cmd.Parameters.AddWithValue("@email", request.Email);
@@ -30,7 +30,7 @@ namespace CIResearch.Services
             cmd.Parameters.AddWithValue("@reject_reason", (object)request.RejectReason ?? DBNull.Value);
             cmd.Parameters.AddWithValue("@approved_time", (object)request.ApprovedTime ?? DBNull.Value);
             cmd.Parameters.AddWithValue("@admin_approved_by", (object)request.AdminApprovedBy ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("@source", (object)request.Source ?? DBNull.Value);
+            // cmd.Parameters.AddWithValue("@source", (object)request.Source ?? DBNull.Value);
             var id = Convert.ToInt32(await cmd.ExecuteScalarAsync());
             return id;
         }
@@ -89,7 +89,7 @@ namespace CIResearch.Services
                 RejectReason = reader.IsDBNull(reader.GetOrdinal("reject_reason")) ? null : reader.GetString(reader.GetOrdinal("reject_reason")),
                 ApprovedTime = reader.IsDBNull(reader.GetOrdinal("approved_time")) ? (DateTime?)null : reader.GetDateTime(reader.GetOrdinal("approved_time")),
                 AdminApprovedBy = reader.IsDBNull(reader.GetOrdinal("admin_approved_by")) ? null : reader.GetString(reader.GetOrdinal("admin_approved_by")),
-                Source = reader.IsDBNull(reader.GetOrdinal("source")) ? null : reader.GetString(reader.GetOrdinal("source"))
+                Source = null // reader.IsDBNull(reader.GetOrdinal("source")) ? null : reader.GetString(reader.GetOrdinal("source"))
             };
         }
     }

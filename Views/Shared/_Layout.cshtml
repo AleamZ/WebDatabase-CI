@@ -177,6 +177,15 @@
 			<ul class="side-menu top">
 				@if (!string.IsNullOrEmpty(username))
 				{
+					@if (userRole == "Admin")
+					{
+						<li>
+							<a href="@Url.Action("Index", "Admin")" data-tooltip="Trang admin">
+								<i class='bx bxs-user-plus'></i>
+								<span class="text">Trang Admin</span>
+							</a>
+						</li>
+					}
 					<li class="dropdown bootstrap-dropdown">
 						<a href="#" class="dropdown-toggle" data-tooltip="Dữ liệu công ty" aria-haspopup="true"
 							aria-expanded="false">
@@ -242,12 +251,6 @@
 					}
 					@if (userRole == "Admin")
 					{
-						<li>
-							<a href="@Url.Action("Index", "Admin")" data-tooltip="Trang admin">
-								<i class='bx bxs-user-plus'></i>
-								<span class="text">Trang admin</span>
-							</a>
-						</li>
 						<li>
 							<a href="@Url.Action("Register", "LoginRegister")" data-tooltip="Đăng ký tài khoản">
 								<i class='bx bxs-user-plus'></i>

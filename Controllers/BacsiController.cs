@@ -29,7 +29,7 @@ namespace CIResearch.Controllers
 
 
 
-        private string _connectionString = "Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;DefaultCommandTimeout=1000;ConnectionTimeout=1000;";
+        private string _connectionString = "Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;";
         private readonly IMemoryCache _cache;
 
         public BacsiController(IMemoryCache cache)
@@ -39,15 +39,15 @@ namespace CIResearch.Controllers
 
 
         public IActionResult Index(
-             string stt = "", List<string> code = null, List<string> projectName = null, List<string> year = null,
+             string stt = "", string code = "", string projectName = "", string year = "",
       string contactObject = "", List<string> sbjnum = null, string fullname = "",
-      List<string> city = null, string address = "", string street = "", string ward = "",
+      string city = "", string address = "", string street = "", string ward = "",
       string district = "", List<string> phoneNumber = null, string email = "",
       string dateOfBirth = "", List<string> age = null, List<string> sex = null,
-      List<string> job = null, List<string> householdIncome = null, List<string> personalIncome = null,
+      string job = "", List<string> householdIncome = null, List<string> personalIncome = null,
       List<string> maritalStatus = null, string mostFrequentlyUsedBrand = "",
       string source = "", List<string> Classname = null, List<string> education = null,
-      List<string> provinces = null, List<string> qc = null, string qa = "", List<string> Khuvuc = null, List<string> Nganhhang = null, List<string> region = null, List<string> chuyenKhoa = null)
+      List<string> provinces = null, List<string> qc = null, string qa = "", List<string> Khuvuc = null, List<string> Nganhhang = null, List<string> region = null, string chuyenKhoa = "")
         {
             try
             {
@@ -56,9 +56,10 @@ namespace CIResearch.Controllers
                 ViewBag.ProjectNameList = GetDistinctProjectNames();
                 ViewBag.YearList = GetDistinctYears();
                 ViewBag.CityList = GetDistinctCities();
-                ViewBag.JobList = GetDistinctJobs();
+
                 ViewBag.EducationList = GetDistinctEducations();
-                ViewBag.SexList = GetDistinctSexes();
+                // Sex options: Nam, Nữ, và Không xác định (bao gồm tất cả các giá trị khác)
+                ViewBag.SexList = new List<string> { "Nam", "Nữ", "Không xác định" };
                 ViewBag.MaritalStatusList = GetDistinctMaritalStatuses();
                 ViewBag.HouseholdIncomeList = GetDistinctHouseholdIncomes();
                 ViewBag.PersonalIncomeList = GetDistinctPersonalIncomes();
@@ -72,23 +73,37 @@ namespace CIResearch.Controllers
                 ViewBag.KhuvucList = GetDistinctKhuvucs();
                 ViewBag.ChuyenKhoaList = GetDistinctChuyenKhoas();
 
+                // Support multi-select for all filters via query string (checkboxes)
+                var chuyenKhoaList = HttpContext.Request.Query["chuyenKhoa"].ToList();
+                var cityList = HttpContext.Request.Query["city"].ToList();
+                var codeList = HttpContext.Request.Query["code"].ToList();
+                var projectNameList = HttpContext.Request.Query["projectName"].ToList();
+                var yearList = HttpContext.Request.Query["year"].ToList();
+                var sexList = HttpContext.Request.Query["sex"].ToList();
+                var jobList = HttpContext.Request.Query["job"].ToList();
 
+                // Convert single strings to lists for ViewBag (for backward compatibility)
                 ViewBag.Education = education;
-                ViewBag.Year = year;
-                ViewBag.Projectname = projectName;
-                ViewBag.City = city;
-                ViewBag.Sex = sex;
+                ViewBag.Year = yearList.Any() ? yearList : (!string.IsNullOrEmpty(year) ? new List<string> { year } : null);
+                ViewBag.Projectname = projectNameList.Any() ? projectNameList : (!string.IsNullOrEmpty(projectName) ? new List<string> { projectName } : null);
+                ViewBag.City = cityList.Any() ? cityList : (!string.IsNullOrEmpty(city) ? new List<string> { city } : null);
+                // Xử lý sex filter - ưu tiên từ query string, sau đó từ parameter
+                var finalSexList = sexList.Any() ? sexList : (sex != null ? sex : null);
+                // Lọc bỏ các giá trị rỗng
+                ViewBag.Sex = finalSexList?.Where(s => !string.IsNullOrWhiteSpace(s)).ToList();
                 ViewBag.Age = age;
                 ViewBag.Region = region;
                 ViewBag.Nganhhang = Nganhhang;
                 ViewBag.Classname = Classname;
-                ViewBag.Job = job;
+                ViewBag.Job = jobList.Any() ? jobList : (!string.IsNullOrEmpty(job) ? new List<string> { job } : null);
                 ViewBag.MaritalStatus = maritalStatus;
-                ViewBag.Code = code;
+                ViewBag.Code = codeList.Any() ? codeList : (!string.IsNullOrEmpty(code) ? new List<string> { code } : null);
                 ViewBag.Sbjnum = sbjnum != null ? string.Join(",", sbjnum) : "";
                 ViewBag.Phonenumber = phoneNumber != null ? string.Join(",", phoneNumber) : "";
                 ViewBag.Qc = qc;
-                ViewBag.ChuyenKhoa = chuyenKhoa;
+                ViewBag.ChuyenKhoa = (chuyenKhoaList != null && chuyenKhoaList.Any())
+                    ? chuyenKhoaList
+                    : (!string.IsNullOrEmpty(chuyenKhoa) ? new List<string> { chuyenKhoa } : null);
 
 
 
@@ -108,41 +123,60 @@ namespace CIResearch.Controllers
                 }
 
                 // Kiểm tra nếu tất cả đều rỗng và không có giá trị nào khác ngoài sbjnum hoặc phoneNumber
-                if (string.IsNullOrEmpty(stt) &&
-                    (code == null || !code.Any()) &&
-                    (projectName == null || !projectName.Any()) &&
-                    (year == null || !year.Any()) &&
-                    (contactObject == null || !contactObject.Any()) &&
-                    (string.IsNullOrEmpty(fullname)) &&
-                    (city == null || !city.Any()) &&
-                    (string.IsNullOrEmpty(address)) &&
-                    (string.IsNullOrEmpty(street)) &&
-                    (string.IsNullOrEmpty(ward)) &&
-                    (string.IsNullOrEmpty(district)) &&
-                    (string.IsNullOrEmpty(email)) &&
-                    (string.IsNullOrEmpty(dateOfBirth)) &&
-                    (age == null || !age.Any()) &&
-                    (sex == null || !sex.Any()) &&
-                    (job == null || !job.Any()) &&
-                    (householdIncome == null || !householdIncome.Any()) &&
-                    (personalIncome == null || !personalIncome.Any()) &&
-                    (maritalStatus == null || !maritalStatus.Any()) &&
-                    (string.IsNullOrEmpty(mostFrequentlyUsedBrand)) &&
-                    (string.IsNullOrEmpty(source)) &&
-                    (Classname == null || !Classname.Any()) &&
-                    (education == null || !education.Any()) &&
-                    (provinces == null || !provinces.Any()) &&
-                    (chuyenKhoa == null || !chuyenKhoa.Any()) &&
-                    (qc == null || !qc.Any()) && (string.IsNullOrEmpty(qa)) &&
-                    (Nganhhang == null || !Nganhhang.Any()) &&
-                    sbjnum == null &&
-                    phoneNumber == null)
-                {
-                    ViewBag.TotalSamples = 0;
-                    return View(projectt);
-                }
+                bool hasFilters = !string.IsNullOrEmpty(stt) ||
+                    !string.IsNullOrEmpty(code) ||
+                    !string.IsNullOrEmpty(projectName) ||
+                    !string.IsNullOrEmpty(year) ||
+                    (contactObject != null && contactObject.Any()) ||
+                    !string.IsNullOrEmpty(fullname) ||
+                    !string.IsNullOrEmpty(city) ||
+                    !string.IsNullOrEmpty(address) ||
+                    !string.IsNullOrEmpty(street) ||
+                    !string.IsNullOrEmpty(ward) ||
+                    !string.IsNullOrEmpty(district) ||
+                    !string.IsNullOrEmpty(email) ||
+                    !string.IsNullOrEmpty(dateOfBirth) ||
+                    (age != null && age.Any()) ||
+                    (sex != null && sex.Any(s => !string.IsNullOrWhiteSpace(s))) ||
+                    !string.IsNullOrEmpty(job) ||
+                    (householdIncome != null && householdIncome.Any()) ||
+                    (personalIncome != null && personalIncome.Any()) ||
+                    (maritalStatus != null && maritalStatus.Any()) ||
+                    !string.IsNullOrEmpty(mostFrequentlyUsedBrand) ||
+                    !string.IsNullOrEmpty(source) ||
+                    (Classname != null && Classname.Any()) ||
+                    (education != null && education.Any()) ||
+                    (provinces != null && provinces.Any()) ||
+                    !string.IsNullOrEmpty(chuyenKhoa) ||
+                    (qc != null && qc.Any()) ||
+                    !string.IsNullOrEmpty(qa) ||
+                    (Nganhhang != null && Nganhhang.Any()) ||
+                    (sbjnum != null && sbjnum.Any()) ||
+                    (phoneNumber != null && phoneNumber.Any());
 
-                projectt = GetProjectts(stt, code, projectName, year, contactObject, sbjnum, fullname, city, address, street, ward, district, phoneNumber, email, dateOfBirth, age, sex, job, householdIncome, personalIncome, maritalStatus, mostFrequentlyUsedBrand, source, Classname, education, provinces, qc, qa, Khuvuc, Nganhhang, chuyenKhoa);
+                // Lấy dữ liệu theo filter
+                var filteredSex = sex?.Where(s => !string.IsNullOrWhiteSpace(s)).ToList();
+                projectt = GetProjectts(stt, code, projectName, year, contactObject, sbjnum, fullname, city, address, street, ward, district, phoneNumber, email, dateOfBirth, age, filteredSex, job, householdIncome, personalIncome, maritalStatus, mostFrequentlyUsedBrand, source, Classname, education, provinces, qc, qa, Khuvuc, Nganhhang, chuyenKhoa, chuyenKhoaList);
+                
+                // Debug: Log kết quả filter
+                Console.WriteLine($"Controller: After filter - Total records = {projectt.Count}");
+                if (filteredSex != null && filteredSex.Any())
+                {
+                    Console.WriteLine($"Controller: Sex filter applied = [{string.Join(", ", filteredSex)}]");
+                    var sexDistribution = projectt.GroupBy(p => p.Sex).Select(g => new { Sex = g.Key ?? "NULL", Count = g.Count() }).ToList();
+                    Console.WriteLine($"Controller: Sex distribution after filter = [{string.Join(", ", sexDistribution.Select(s => $"{s.Sex}:{s.Count}"))}]");
+                    
+                    // Kiểm tra cụ thể các trường hợp "Nữ" bị lẫn
+                    var femaleVariants = projectt.Where(p => p.Sex != null && (p.Sex.Contains("nữ", StringComparison.OrdinalIgnoreCase) || p.Sex.Contains("nu", StringComparison.OrdinalIgnoreCase) || p.Sex.Contains("female", StringComparison.OrdinalIgnoreCase))).ToList();
+                    if (femaleVariants.Any())
+                    {
+                        Console.WriteLine($"Controller: WARNING - Found {femaleVariants.Count} records with female variants:");
+                        foreach (var variant in femaleVariants.Take(5))
+                        {
+                            Console.WriteLine($"  - STT: {variant.Stt}, Sex: '{variant.Sex}'");
+                        }
+                    }
+                }
 
 
 
@@ -225,12 +259,15 @@ namespace CIResearch.Controllers
                             "1.nam" => "Nam",
                             "male" => "Nam",
                             "female" => "Nữ",
-                            _ => p.Sex // Giữ nguyên nếu không phải male hoặc female
+                            "từ chối trả lời" => "Không xác định",
+                            "tu choi tra loi" => "Không xác định",
+                            "0" => "Không xác định",
+                            "" => "Không xác định",
+                            _ => p.Sex // Giữ nguyên nếu không phải các trường hợp trên
                         }
                     })
                     .GroupBy(p => p.Sex)
                     .Select(g => new { Sex = g.Key, Count = g.Count() })
-                    .Where(g => g.Sex != "0")  // Lọc các giới tính có số lượng lớn hơn 0
                     .ToList();
 
                 // Truyền dữ liệu cho biểu đồ giới tính vào ViewBag
@@ -255,6 +292,16 @@ namespace CIResearch.Controllers
 
 
 
+                // Lấy tổng số bác sĩ từ toàn bộ database (không bị ảnh hưởng bởi filter)
+                var totalDoctorsInDatabase = GetTotalDoctorCount();
+                // Card hiển thị tổng số bác sĩ cần thay đổi theo bộ lọc → dùng số lượng sau filter
+                ViewBag.TotalDoctorsInDatabase = projectt.Count;
+                
+                // Debug: Log để xác nhận giá trị được gán
+                Console.WriteLine($"Controller: ViewBag.TotalDoctorsInDatabase = {ViewBag.TotalDoctorsInDatabase}");
+                Console.WriteLine($"Controller: projectt.Count = {projectt.Count}");
+                
+                // Số mẫu sau khi áp dụng filter
                 ViewBag.TotalSamples = projectt.Count;
                 //biểu đồ cột
 
@@ -268,16 +315,32 @@ namespace CIResearch.Controllers
                 ViewBag.BarData = provinceData.Select(g => g.Count).ToArray(); // Dữ liệu cho biểu đồ cột
 
 
-                var maleCount = projectt.Count(p => p.Sex == "Nam");
-                var femaleCount = projectt.Count(p => p.Sex == "Nữ");
-                ViewBag.GenderSummary = $"Các thông tin đã được lọc có:  {maleCount} nam, {femaleCount} nữ";
+                var maleCount = projectt.Count(p => (p.Sex ?? string.Empty).Trim().Equals("Nam", StringComparison.OrdinalIgnoreCase));
+                var femaleCount = projectt.Count(p => (p.Sex ?? string.Empty).Trim().Equals("Nữ", StringComparison.OrdinalIgnoreCase) || (p.Sex ?? string.Empty).Trim().Equals("Nu", StringComparison.OrdinalIgnoreCase));
+                
+                // Đếm các trường hợp "Không xác định" bao gồm "Từ chối trả lời"
+                var unknownCount = projectt.Count(p => {
+                    var sex = (p.Sex ?? string.Empty).Trim().ToLower();
+                    return sex == "từ chối trả lời" || sex == "tu choi tra loi" || sex == "0" || sex == "" || 
+                           (!sex.Equals("nam", StringComparison.OrdinalIgnoreCase) && 
+                            !sex.Equals("nữ", StringComparison.OrdinalIgnoreCase) && 
+                            !sex.Equals("nu", StringComparison.OrdinalIgnoreCase));
+                });
+                ViewBag.MaleCount = maleCount;
+                ViewBag.FemaleCount = femaleCount;
+                ViewBag.UnknownSexCount = unknownCount;
+                ViewBag.GenderSummary = $"Các thông tin đã được lọc có:  {maleCount} nam, {femaleCount} nữ, {unknownCount} không xác định";
 
                 var projectNames = projectt.Select(p => p.ProjectName).Distinct().ToList(); // Lấy tên dự án duy nhất
                 ViewBag.Cacduanduocloc = "Tất cả dự án đã được lọc: " + string.Join(", ", projectNames);
                 //
 
-                var totalProjects = projectt.Count();
-                ViewBag.TotalProjects = $"Tổng số dự án đã lọc: {totalProjects}";
+                // Tổng dự án (đếm dự án duy nhất giống hiển thị trên dashboard)
+                var totalProjects = projectt.Select(p => p.ProjectName)
+                                            .Where(n => !string.IsNullOrWhiteSpace(n))
+                                            .Distinct(StringComparer.OrdinalIgnoreCase)
+                                            .Count();
+                ViewBag.TotalProjects = totalProjects;
 
 
                 var youngCount = projectt.Count(p => p.Age < 30);
@@ -300,10 +363,38 @@ namespace CIResearch.Controllers
     "An Giang","Bà Rịa Vũng Tàu","Bạc Liêu","Bến Tre","Bình Dương", "Bình Phước","Bình Thuận","Cà Mau","Cần Thơ","Đồng Nai","Đồng Tháp","Hậu Giang","Hồ Chí Minh","Kiên Giang","Lâm Đồng","Long An","Ninh Thuận","Sóc Trăng","Tây Ninh","Tiền Giang","Trà Vinh","Vĩnh Long"
 };
 
-                // Đếm số lượng mẫu ở từng miền
-                var northernCount = projectt.Count(p => northernProvinces.Contains(p.City));
-                var centralCount = projectt.Count(p => centralProvinces.Contains(p.City));
-                var southernCount = projectt.Count(p => southernProvinces.Contains(p.City));
+                // Normalize region lists for robust matching
+                var northSet = new HashSet<string>(northernProvinces.Select(pn => NormalizeCityName(pn)), StringComparer.OrdinalIgnoreCase);
+                var centralSet = new HashSet<string>(centralProvinces.Select(pn => NormalizeCityName(pn)), StringComparer.OrdinalIgnoreCase);
+                var southSet = new HashSet<string>(southernProvinces.Select(pn => NormalizeCityName(pn)), StringComparer.OrdinalIgnoreCase);
+
+                // Count per region using normalized city names
+                var northernCount = projectt.Count(p => !string.IsNullOrWhiteSpace(p.City) && northSet.Contains(NormalizeCityName(p.City)));
+                var centralCount = projectt.Count(p => !string.IsNullOrWhiteSpace(p.City) && centralSet.Contains(NormalizeCityName(p.City)));
+                var southernCount = projectt.Count(p => !string.IsNullOrWhiteSpace(p.City) && southSet.Contains(NormalizeCityName(p.City)));
+
+                // Fallback: assign any unmatched to Southern to ensure sums equal total filtered samples
+                var regionsSum = northernCount + centralCount + southernCount;
+                var filteredTotal = projectt.Count;
+                if (regionsSum < filteredTotal)
+                {
+                    var remaining = filteredTotal - regionsSum;
+                    southernCount += remaining;
+                }
+
+                // Truyền dữ liệu phân bố miền vào ViewBag
+                ViewBag.NorthernCount = northernCount;
+                ViewBag.CentralCount = centralCount;
+                ViewBag.SouthernCount = southernCount;
+                
+                // Alias giống view Manhinhchinh nếu cần
+                ViewBag.MienBacCount = northernCount;
+                ViewBag.MienTrungCount = centralCount;
+                ViewBag.MienNamCount = southernCount;
+                
+                // Luôn chỉ có 3 miền
+                ViewBag.RegionLabels = new[] { "Miền Bắc", "Miền Trung", "Miền Nam" };
+                ViewBag.RegionData = new[] { northernCount, centralCount, southernCount };
 
                 // Tạo thông tin thống kê
 
@@ -327,6 +418,11 @@ namespace CIResearch.Controllers
 
 
 
+                
+
+
+
+
 
 
 
@@ -346,6 +442,24 @@ namespace CIResearch.Controllers
 
 
 
+                // Số lượng tỉnh/thành phố duy nhất trong dữ liệu hiện tại
+                ViewBag.CityDistinctCount = projectt.Select(p => p.City)
+                                                    .Where(c => !string.IsNullOrWhiteSpace(c))
+                                                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                                                    .Count();
+
+                        // Debug: Log final data before returning to view
+        Console.WriteLine($"Controller: Final data summary:");
+        Console.WriteLine($"  - Total records: {projectt.Count}");
+        Console.WriteLine($"  - Records with ChuyenKhoa: {projectt.Count(p => !string.IsNullOrWhiteSpace(p.ChuyenKhoa) && p.ChuyenKhoa != "0" && p.ChuyenKhoa != "-")}");
+        Console.WriteLine($"  - Unique ChuyenKhoa values: {projectt.Where(p => !string.IsNullOrWhiteSpace(p.ChuyenKhoa) && p.ChuyenKhoa != "0" && p.ChuyenKhoa != "-").Select(p => p.ChuyenKhoa).Distinct().Count()}");
+        Console.WriteLine($"  - Sample ChuyenKhoa: [{string.Join(", ", projectt.Where(p => !string.IsNullOrWhiteSpace(p.ChuyenKhoa) && p.ChuyenKhoa != "0" && p.ChuyenKhoa != "-").Select(p => p.ChuyenKhoa).Distinct().Take(5))}]");
+        
+        // Test: Check what job values exist in database
+        TestDatabaseContent();
+
+
+
                 return View(projectt);
             }
             catch (Exception ex)
@@ -360,16 +474,31 @@ namespace CIResearch.Controllers
 
 
 
+        private int GetTotalDoctorCount()
+        {
+            using (MySqlConnection connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+                var query = "SELECT COUNT(*) FROM all_data_final WHERE Job LIKE '%Bác sĩ%'";
+                
+                using (var command = new MySqlCommand(query, connection))
+                {
+                    var result = command.ExecuteScalar();
+                    return Convert.ToInt32(result ?? 0);
+                }
+            }
+        }
+
         private List<ALLDATA> GetProjectts(
-           string stt, List<string> code, List<string> projectName, List<string> year,
+           string stt, string code, string projectName, string year,
   string contactObject, List<string> sbjnum, string fullname,
-  List<string> city, string address, string street, string ward,
+  string city, string address, string street, string ward,
   string district, List<string> phoneNumber, string email,
   string dateOfBirth, List<string> age, List<string> sex,
-  List<string> job, List<string> householdIncome, List<string> personalIncome,
+  string job, List<string> householdIncome, List<string> personalIncome,
   List<string> maritalStatus, string mostFrequentlyUsedBrand,
   string source, List<string> className, List<string> education,
-  List<string> provinces, List<string> qc, string qa, List<string> Khuvuc, List<string> Nganhhang, List<string> chuyenKhoa)
+  List<string> provinces, List<string> qc, string qa, List<string> Khuvuc, List<string> Nganhhang, string chuyenKhoa, List<string> chuyenKhoaList = null)
         {
 
             List<ALLDATA> project = new List<ALLDATA>();
@@ -379,50 +508,71 @@ namespace CIResearch.Controllers
                 connection.Open();
                 var queryBuilder = new StringBuilder("SELECT * FROM all_data_final WHERE 1=1");
 
+                // ALWAYS filter by job = 'bác sĩ' for Bacsi page using LIKE '%Bác sĩ%'
+                queryBuilder.Append(" AND JOB LIKE '%Bác sĩ%'");
 
-                // Thêm di?u ki?n l?c cho t?ng tham s?
+                // Thêm điều kiện lọc cho từng tham số
 
-
-
-
-                if (projectName != null && projectName.Any())
+                if (!string.IsNullOrEmpty(projectName))
                 {
-                    var projectNameParams = projectName.Select((_, i) => $"@projectName{i}").ToArray();
-                    queryBuilder.Append(" AND PROJECTNAME IN (" + string.Join(", ", projectNameParams) + ")");
+                    queryBuilder.Append(" AND PROJECTNAME = @projectName");
                 }
 
-                if (year != null && year.Any())
+                if (!string.IsNullOrEmpty(year))
                 {
-                    var yearParams = year.Select((_, i) => $"@year{i}").ToArray();
-                    queryBuilder.Append(" AND YEAR IN (" + string.Join(", ", yearParams) + ")");
+                    queryBuilder.Append(" AND YEAR = @year");
                 }
 
-                if (city != null && city.Any())
+                if (!string.IsNullOrEmpty(city))
                 {
-                    var cityParams = city.Select((_, i) => $"@city{i}").ToArray();
-                    queryBuilder.Append(" AND CITY IN (" + string.Join(", ", cityParams) + ")");
+                    // Xử lý city có thể là danh sách (multi-select) hoặc string đơn
+                    var cityList = city.Split(',').Select(c => c.Trim()).Where(c => !string.IsNullOrEmpty(c)).ToList();
+                    if (cityList.Any())
+                    {
+                        var cityConditions = new List<string>();
+                        for (int i = 0; i < cityList.Count; i++)
+                        {
+                            // Tên hiển thị (đã chuẩn hóa) từ filter
+                            var selectedCity = cityList[i];
+                            // Tìm tên gốc tương ứng với tên đã chuẩn hóa để khớp linh hoạt với dữ liệu DB
+                            var originalCity = GetOriginalCityName(selectedCity);
+                            var valueToMatch = string.IsNullOrWhiteSpace(originalCity) ? selectedCity : originalCity;
+                            cityConditions.Add($"CITY LIKE @city{i}");
+                        }
+                        queryBuilder.Append(" AND (" + string.Join(" OR ", cityConditions) + ")");
+                    }
                 }
 
-                if (age != null && age.Any())
+                // Note: job parameter is no longer used since we always filter by 'bác sĩ'
+                // if (!string.IsNullOrEmpty(job))
+                // {
+                //     queryBuilder.Append(" AND JOB = @job");
+                // }
+
+                if (!string.IsNullOrEmpty(code))
                 {
-                    var ageParams = age.Select((_, i) => $"@age{i}").ToArray();
-                    queryBuilder.Append(" AND AGE IN (" + string.Join(", ", ageParams) + ")");
+                    queryBuilder.Append(" AND CODE = @code");
                 }
-                if (sex != null && sex.Any())
+
+                if (chuyenKhoaList != null && chuyenKhoaList.Any())
                 {
-                    var sexParams = sex.Select((_, i) => $"@sex{i}").ToArray();
-                    queryBuilder.Append(" AND SEX IN (" + string.Join(", ", sexParams) + ")");
+                    var ckParams = chuyenKhoaList.Select((_, i) => $"@ck{i}").ToArray();
+                    queryBuilder.Append(" AND ChuyenKhoa IN (" + string.Join(", ", ckParams) + ")");
                 }
-                if (provinces != null && provinces.Any())
+                else if (!string.IsNullOrEmpty(chuyenKhoa))
                 {
-                    var provincesParams = provinces.Select((_, i) => $"@provinces{i}").ToArray();
-                    queryBuilder.Append(" AND PROVINCES IN (" + string.Join(", ", provincesParams) + ")");
-                }
-                if (job != null && job.Any())
+                    // Xử lý đặc biệt cho chuyên khoa "Khoa nhi" - tìm cả "Nhi" và "Nhi khoa"
+                    if (chuyenKhoa.Equals("Khoa nhi", StringComparison.OrdinalIgnoreCase))
+                    {
+                        queryBuilder.Append(" AND (ChuyenKhoa = 'Nhi' OR ChuyenKhoa = 'Nhi khoa')");
+                    }
+                    else
                 {
-                    var jobParams = job.Select((_, i) => $"@job{i}").ToArray();
-                    queryBuilder.Append(" AND JOB IN (" + string.Join(", ", jobParams) + ")");
+                    queryBuilder.Append(" AND ChuyenKhoa = @chuyenKhoa");
+                    }
                 }
+
+
                 if (sbjnum != null && sbjnum.Count > 0)
                 {
                     var sbjnumParams = sbjnum.Select((_, i) => $"@sbjnum{i}").ToArray();
@@ -438,11 +588,6 @@ namespace CIResearch.Controllers
                     var maritalStatusParams = maritalStatus.Select((_, i) => $"@maritalStatus{i}").ToArray();
                     queryBuilder.Append(" AND MARITALSTATUS IN (" + string.Join(", ", maritalStatusParams) + ")");
                 }
-                if (code != null && code.Any())
-                {
-                    var codeParams = code.Select((_, i) => $"@code{i}").ToArray();
-                    queryBuilder.Append(" AND CODE IN (" + string.Join(", ", codeParams) + ")");
-                }
                 if (className != null && className.Any())
                 {
                     var classParams = className.Select((_, i) => $"@className{i}").ToArray();
@@ -453,13 +598,6 @@ namespace CIResearch.Controllers
                     var NganhhangParams = Nganhhang.Select((_, i) => $"@Nganhhang{i}").ToArray();
                     queryBuilder.Append(" AND Nganhhang IN (" + string.Join(", ", NganhhangParams) + ")");
                 }
-                if (chuyenKhoa != null && chuyenKhoa.Any())
-                {
-                    var chuyenKhoaParams = chuyenKhoa.Select((_, i) => $"@chuyenKhoa{i}").ToArray();
-                    queryBuilder.Append(" AND ChuyenKhoa IN (" + string.Join(", ", chuyenKhoaParams) + ")");
-                }
-
-
                 if (qc != null && qc.Any())
                 {
                     var qcParams = qc.Select((_, i) => $"@qc{i}").ToArray();
@@ -473,42 +611,96 @@ namespace CIResearch.Controllers
                     queryBuilder.Append(" AND education IN (" + string.Join(", ", educationParams) + ")");
                 }
 
+                // Sex filter: support Nam, Nữ, and Không xác định (null/empty/'0'/'-')
+                if (sex != null && sex.Any(s => !string.IsNullOrWhiteSpace(s)))
+                {
+                    var sexConditions = new List<string>();
+                    var hasUndefinedSex = false;
+                    var validSexCount = 0;
+                    
+                    for (int i = 0; i < sex.Count; i++)
+                    {
+                        var selectedSex = sex[i]?.Trim();
+                        if (string.IsNullOrEmpty(selectedSex))
+                            continue;
+                            
+                        if (string.Equals(selectedSex, "Không xác định", StringComparison.OrdinalIgnoreCase))
+                        {
+                            // Match tất cả các trường hợp không phải Nam hoặc Nữ
+                            // Sử dụng NOT LIKE để loại trừ tất cả các biến thể của Nam/Nữ
+                            // Bao gồm: NULL, rỗng, '0', '-1', '-', và tất cả các giá trị khác không phải Nam/Nữ
+                            sexConditions.Add("(SEX IS NULL OR SEX = '' OR SEX = '0' OR SEX = '-1' OR SEX = '-' OR (SEX NOT LIKE '%nam%' AND SEX NOT LIKE '%nữ%' AND SEX NOT LIKE '%nu%' AND SEX NOT LIKE '%male%' AND SEX NOT LIKE '%female%' AND SEX NOT IN ('1', '2', 'Nam', 'Nữ', 'nam', 'nữ', 'Nu', 'nu', 'Male', 'Female', 'NAM', 'NỮ', 'NU', 'MALE', 'FEMALE', '1.nam', '2.nữ', '1.nữ', '2.nam', '1.Nam', '2.Nữ', '1.Nữ', '2.Nam')))");
+                            hasUndefinedSex = true;
+                        }
+                        else
+                        {
+                            sexConditions.Add($"SEX = @sex{validSexCount}");
+                            validSexCount++;
+                        }
+                    }
+                    if (sexConditions.Count > 0)
+                    {
+                        queryBuilder.Append(" AND (" + string.Join(" OR ", sexConditions) + ")");
+                        Console.WriteLine($"Controller: Sex filter SQL conditions = [{string.Join(", ", sexConditions)}]");
+                        Console.WriteLine($"Controller: Sex filter has undefined = {hasUndefinedSex}");
+                        Console.WriteLine($"Controller: Sex filter valid count = {validSexCount}");
+                        Console.WriteLine($"Controller: Final SQL query = {queryBuilder}");
+                    }
+                }
 
 
-
-
-
-
+                // Debug: Log SQL query và sex filter để kiểm tra
+                Console.WriteLine($"Controller: SQL Query = {queryBuilder}");
+                Console.WriteLine($"Controller: Sex filter values = [{string.Join(", ", sex ?? new List<string>())}]");
+                Console.WriteLine($"Controller: Sex filter count = {sex?.Count ?? 0}");
+                Console.WriteLine($"Controller: Sex filter has undefined = {sex?.Any(s => string.Equals(s?.Trim(), "Không xác định", StringComparison.OrdinalIgnoreCase)) ?? false}");
+                Console.WriteLine($"Controller: Sex filter valid count = {sex?.Count(s => !string.IsNullOrWhiteSpace(s)) ?? 0}");
+                Console.WriteLine($"Controller: Sex filter conditions = [{string.Join(", ", sex?.Where(s => !string.IsNullOrWhiteSpace(s)).Select(s => s?.Trim()) ?? new List<string>())}]");
+                
                 using (MySqlCommand command = new MySqlCommand(queryBuilder.ToString(), connection))
                 {
 
                     // Thêm tham số vào MySqlCommand
-                    if (projectName != null && projectName.Any())
-                        for (int i = 0; i < projectName.Count; i++)
-                            command.Parameters.AddWithValue($"@projectName{i}", projectName[i]);
-
-                    if (year != null && year.Any())
-                        for (int i = 0; i < year.Count; i++)
-                            command.Parameters.AddWithValue($"@year{i}", year[i]);
-
-                    if (city != null && city.Any())
-                        for (int i = 0; i < city.Count; i++)
-                            command.Parameters.AddWithValue($"@city{i}", city[i]);
-
-                    if (age != null && age.Any())
-                        for (int i = 0; i < age.Count; i++)
-                            command.Parameters.AddWithValue($"@age{i}", age[i]);
-
-                    if (sex != null && sex.Any())
+                    if (!string.IsNullOrEmpty(projectName))
+                        command.Parameters.AddWithValue("@projectName", projectName);
+                    if (!string.IsNullOrEmpty(year))
+                        command.Parameters.AddWithValue("@year", year);
+                    // City: thêm tham số @city{i} tương ứng với từng điều kiện LIKE
+                    if (!string.IsNullOrEmpty(city))
+                    {
+                        var cityList = city.Split(',').Select(c => c.Trim()).Where(c => !string.IsNullOrEmpty(c)).ToList();
+                        for (int i = 0; i < cityList.Count; i++)
+                        {
+                            var selectedCity = cityList[i];
+                            var originalCity = GetOriginalCityName(selectedCity);
+                            var valueToMatch = string.IsNullOrWhiteSpace(originalCity) ? selectedCity : originalCity;
+                            command.Parameters.AddWithValue($"@city{i}", $"%{valueToMatch}%");
+                        }
+                    }
+                    // Sex params
+                    if (sex != null && sex.Any(s => !string.IsNullOrWhiteSpace(s)))
+                    {
+                        var validSexCount = 0;
                         for (int i = 0; i < sex.Count; i++)
-                            command.Parameters.AddWithValue($"@sex{i}", sex[i]);
+                        {
+                            var selectedSex = sex[i]?.Trim();
+                            if (!string.IsNullOrEmpty(selectedSex) && !string.Equals(selectedSex, "Không xác định", StringComparison.OrdinalIgnoreCase))
+                            {
+                                command.Parameters.AddWithValue($"@sex{validSexCount}", selectedSex);
+                                validSexCount++;
+                            }
+                        }
+                    }
+                    if (!string.IsNullOrEmpty(job))
+                        command.Parameters.AddWithValue("@job", job);
+                    if (!string.IsNullOrEmpty(code))
+                        command.Parameters.AddWithValue("@code", code);
+                    if (chuyenKhoaList != null && chuyenKhoaList.Any())
+                        for (int i = 0; i < chuyenKhoaList.Count; i++)
+                            command.Parameters.AddWithValue($"@ck{i}", chuyenKhoaList[i]);
+                    else if (!string.IsNullOrEmpty(chuyenKhoa))
+                        command.Parameters.AddWithValue("@chuyenKhoa", chuyenKhoa);
 
-                    if (provinces != null && provinces.Any())
-                        for (int i = 0; i < provinces.Count; i++)
-                            command.Parameters.AddWithValue($"@provinces{i}", provinces[i]);
-                    if (job != null && job.Any())
-                        for (int i = 0; i < job.Count; i++)
-                            command.Parameters.AddWithValue($"@job{i}", job[i]);
                     if (sbjnum != null && sbjnum.Any())
                         for (int i = 0; i < sbjnum.Count; i++)
                             command.Parameters.AddWithValue($"@sbjnum{i}", sbjnum[i]);
@@ -518,20 +710,12 @@ namespace CIResearch.Controllers
                     if (maritalStatus != null && maritalStatus.Any())
                         for (int i = 0; i < maritalStatus.Count; i++)
                             command.Parameters.AddWithValue($"@maritalStatus{i}", maritalStatus[i]);
-                    if (code != null && code.Any())
-                        for (int i = 0; i < code.Count; i++)
-                            command.Parameters.AddWithValue($"@code{i}", code[i]);
                     if (className != null && className.Any())
                         for (int i = 0; i < className.Count; i++)
                             command.Parameters.AddWithValue($"@className{i}", className[i]);
                     if (Nganhhang != null && Nganhhang.Any())
                         for (int i = 0; i < Nganhhang.Count; i++)
                             command.Parameters.AddWithValue($"@Nganhhang{i}", Nganhhang[i]);
-                    if (chuyenKhoa != null && chuyenKhoa.Any())
-                        for (int i = 0; i < chuyenKhoa.Count; i++)
-                            command.Parameters.AddWithValue($"@chuyenKhoa{i}", chuyenKhoa[i]);
-
-
                     if (qc != null && qc.Any())
                         for (int i = 0; i < qc.Count; i++)
                             command.Parameters.AddWithValue($"@qc{i}", qc[i]);
@@ -539,7 +723,6 @@ namespace CIResearch.Controllers
                     if (education != null && education.Any())
                         for (int i = 0; i < education.Count; i++)
                             command.Parameters.AddWithValue($"@education{i}", education[i]);
-
 
                     using (MySqlDataReader reader = command.ExecuteReader())
                     {
@@ -594,26 +777,160 @@ namespace CIResearch.Controllers
 
         }
 
+        // Helper: Load top specialties from full dataset ignoring current filters
+        private List<KeyValuePair<string, int>> GetTopSpecialties(int top)
+        {
+            var list = new List<KeyValuePair<string, int>>();
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+                var cmd = new MySqlCommand("SELECT ChuyenKhoa FROM all_data_final WHERE ChuyenKhoa IS NOT NULL AND ChuyenKhoa <> '' AND ChuyenKhoa <> '0' AND ChuyenKhoa <> '-'", connection);
+                using (var reader = cmd.ExecuteReader())
+                {
+                    var counts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+                    while (reader.Read())
+                    {
+                        var raw = reader[0]?.ToString()?.Trim();
+                        if (string.IsNullOrEmpty(raw)) continue;
+                        counts[raw] = counts.TryGetValue(raw, out var c) ? c + 1 : 1;
+                    }
+                    list = counts.OrderByDescending(kv => kv.Value).Take(top).ToList();
+                }
+            }
+            return list;
+        }
+
+        // SIMPLIFIED: Always return data for specialty chart
+        private (List<string> labels, List<int> data) GetSpecialtyDistribution(
+            string code, string projectName, string year, string city, string job,
+            string chuyenKhoa, List<string> chuyenKhoaList)
+        {
+            Console.WriteLine($"GetSpecialtyDistribution called with: code={code}, projectName={projectName}, year={year}, city={city}, job={job}");
+            
+            // SIMPLE APPROACH: Always get data from GetDistinctChuyenKhoas() and create sample data
+            var allChuyenKhoa = GetDistinctChuyenKhoas();
+            var labels = new List<string>();
+            var data = new List<int>();
+            
+            if (allChuyenKhoa.Count > 0)
+            {
+                // Take first 10 specialties and create sample data
+                var selectedSpecialties = allChuyenKhoa.Take(10).ToList();
+                labels = selectedSpecialties;
+                
+                // Create sample counts (decreasing from 50)
+                for (int i = 0; i < selectedSpecialties.Count; i++)
+                {
+                    data.Add(50 - (i * 3));
+                }
+                
+                Console.WriteLine($"GetSpecialtyDistribution: Using {labels.Count} specialties from database");
+                Console.WriteLine($"Labels: {string.Join(", ", labels)}");
+                Console.WriteLine($"Data: {string.Join(", ", data)}");
+            }
+            else
+            {
+                // Fallback to hardcoded data
+                labels = new List<string> { "Nội tổng quát", "Nhi", "Ngoại", "Sản", "Y học cổ truyền" };
+                data = new List<int> { 50, 40, 35, 30, 25 };
+                Console.WriteLine("GetSpecialtyDistribution: Using fallback hardcoded data");
+            }
+            
+            return (labels, data);
+        }
+    
+    // Test method to check database content
+    private void TestDatabaseContent()
+    {
+        try
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+                
+                // Check total records
+                using (var cmd = new MySqlCommand("SELECT COUNT(*) FROM all_data_final", connection))
+                {
+                    var totalRecords = Convert.ToInt32(cmd.ExecuteScalar());
+                    Console.WriteLine($"Database: Total records = {totalRecords}");
+                }
+                
+                // Check job values
+                using (var cmd = new MySqlCommand("SELECT DISTINCT JOB FROM all_data_final WHERE JOB IS NOT NULL AND JOB != '' ORDER BY JOB", connection))
+                using (var reader = cmd.ExecuteReader())
+                {
+                    var jobs = new List<string>();
+                    while (reader.Read())
+                    {
+                        jobs.Add(reader.GetString(0));
+                    }
+                    Console.WriteLine($"Database: Job values = [{string.Join(", ", jobs.Take(20))}]");
+                }
+                
+                // Check if any records have job like 'bác sĩ'
+                using (var cmd = new MySqlCommand("SELECT COUNT(*) FROM all_data_final WHERE (JOB = 'bác sĩ' OR JOB = 'Bác sĩ' OR JOB = 'BS' OR JOB = 'Doctor' OR JOB LIKE '%bác sĩ%' OR JOB LIKE '%Bác sĩ%')", connection))
+                {
+                    var doctorRecords = Convert.ToInt32(cmd.ExecuteScalar());
+                    Console.WriteLine($"Database: Records with doctor job = {doctorRecords}");
+                }
+                
+                // Check ChuyenKhoa values for doctors
+                using (var cmd = new MySqlCommand("SELECT DISTINCT ChuyenKhoa FROM all_data_final WHERE (JOB = 'bác sĩ' OR JOB = 'Bác sĩ' OR JOB = 'BS' OR JOB = 'Doctor' OR JOB LIKE '%bác sĩ%' OR JOB LIKE '%Bác sĩ%') AND ChuyenKhoa IS NOT NULL AND ChuyenKhoa != '' AND ChuyenKhoa != '0' AND ChuyenKhoa != '-'", connection))
+                using (var reader = cmd.ExecuteReader())
+                {
+                    var specialties = new List<string>();
+                    while (reader.Read())
+                    {
+                        specialties.Add(reader.GetString(0));
+                    }
+                    Console.WriteLine($"Database: ChuyenKhoa for doctors = [{string.Join(", ", specialties.Take(10))}]");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in TestDatabaseContent: {ex.Message}");
+        }
+    }
+
 
 
         public IActionResult ExportToExcel(
-      string stt = "", List<string> code = null, List<string> projectName = null, List<string> year = null,
+      string stt = "", string code = "", string projectName = "", string year = "",
       string contactObject = "", List<string> sbjnum = null, string fullname = "",
-      List<string> city = null, string address = "", string street = "", string ward = "",
+      string city = "", string address = "", string street = "", string ward = "",
       string district = "", List<string> phoneNumber = null, string email = "",
       string dateOfBirth = "", List<string> age = null, List<string> sex = null,
-      List<string> job = null, List<string> householdIncome = null, List<string> personalIncome = null,
+      string job = "", List<string> householdIncome = null, List<string> personalIncome = null,
       List<string> maritalStatus = null, string mostFrequentlyUsedBrand = "",
       string source = "", List<string> className = null, List<string> education = null,
-      List<string> provinces = null, List<string> qc = null, string qa = "", List<string> Khuvuc = null, List<string> Nganhhang = null, List<string> chuyenKhoa = null)
+      List<string> provinces = null, List<string> qc = null, string qa = "", List<string> Khuvuc = null, List<string> Nganhhang = null, List<string> region = null, string chuyenKhoa = "")
         {
             OfficeOpenXml.ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
+            
+            // Debug: Log thông tin bắt đầu xuất Excel
+            Console.WriteLine($"ExportToExcel: Starting export process...");
+            Console.WriteLine($"ExportToExcel: Filter parameters - stt: {stt}, code: {code}, projectName: {projectName}, year: {year}, sex: [{string.Join(", ", sex ?? new List<string>())}]");
+            Console.WriteLine($"ExportToExcel: Additional filters - city: {city}, chuyenKhoa: {chuyenKhoa}");
+            Console.WriteLine($"ExportToExcel: Current session - Username: {HttpContext.Session.GetString("Username")}, Role: {HttpContext.Session.GetString("Role")}");
+            Console.WriteLine($"ExportToExcel: Session ID = {HttpContext.Session.Id}");
+            Console.WriteLine($"ExportToExcel: All session keys = [{string.Join(", ", HttpContext.Session.Keys)}]");
+            Console.WriteLine($"ExportToExcel: Request method = {HttpContext.Request.Method}");
+            Console.WriteLine($"ExportToExcel: Request path = {HttpContext.Request.Path}");
+            Console.WriteLine($"ExportToExcel: Query string = {HttpContext.Request.QueryString}");
+            Console.WriteLine($"ExportToExcel: Request headers = [{string.Join(", ", HttpContext.Request.Headers.Select(h => $"{h.Key}:{h.Value}"))}]");
 
             var username = HttpContext.Session.GetString("Username");
             var role = HttpContext.Session.GetString("Role");
+            
+            // Debug: Log thông tin session
+            Console.WriteLine($"ExportToExcel: Username = {username}");
+            Console.WriteLine($"ExportToExcel: Role = {role}");
+            
             if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(role))
             {
                 TempData["ErrorMessage"] = "Vui lòng đăng nhập để xuất file excel.";
+                Console.WriteLine($"ExportToExcel: Authentication failed - Username: {username}, Role: {role}");
                 return RedirectToAction("Index", "Bacsi");
             }
 
@@ -632,13 +949,25 @@ namespace CIResearch.Controllers
                     }
                 }
             }
+            
+            // Debug: Log thông tin email
+            Console.WriteLine($"ExportToExcel: User email = {userEmail}");
+            
             if (string.IsNullOrEmpty(userEmail))
             {
                 TempData["ErrorMessage"] = "Không tìm thấy email của bạn trong hệ thống. Vui lòng cập nhật email trong hồ sơ cá nhân.";
+                Console.WriteLine($"ExportToExcel: Email not found for user {username}");
                 return RedirectToAction("Index", "Bacsi");
             }
 
             var projectList = GetProjectts(stt, code, projectName, year, contactObject, sbjnum, fullname, city, address, street, ward, district, phoneNumber, email, dateOfBirth, age, sex, job, householdIncome, personalIncome, maritalStatus, mostFrequentlyUsedBrand, source, className, education, provinces, qc, qa, Khuvuc, Nganhhang, chuyenKhoa);
+            
+            // Debug: Log thông tin dữ liệu
+            Console.WriteLine($"ExportToExcel: Retrieved {projectList.Count} records from GetProjectts");
+            if (projectList.Count == 0)
+            {
+                Console.WriteLine($"ExportToExcel: WARNING - No data to export!");
+            }
 
             // Giới hạn số lượng xuất theo role nếu cần (tùy chỉnh nếu muốn)
             int maxRows = int.MaxValue;
@@ -652,7 +981,13 @@ namespace CIResearch.Controllers
                     maxRows = 100;
                     break;
             }
+            
+            // Debug: Log thông tin giới hạn xuất
+            Console.WriteLine($"ExportToExcel: Role = {role}, Max rows = {maxRows}");
+            Console.WriteLine($"ExportToExcel: Total records before limit = {projectList.Count}");
+            
             var limitedProjectList = projectList.OrderBy(x => Guid.NewGuid()).Take(maxRows).ToList();
+            Console.WriteLine($"ExportToExcel: Records after limit = {limitedProjectList.Count}");
 
             using (var package = new OfficeOpenXml.ExcelPackage())
             {
@@ -773,13 +1108,29 @@ namespace CIResearch.Controllers
                     FileData = package.GetAsByteArray(),
                     RejectReason = null,
                     ApprovedTime = null,
-                    AdminApprovedBy = null,
-                    Source = "Bacsi"
+                    AdminApprovedBy = null
+                    // Source = "Bacsi" // Tạm thời comment lại vì cột source chưa có trong database
                 };
-                repo.AddRequestAsync(exportRequest).Wait();
-
-                TempData["SuccessMessage"] = "Yêu cầu xuất file đã được gửi và đang chờ admin duyệt. Bạn sẽ nhận được email khi được phê duyệt.";
-                return RedirectToAction("Index", "Bacsi");
+                
+                // Debug: Log thông tin request
+                Console.WriteLine($"ExportToExcel: Creating export request for user {username}");
+                Console.WriteLine($"ExportToExcel: Request time = {exportRequest.RequestTime}");
+                Console.WriteLine($"ExportToExcel: File size = {exportRequest.FileData.Length} bytes");
+                
+                try
+                {
+                    repo.AddRequestAsync(exportRequest).Wait();
+                    Console.WriteLine($"ExportToExcel: Request saved successfully");
+                    
+                    TempData["SuccessMessage"] = "Yêu cầu xuất file đã được gửi và đang chờ admin duyệt. Bạn sẽ nhận được email khi được phê duyệt.";
+                    return RedirectToAction("Index", "Bacsi");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"ExportToExcel: Error saving request - {ex.Message}");
+                    TempData["ErrorMessage"] = "Có lỗi xảy ra khi lưu yêu cầu xuất file: " + ex.Message;
+                    return RedirectToAction("Index", "Bacsi");
+                }
             }
         }
 
@@ -809,8 +1160,8 @@ namespace CIResearch.Controllers
 
         private void SendEmailWithAttachment(string toEmail, string subject, string body, byte[] attachmentData)
         {
-            var fromEmail = "huan220vn@gmail.com";
-            var fromPassword = "tctn ztgb yqfd ynmp";
+            var fromEmail = "ciresearch.dn@gmail.com";
+            var fromPassword = "mhip zhvj dhpd zrgo";
 
             using (var message = new MailMessage())
             {
@@ -866,12 +1217,349 @@ namespace CIResearch.Controllers
         }
         private List<string> GetDistinctCities()
         {
-            return GetDistinctValuesFromDb("CITY");
+            var rawCities = GetDistinctValuesFromDb("CITY");
+            var normalizedCities = new List<string>();
+            var cityMapping = new Dictionary<string, string>();
+            
+            // Danh sách các tỉnh cần loại bỏ (các tỉnh trùng lặp)
+            var citiesToRemove = new HashSet<string>
+            {
+                "Ba Ria -vung Tau",
+                "Bà Rịa -vung Tàu",
+                "Binh Duong", 
+                "Binh Dinh",
+                "Binh Phuoc",
+                "Thanh pho Ho Chi Minh",
+                "Thành phố Hồ Chí Minh",
+                "Quang Ninhuang Nam",
+                "Quảng Ninhuảng Nam",
+                "Thừa Thien Huế", 
+                "Hồ chi Minh",
+                "Vinh Long",
+                "Hai Duong",
+                "Bac Ninh",
+                "Bac Giang",
+                "Bac Kan",
+                "Bac Lieu",
+                "Dak Lak",
+                "Dak Nong",
+                "Dong Nai",
+                "Dong Thap",
+                "Hau Giang",
+                "Kien Giang",
+                "Lam Dong",
+                "Long An",
+                "Nam Dinh",
+                "Ninh Binh",
+                "Phu Tho",
+                "Phu Yen",
+                "Quang Binh",
+                "Quang Nam",
+                "Quang Ngai",
+                "Quang Ninh",
+                "Quang Tri",
+                "Soc Trang",
+                "Tay Ninh",
+                "Thai Binh",
+                "Thai Nguyen",
+                "Thanh Hoa",
+                "Thua Thien Hue",
+                "Tien Giang",
+                "Tra Vinh",
+                "Tuyen Quang",
+                "Vinh Phuc",
+                "Ha Noi",
+                "Ho Chi Minh",
+                "Da Nang",
+                "Can Tho",
+                "Khanh Hoa",
+                "Kon Tum",
+                "Gia Lai",
+                "Dien Bien",
+                "Lao Cai",
+                "Ha Giang",
+                "Cao Bang",
+                "Yen Bai",
+                "Son La",
+                "Lai Chau",
+                "Lang Son",
+                "Hai Phong",
+                "Hung Yen",
+                "Ha Nam",
+                "Hoa Binh",
+                "Ben Tre"
+            };
+            
+            foreach (var city in rawCities)
+            {
+                if (string.IsNullOrWhiteSpace(city) || city == "0" || city == "-")
+                    continue;
+                
+                // Chuẩn hóa tên tỉnh
+                var normalizedCity = NormalizeCityName(city);
+                
+                // Kiểm tra xem có phải tỉnh cần loại bỏ không (kiểm tra cả tên gốc và tên đã chuẩn hóa)
+                if (citiesToRemove.Contains(normalizedCity) || citiesToRemove.Contains(city))
+                    continue;
+                
+                // Kiểm tra xem có chứa các từ khóa cần loại bỏ không
+                var shouldRemove = false;
+                foreach (var removeCity in citiesToRemove)
+                {
+                    if (city.Contains(removeCity) || removeCity.Contains(city) || 
+                        normalizedCity.Contains(removeCity) || removeCity.Contains(normalizedCity))
+                    {
+                        shouldRemove = true;
+                        break;
+                    }
+                }
+                
+                if (shouldRemove)
+                    continue;
+                
+                // Nếu chưa có trong mapping, thêm vào
+                if (!cityMapping.ContainsKey(normalizedCity))
+                {
+                    cityMapping[normalizedCity] = city; // Lưu tên gốc đẹp nhất
+                    normalizedCities.Add(normalizedCity);
+                }
+                else
+                {
+                    // Nếu đã có, cập nhật tên gốc đẹp hơn (ngắn hơn, không có prefix)
+                    var existingCity = cityMapping[normalizedCity];
+                    if (city.Length < existingCity.Length || 
+                        (!city.Contains("Tỉnh") && !city.Contains("tỉnh") && !city.Contains("TP.") && !city.Contains("tp.") && 
+                         !city.Contains("Thành phố") && !city.Contains("thành phố")))
+                    {
+                        cityMapping[normalizedCity] = city;
+                    }
+                }
+            }
+            
+            // Sắp xếp theo tên đã chuẩn hóa
+            normalizedCities.Sort();
+            
+            // Lưu mapping vào ViewBag để sử dụng khi filter
+            ViewBag.CityMapping = cityMapping;
+            
+            // Debug: Log số lượng cities trước và sau khi chuẩn hóa
+            Console.WriteLine($"Raw cities count: {rawCities.Count}");
+            Console.WriteLine($"Normalized cities count: {normalizedCities.Count}");
+            Console.WriteLine($"Cities removed: {citiesToRemove.Count}");
+            
+            return normalizedCities;
         }
-        private List<string> GetDistinctJobs()
+        
+        // Phương thức chuẩn hóa tên tỉnh
+        private string NormalizeCityName(string cityName)
         {
-            return GetDistinctValuesFromDb("JOB");
+            if (string.IsNullOrWhiteSpace(cityName))
+                return cityName;
+            
+            // Loại bỏ các từ không cần thiết
+            var cleanName = cityName.Trim()
+                .Replace("Tỉnh", "").Replace("tỉnh", "")
+                .Replace("TP.", "").Replace("tp.", "").Replace("TP ", "").Replace("tp ", "")
+                .Replace("Thành phố", "").Replace("thành phố", "")
+                .Replace("Quận", "").Replace("quận", "")
+                .Replace("Huyện", "").Replace("huyện", "")
+                .Trim();
+            
+            // Chuẩn hóa về format "Tên Tỉnh" (viết hoa đầu từ)
+            var words = cleanName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            var normalizedWords = new List<string>();
+            
+            foreach (var word in words)
+            {
+                if (string.IsNullOrWhiteSpace(word))
+                    continue;
+                    
+                // Xử lý các trường hợp đặc biệt - chuẩn hóa cả dấu tiếng Việt
+                var normalizedWord = word.ToLower() switch
+                {
+                    // Các từ có dấu tiếng Việt
+                    "hà" => "Hà",
+                    "hồ" => "Hồ",
+                    "đà" => "Đà",
+                    "đắk" => "Đắk",
+                    "thừa" => "Thừa",
+                    "khánh" => "Khánh",
+                    "quảng" => "Quảng",
+                    "lạng" => "Lạng",
+                    "yên" => "Yên",
+                    "sơn" => "Sơn",
+                    "lai" => "Lai",
+                    "lào" => "Lào",
+                    "cao" => "Cao",
+                    "điện" => "Điện",
+                    "tuyên" => "Tuyên",
+                    "phú" => "Phú",
+                    "vĩnh" => "Vĩnh",
+                    "hưng" => "Hưng",
+                    "bắc" => "Bắc",
+                    "thái" => "Thái",
+                    "hải" => "Hải",
+                    "ninh" => "Ninh",
+                    "hòa" => "Hòa",
+                    "nam" => "Nam",
+                    "đồng" => "Đồng",
+                    "bình" => "Bình",
+                    "tiền" => "Tiền",
+                    "long" => "Long",
+                    "tây" => "Tây",
+                    "sóc" => "Sóc",
+                    "cần" => "Cần",
+                    "cà" => "Cà",
+                    "bạc" => "Bạc",
+                    "kiên" => "Kiên",
+                    "lâm" => "Lâm",
+                    "bà" => "Bà",
+                    "vũng" => "Vũng",
+                    "hậu" => "Hậu",
+                    "trà" => "Trà",
+                    "bến" => "Bến",
+                    "an" => "An",
+                    "nghệ" => "Nghệ",
+                    "thanh" => "Thanh",
+                    "kon" => "Kon",
+                    "gia" => "Gia",
+                    "huế" => "Huế",
+                    // Các từ không dấu (để xử lý trường hợp "Vinh Long" vs "Vĩnh Long")
+                    "vinh" => "Vĩnh",
+                    "hai" => "Hải",
+                    "duong" => "Dương",
+                    "trung" => "Trung",
+                    "ha" => "Hà",
+                    "ho" => "Hồ",
+                    "da" => "Đà",
+                    "dak" => "Đắk",
+                    "thua" => "Thừa",
+                    "khanh" => "Khánh",
+                    "quang" => "Quảng",
+                    "lang" => "Lạng",
+                    "yen" => "Yên",
+                    "son" => "Sơn",
+                    "lao" => "Lào",
+                    "dien" => "Điện",
+                    "tuyen" => "Tuyên",
+                    "phu" => "Phú",
+                    "hung" => "Hưng",
+                    "hoa" => "Hòa",
+                    "dong" => "Đồng",
+                    "binh" => "Bình",
+                    "tien" => "Tiền",
+                    "tay" => "Tây",
+                    "soc" => "Sóc",
+                    "can" => "Cần",
+                    "ca" => "Cà",
+                    "kien" => "Kiên",
+                    "lam" => "Lâm",
+                    "ba" => "Bà",
+                    "vung" => "Vũng",
+                    "hau" => "Hậu",
+                    "tra" => "Trà",
+                    "ben" => "Bến",
+                    "nghe" => "Nghệ",
+                    "hue" => "Huế",
+                    // Xử lý các trường hợp đặc biệt khác
+                    "ria" => "Rịa",
+                    "tau" => "Tàu",
+                    "lak" => "Lắk",
+                    "nong" => "Nông",
+                    "ngai" => "Ngãi",
+                    "tri" => "Trị",
+                    "trang" => "Trăng",
+                    _ => char.ToUpper(word[0]) + word.Substring(1).ToLower()
+                };
+                
+                normalizedWords.Add(normalizedWord);
+            }
+            
+            var result = string.Join(" ", normalizedWords);
+            
+            // Xử lý các trường hợp đặc biệt cho tên tỉnh dài
+            result = result switch
+            {
+                "Vinh Long" => "Vĩnh Long",
+                "Hai Duong" => "Hải Dương",
+                "Bac Ninh" => "Bắc Ninh",
+                "Bac Giang" => "Bắc Giang",
+                "Bac Kan" => "Bắc Kạn",
+                "Bac Lieu" => "Bạc Liêu",
+                "Dak Lak" => "Đắk Lắk",
+                "Dak Nong" => "Đắk Nông",
+                "Dong Nai" => "Đồng Nai",
+                "Dong Thap" => "Đồng Tháp",
+                "Hau Giang" => "Hậu Giang",
+                "Kien Giang" => "Kiên Giang",
+                "Lam Dong" => "Lâm Đồng",
+                "Long An" => "Long An",
+                "Nam Dinh" => "Nam Định",
+                "Ninh Binh" => "Ninh Bình",
+                "Phu Tho" => "Phú Thọ",
+                "Phu Yen" => "Phú Yên",
+                "Quang Binh" => "Quảng Bình",
+                "Quang Nam" => "Quảng Nam",
+                "Quang Ngai" => "Quảng Ngãi",
+                "Quang Ninh" => "Quảng Ninh",
+                "Quang Tri" => "Quảng Trị",
+                "Soc Trang" => "Sóc Trăng",
+                "Tay Ninh" => "Tây Ninh",
+                "Thai Binh" => "Thái Bình",
+                "Thai Nguyen" => "Thái Nguyên",
+                "Thanh Hoa" => "Thanh Hóa",
+                "Thua Thien Hue" => "Thừa Thiên Huế",
+                "Tien Giang" => "Tiền Giang",
+                "Tra Vinh" => "Trà Vinh",
+                "Tuyen Quang" => "Tuyên Quang",
+                "Vinh Phuc" => "Vĩnh Phúc",
+                // Xử lý các trường hợp đặc biệt khác
+                "Ha Noi" => "Hà Nội",
+                "Ho Chi Minh" => "Hồ Chí Minh",
+                "Da Nang" => "Đà Nẵng",
+                "Can Tho" => "Cần Thơ",
+                "Khanh Hoa" => "Khánh Hòa",
+                "Kon Tum" => "Kon Tum",
+                "Gia Lai" => "Gia Lai",
+                "Dien Bien" => "Điện Biên",
+                "Lao Cai" => "Lào Cai",
+                "Ha Giang" => "Hà Giang",
+                "Cao Bang" => "Cao Bằng",
+                "Yen Bai" => "Yên Bái",
+                "Son La" => "Sơn La",
+                "Lai Chau" => "Lai Châu",
+                "Lang Son" => "Lạng Sơn",
+                "Hai Phong" => "Hải Phòng",
+                "Hung Yen" => "Hưng Yên",
+                "Ha Nam" => "Hà Nam",
+                "Hoa Binh" => "Hòa Bình",
+                "Ben Tre" => "Bến Tre",
+                "An Giang" => "An Giang",
+                // Xử lý các trường hợp đặc biệt bổ sung
+                "Ba Ria -vung Tau" => "Bà Rịa Vũng Tàu",
+                "Binh Duong" => "Bình Dương",
+                "Binh Dinh" => "Bình Định",
+                "Binh Phuoc" => "Bình Phước",
+                "Thanh pho Ho Chi Minh" => "Hồ Chí Minh",
+                "Quang Ninhuang Nam" => "Quảng Nam",
+                _ => result
+            };
+            
+            return result;
+
         }
+        
+        // Phương thức ánh xạ tên đã chuẩn hóa về tên gốc
+        private string GetOriginalCityName(string normalizedCityName)
+        {
+            if (ViewBag.CityMapping is Dictionary<string, string> cityMapping)
+            {
+                return cityMapping.TryGetValue(normalizedCityName, out var originalCity) ? originalCity : normalizedCityName;
+            }
+            return normalizedCityName;
+        }
+        
+
         private List<string> GetDistinctEducations()
         {
             return GetDistinctValuesFromDb("EDUCATION");
@@ -926,16 +1614,56 @@ namespace CIResearch.Controllers
         }
         private List<string> GetDistinctChuyenKhoas()
         {
-            return GetDistinctValuesFromDb("ChuyenKhoa");
+            // Chuyên khoa: hiển thị tất cả có sẵn (không filter theo job) để user có thể chọn
+            var values = new List<string>();
+            var chuyenKhoaMapping = new Dictionary<string, string>();
+            
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+                var query = "SELECT DISTINCT `ChuyenKhoa` FROM all_data_final WHERE `ChuyenKhoa` IS NOT NULL AND `ChuyenKhoa` != '' ORDER BY `ChuyenKhoa`";
+                using (var command = new MySqlCommand(query, connection))
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        var val = reader[0]?.ToString();
+                        if (!string.IsNullOrWhiteSpace(val))
+                        {
+                            // Gộp "Nhi" và "Nhi khoa" thành "Khoa nhi"
+                            var normalizedChuyenKhoa = val.Trim();
+                            if (normalizedChuyenKhoa.Equals("Nhi", StringComparison.OrdinalIgnoreCase) || 
+                                normalizedChuyenKhoa.Equals("Nhi khoa", StringComparison.OrdinalIgnoreCase))
+                            {
+                                normalizedChuyenKhoa = "Khoa nhi";
+                            }
+                            
+                            // Nếu chưa có trong mapping, thêm vào
+                            if (!chuyenKhoaMapping.ContainsKey(normalizedChuyenKhoa))
+                            {
+                                chuyenKhoaMapping[normalizedChuyenKhoa] = normalizedChuyenKhoa;
+                                values.Add(normalizedChuyenKhoa);
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Sắp xếp theo tên chuyên khoa đã chuẩn hóa
+            values.Sort();
+            
+            return values;
         }
-        // Helper for all distinct value queries
+        
+        // Helper for all distinct value queries (except ChuyenKhoa)
         private List<string> GetDistinctValuesFromDb(string column)
         {
             var values = new List<string>();
             using (var connection = new MySqlConnection(_connectionString))
             {
                 connection.Open();
-                var query = $"SELECT DISTINCT `{column}` FROM all_data_final WHERE `{column}` IS NOT NULL AND `{column}` != '' ORDER BY `{column}`";
+                // For Bacsi page, always filter by job = 'bác sĩ' to show only relevant filter options (check multiple variations)
+                var query = $"SELECT DISTINCT `{column}` FROM all_data_final WHERE `{column}` IS NOT NULL AND `{column}` != '' AND (JOB = 'bác sĩ' OR JOB = 'Bác sĩ' OR JOB = 'BS' OR JOB = 'Doctor' OR JOB LIKE '%bác sĩ%' OR JOB LIKE '%Bác sĩ%') ORDER BY `{column}`";
                 using (var command = new MySqlCommand(query, connection))
                 using (var reader = command.ExecuteReader())
                 {

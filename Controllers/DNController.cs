@@ -758,7 +758,6 @@ namespace CIResearch.Controllers
             }
             return data;
         }
-
         private async Task<List<QLKH>> GetDataFromDatabaseAsync()
         {
             var data = new List<QLKH>();
@@ -1498,7 +1497,6 @@ namespace CIResearch.Controllers
             Console.WriteLine($"   - TotalRevenue: {stats.FinancialStats["TotalRevenue"]:N0} triệu VND");
             Console.WriteLine($"   - TotalProfit: {stats.FinancialStats["TotalProfit"]:N0} triệu VND");
         }
-
         private static void CalculateRevenueData(List<QLKH> data, ComprehensiveStats stats)
         {
             Console.WriteLine($"🔍 TREND DATA CALCULATION - Starting with {data.Count} total records");
@@ -1591,7 +1589,7 @@ namespace CIResearch.Controllers
             }
             else
             {
-                Console.WriteLine($"❌ NO TREND DATA FOUND after grouping from database admin_ciresearch.dn_all");
+                Console.WriteLine($"❌ NO TREND DATA FOUND after grouping from database sakila.dn_all");
                 Console.WriteLine($"❌ Check if records have valid values in Nam, SR_Doanhthu_Thuan_BH_CCDV, SR_Loinhuan_TruocThue columns");
             }
 
@@ -2291,7 +2289,6 @@ namespace CIResearch.Controllers
                 });
             }
         }
-
         // Hàm kiểm tra quyền export theo role
         private (bool isAllowed, string errorMessage) ValidateExportByRole(string role, int recordCount, string username)
         {
@@ -2747,7 +2744,7 @@ namespace CIResearch.Controllers
                     {
                         Message = "✅ ALL DATA IS REAL FROM DATABASE - NO DEMO DATA",
                         DatabaseStatus = "CONNECTED",
-                        DataSource = "admin_ciresearch.dn_all",
+                        DataSource = "sakila.dn_all",
                         LastChecked = DateTime.Now
                     }
                 };
@@ -2921,7 +2918,7 @@ namespace CIResearch.Controllers
                     {
                         success = false,
                         message = "❌ Column TEN_NGANH does not exist in dn_all table",
-                        connectionString = "Server=localhost;Database=admin_ciresearch;User=root;Password=***",
+                        connectionString = "Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;",
                         timestamp = DateTime.Now
                     });
                 }
@@ -2960,7 +2957,7 @@ namespace CIResearch.Controllers
                     success = true,
                     message = $"✅ Industry data test successful. Found {industries.Count} industries from TEN_NGANH column",
                     data = industries,
-                    connectionString = "Server=localhost;Database=admin_ciresearch;User=root;Password=***",
+                    connectionString = "Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;",
                     database = "admin_ciresearch",
                     table = "dn_all",
                     column = "TEN_NGANH",
@@ -2975,7 +2972,7 @@ namespace CIResearch.Controllers
                 {
                     success = false,
                     message = $"❌ Industry data test failed: {ex.Message}",
-                    connectionString = "Server=localhost;Database=admin_ciresearch;User=root;Password=***",
+                    connectionString = "Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;",
                     timestamp = DateTime.Now
                 });
             }
@@ -3093,7 +3090,6 @@ namespace CIResearch.Controllers
                 });
             }
         }
-
         [HttpGet]
         public async Task<IActionResult> DebugRawTrendData()
         {
@@ -3869,7 +3865,6 @@ namespace CIResearch.Controllers
         #endregion
 
         #region Server-Side Pagination API
-
         [HttpPost]
         public async Task<IActionResult> GetPaginatedData()
         {
@@ -4469,7 +4464,7 @@ namespace CIResearch.Controllers
                     sampleCompanies = sampleCompanies,
                     databaseInfo = new
                     {
-                        database = "admin_ciresearch",
+                        database = "sakila",
                         table = "dn_all",
                         revenueColumn = "SR_Doanhthu_Thuan_BH_CCDV",
                         profitColumn = "SR_Loinhuan_TruocThue",
@@ -4559,7 +4554,7 @@ namespace CIResearch.Controllers
                     message = "✅ Filter options loaded from database",
                     dataSource = new
                     {
-                        database = "admin_ciresearch",
+                        database = "sakila",
                         table = "dn_all",
                         totalRecords = allData.Count
                     },
@@ -4597,7 +4592,6 @@ namespace CIResearch.Controllers
                 });
             }
         }
-
         [HttpGet]
         public async Task<IActionResult> GetTopCompaniesRevenueChart()
         {
@@ -5154,7 +5148,6 @@ namespace CIResearch.Controllers
                 });
             }
         }
-
         [HttpGet]
         public async Task<IActionResult> GetMarketShareChart(int? nam = null)
         {
@@ -5907,7 +5900,6 @@ namespace CIResearch.Controllers
                 });
             }
         }
-
         [HttpGet]
         public async Task<IActionResult> DebugCompanyCountDiscrepancy(int? year = null)
         {
@@ -6681,7 +6673,6 @@ namespace CIResearch.Controllers
                 });
             }
         }
-
         [HttpGet]
         public async Task<IActionResult> VerifyTotalRecords()
         {
@@ -6755,7 +6746,7 @@ namespace CIResearch.Controllers
                         loadTime = DateTime.Now,
                         dataSource = "Real data from dn_all table",
                         limitRemoved = "LIMIT 50000 has been removed - loading ALL data",
-                        connectionString = "Server=localhost;Database=admin_ciresearch;User=root;Password=***"
+                        connectionString = "Server=127.0.0.1;Database=admin_ciresearch;User=admin_dbciresearch;Password=9t52$7sBx;"
                     }
                 };
 
@@ -7483,7 +7474,6 @@ namespace CIResearch.Controllers
                 });
             }
         }
-
         [HttpGet]
         public async Task<IActionResult> GetFilteredMarketShareChart(
             List<string>? Nam = null,

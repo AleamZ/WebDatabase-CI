@@ -1,7 +1,7 @@
 -- Script thêm cột Source vào bảng ExportRequests
 -- Chạy script này để cập nhật cấu trúc bảng
 
-USE admin_ciresearch;
+USE sakila;
 
 -- Thêm cột Source vào bảng ExportRequests
 ALTER TABLE ExportRequests 

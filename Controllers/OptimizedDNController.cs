@@ -600,7 +600,7 @@ namespace CIResearch.Controllers
                 var recordCount = Convert.ToInt64(result);
 
                 return (true, "✅ Kết nối cơ sở dữ liệu thành công!",
-                       $"Server: 127.0.0.1 | Database: admin_ciresearch | Records: {recordCount:N0}");
+                       $"Server: localhost | Database: sakila | Records: {recordCount:N0}");
             }
             catch (Exception ex)
             {
